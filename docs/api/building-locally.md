@@ -18,6 +18,36 @@ npm run check
 The normal package build uses the committed runtime/proving assets and verifies
 their integrity. It does not require rebuilding the native runtime with Rust.
 
+## Native Rust source and rebuilds
+
+The wallet engine comes from the separate
+[`zakura-wasm-bindings` repository](https://github.com/jp4g/zakura-wasm-bindings),
+whose Rust crate is named `zakura-network-bindings`. It supplies native wallet
+and cryptographic functionality compiled to WebAssembly for this SDK.
+
+The current wallet build pins revision
+`9741e95a21e2314b3f817e3ed1427d17f919beb6` in
+[`scripts/build-native-wallet.mjs`](https://github.com/zcashlabs/zcashjs/blob/main/scripts/build-native-wallet.mjs).
+The native repository is currently private; its link and source checkout require
+access. Consequently, the public SDK checkout alone is not yet sufficient to
+rebuild the native wallet from source. The ordinary build above uses the
+committed artifacts and does not require access to that repository.
+
+The native crate currently has `publish = false`. Publishing it to crates.io is
+not a prerequisite for building this SDK: the build can obtain a pinned Git
+revision. A public source-build workflow does require that revision and all its
+build inputs to be publicly obtainable.
+
+Existing scripts cover native compilation, worker bundling and runtime
+packaging, but currently require separately prepared source, pinned Rust/WASI/
+wasm-bindgen tools and cached Cargo dependencies. They are not yet a single
+fresh-checkout build workflow. [Issue #3](https://github.com/zcashlabs/zcashjs/issues/3)
+tracks public source availability, build orchestration, documentation and removing
+generated artifacts from Git after their replacement build is verified.
+
+npm consumers receive the compiled runtime in the package; they do not need
+Rust or access to the native source repository.
+
 ## Make a local package
 
 From the SDK checkout:
