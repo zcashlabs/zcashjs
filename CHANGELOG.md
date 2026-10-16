@@ -2,6 +2,8 @@
 
 ## 0.1.0-rc.5
 
+- Publish under `@zcashlabs/zcash.js`; update application imports to this scope.
+
 - Build native components from the `zakura-wasm-bindings` v0.1.0 release.
   Runtime and proving assets remain bundled in npm; generated output stays out of Git.
 - Add `getConsensusContext({ network, targetHeight })`, export the documented public types,
@@ -57,7 +59,7 @@
 
 ## 0.1.0-rc.1 — single-import release candidate
 
-- Package identity is `@jp4g/zcash.js`.
+- Initial single-import release candidate.
 - Wallet creation defaults to the included baseline WASM engine, worker and
   storage adapters. Runtime configuration is an optional advanced override.
 - Canonical Sapling proving parameters are included and load only when needed.

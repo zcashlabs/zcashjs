@@ -1,5 +1,5 @@
-import { accountIndex, defineNetwork, diversifierIndex, formatZec, parseZec } from "@jp4g/zcash.js";
-import type { NetworkDefinition } from "@jp4g/zcash.js";
+import { accountIndex, defineNetwork, diversifierIndex, formatZec, parseZec } from "@zcashlabs/zcash.js";
+import type { NetworkDefinition } from "@zcashlabs/zcash.js";
 
 export async function validateInputs(definition: NetworkDefinition) {
   const network = await defineNetwork(definition);

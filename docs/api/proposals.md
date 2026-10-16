@@ -7,8 +7,8 @@ Endpoint-created wallets use the Ironwood-only policy described in
 limits, supply a complete `transactionPolicy` when opening the wallet:
 
 ```ts
-import { createWalletClient } from '@jp4g/zcash.js';
-import type { TransactionPolicy, WalletStorage } from '@jp4g/zcash.js';
+import { createWalletClient } from '@zcashlabs/zcash.js';
+import type { TransactionPolicy, WalletStorage } from '@zcashlabs/zcash.js';
 
 export function openWithPolicy(endpoint: string, storage: WalletStorage, transactionPolicy: TransactionPolicy) {
   return createWalletClient(endpoint, { network: 'testnet', storage, transactionPolicy });
@@ -19,8 +19,8 @@ The policy's confirmation requirements also apply to balance queries unless
 explicitly supplied separately; conflicting confirmation requirements reject.
 
 ```ts
-import { parseZec } from '@jp4g/zcash.js';
-import type { AccountRecord, Proposal, WalletClient } from '@jp4g/zcash.js';
+import { parseZec } from '@zcashlabs/zcash.js';
+import type { AccountRecord, Proposal, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function reviewedSend(
   wallet: WalletClient,

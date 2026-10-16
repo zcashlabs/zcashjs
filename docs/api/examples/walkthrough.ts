@@ -2,11 +2,11 @@ import { waitForConfirmation } from './confirmation.js';
 import {
   createLightClient, createPublicClient, createWalletClient, defineNetwork, formatZec,
   grpc, httpTransport, isZcashError, parseZec,
-} from "@jp4g/zcash.js";
+} from "@zcashlabs/zcash.js";
 import type {
   ErrorCode, LocalProvingOptions, MemorySigner, NetworkDefinition, PaymentState,
   Proposal, SecretInput, SignerBinding, WalletOptions,
-} from "@jp4g/zcash.js";
+} from "@zcashlabs/zcash.js";
 
 // Compile-only: the application supplies validated network/proof data and private inputs.
 declare const networkDefinition: NetworkDefinition;

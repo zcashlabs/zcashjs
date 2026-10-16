@@ -5,7 +5,7 @@
 Pass the returned `Network` to every client and viewing operation for that chain. It is an SDK-owned value; do not manufacture one with a TypeScript cast.
 
 ```ts
-import { defineNetwork } from '@jp4g/zcash.js';
+import { defineNetwork } from '@zcashlabs/zcash.js';
 
 const mainnet = await defineNetwork(); // same as defineNetwork('mainnet')
 const testnet = await defineNetwork('testnet');
@@ -24,9 +24,9 @@ the intended transaction height; it does not choose a height or inspect PCZT byt
 For a custom deployment, supply the genesis hash and a complete typed schedule:
 
 ```ts
-import { blockHash, defineNetwork, encodeNetworkParameters } from '@jp4g/zcash.js';
+import { blockHash, defineNetwork, encodeNetworkParameters } from '@zcashlabs/zcash.js';
 
-import type { NetworkParameters } from '@jp4g/zcash.js';
+import type { NetworkParameters } from '@zcashlabs/zcash.js';
 
 export async function loadNetwork(
   identity: string,
@@ -67,7 +67,7 @@ replace it with your deployment's exact schedule.
 ```ts
 import {
   createPublicClient, defineNetwork, encodeNetworkParameters, httpTransport, readGenesisHash,
-} from '@jp4g/zcash.js';
+} from '@zcashlabs/zcash.js';
 
 export async function connectRegtest(rpcUrl: string) {
   const transport = httpTransport(rpcUrl, {
@@ -102,7 +102,7 @@ a mismatch. Discovery does not infer activation heights or change consensus rule
 ## Keep money exact
 
 ```ts
-import { accountIndex, blockHash, diversifierIndex, formatZec, parseZec, txId } from '@jp4g/zcash.js';
+import { accountIndex, blockHash, diversifierIndex, formatZec, parseZec, txId } from '@zcashlabs/zcash.js';
 
 export function paymentInputs(zec: string, transactionHex: string, blockHex: string) {
   return {

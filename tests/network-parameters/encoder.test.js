@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { defineNetwork, encodeNetworkParameters } from '@jp4g/zcash.js';
+import { defineNetwork, encodeNetworkParameters } from '@zcashlabs/zcash.js';
 
 const schedule = {
   encoding: 'regtest', Overwinter: 1, Sapling: 1, Blossom: 1, Heartwood: 1,

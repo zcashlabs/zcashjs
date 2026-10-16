@@ -3,7 +3,7 @@
 
 # Single-import release qualification
 
-Tracking: https://github.com/jp4g/zcash.js/issues/165 (children #166–#171).
+Tracking: historical issue #165 (children #166–#171).
 
 ## Current candidate: 0.1.0-rc.2
 
@@ -16,7 +16,7 @@ PR #178 merged the fixes at `8aa6e41ecf3d2e7971635189f80e1b8afb920f84`.
 GitHub PR checks, explicit workflow checks, and post-merge main checks passed.
 
 Exact post-merge artifact:
-`/home/jack/zcash-package-consumer-TFjoGs/jp4g-zcash.js-0.1.0-rc.2.tgz`
+`/home/jack/zcash-package-consumer-TFjoGs/zcashlabs-zcash.js-0.1.0-rc.2.tgz`
 
 SHA-256: `f6ae0df7944d4362759c165af044558e68121bcb34ca1fea2599bb4c833b17fd`.
 Size: 59,863,855 bytes packed / 86,321,467 unpacked.
@@ -67,7 +67,7 @@ instructions agree; `private` is removed and publishConfig defaults to public
 access on npm with the `next` tag. No publication was performed.
 
 Exact tested artifact:
-`/home/jack/zcash-package-consumer-IL8mxE/jp4g-zcash.js-0.1.0-rc.1.tgz`
+`/home/jack/zcash-package-consumer-IL8mxE/zcashlabs-zcash.js-0.1.0-rc.1.tgz`
 
 SHA-256: `bd47e04bcd2c1dd5b9ed75df83684790720c10a8a4027690c50df6b6479f358e`.
 Size: 59,863,523 bytes packed / 86,318,679 unpacked.
@@ -97,7 +97,7 @@ See [owner handoff](single-import-handoff.md) for the exact publication command.
 Owner asked to set aside the live endpoint blocker and finish package assembly.
 The latest installable development tarball is:
 
-`/home/jack/zcash-package-consumer-ZvkClr/jp4g-zcash.js-0.0.0.tgz`
+`/home/jack/zcash-package-consumer-ZvkClr/zcashlabs-zcash.js-0.0.0.tgz`
 
 SHA-256: `2dc77d28d8d9444acef6d1b71cfb3d1fc9c6378f6f432f982fac2a0b983892a3`.
 Size: 59,863,396 bytes packed / 86,318,270 unpacked.
@@ -219,7 +219,7 @@ hash comparison alone cannot prove its cause. Unexplained native rejections rema
 errors, not an excuse to bypass validation or claim every provider failure fixed.
 
 Final documentation/notice candidate:
-`/home/jack/zcash-package-consumer-mebHQF/jp4g-zcash.js-0.0.0.tgz`, SHA-256
+`/home/jack/zcash-package-consumer-mebHQF/zcashlabs-zcash.js-0.0.0.tgz`, SHA-256
 `30c9f1682047f8b530b213300ccb7de74a951adc0e45ab668b07e69918bf4587`;
 59,870,216 bytes packed / 86,336,861 unpacked. Clean installed Node checks passed.
 Its distributed `dist` tree is byte-identical to the live runtime-fix candidate;
@@ -332,7 +332,7 @@ The owner publication checklist is [the handoff](single-import-handoff.md).
   native pass does not qualify it. Do not replace this gate with fresh synthetic
   fixtures or a claim of broad historical database compatibility.
 
-The acceptance target is a clean installed `@jp4g/zcash.js` consumer that loads
+The acceptance target is a clean installed `@zcashlabs/zcash.js` consumer that loads
 its included engine and proving assets and completes confirmed testnet A → B → A
 transfers, receipt, spendability and restart checks in Node and a real browser.
 The owner publishes npm; registry acceptance follows publication.

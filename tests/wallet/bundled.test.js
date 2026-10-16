@@ -3,7 +3,7 @@ import test from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFile, mkdir, mkdtemp, rm } from 'node:fs/promises';
-import { createWalletClient, defineNetwork } from '@jp4g/zcash.js';
+import { createWalletClient, defineNetwork } from '@zcashlabs/zcash.js';
 import { packageProving } from '../../dist/src/runtime/package-proving.js';
 import { ProvingAssets, saplingAssets } from '../../dist/src/wallet/proving-assets.js';
 

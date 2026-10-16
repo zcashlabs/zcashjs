@@ -1,4 +1,4 @@
-import type { SyncStatus, WalletClient } from "@jp4g/zcash.js";
+import type { SyncStatus, WalletClient } from "@zcashlabs/zcash.js";
 
 declare const wallet: WalletClient;
 declare const signal: AbortSignal;

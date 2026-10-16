@@ -102,7 +102,7 @@ Require **bidirectional traceability**:
 4. Every available Rust capability considered for exposure has an explicit include/internal/defer/exclude decision. Do not export low-level gadgets solely because Rust exposes them.
 5. Every unavailable capability remains visible with a fallback, design limitation or deferred decision. Do not create imaginary backend methods to fill the matrix.
 
-Keep D20 facilities as deferred capability rows linked to the [tracked future issue](future-issues.md), with its acceptance criteria and review trigger. They are not v1 G3–G6 implementation or validation requirements. GitHub [issue #10](https://github.com/jp4g/zcash.js/issues/10) records the post-v1 work without expanding current scope.
+Keep D20 facilities as deferred capability rows linked to the [tracked future issue](future-issues.md), with its acceptance criteria and review trigger. They are not v1 G3–G6 implementation or validation requirements. GitHub issue #10 (historical) records the post-v1 work without expanding current scope.
 
 **Gate G2 — completeness:** no unowned rows, unmapped critical journeys or implicit support claims. Full-scope deferred rows are allowed only with rationale, consequences and a future review trigger. Exit artifacts include the bidirectional capability matrix and WebZjs requirements/lessons review.
 

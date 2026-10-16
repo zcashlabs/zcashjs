@@ -2,7 +2,7 @@
 
 ## Issue #10 — Assess less-common account imports and unstable key interchange
 
-**Status:** deferred beyond v1 (D20), tracked as [GitHub issue #10](https://github.com/jp4g/zcash.js/issues/10) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). No delivery commitment or v1 scope expansion is implied.
+**Status:** deferred beyond v1 (D20), tracked as GitHub issue #10 (historical) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). No delivery commitment or v1 scope expansion is implied.
 
 **Problem and baseline:** v1 supports application-supplied mnemonic creation/recovery and UFVK wallet import. Applications use a reputable BIP39 npm package, retain their mnemonic backup, and pass the mnemonic to `wallet.accounts.create({ mnemonic })` or `wallet.accounts.import({ mnemonic, accountIndex, birthday })`. zcash.js provides no mnemonic/seed generation and no raw spending-key export (D16/D19). Source codecs alone do not establish safe, coherent wallet imports. Standalone UIVK codecs/address derivation remain distinct from wallet scanning and balances.
 
@@ -32,7 +32,7 @@
 
 **Title:** Benchmark qualified WASM and evaluate optional native acceleration.
 
-**Status:** deferred performance study tracked as [GitHub issue #11](https://github.com/jp4g/zcash.js/issues/11) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). It commits no delivery date or N-API implementation. **Execution dependencies:** [F1–F8 functional evidence](wasm-host-architecture.md#functional-acceptance-gates), stable [transaction/query semantics](transaction-query-api.md), coherent pinned dependency graph and qualified storage/worker variants. Functional correctness/liveness proof is separate from this benchmark study.
+**Status:** deferred performance study tracked as GitHub issue #11 (historical) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). It commits no delivery date or N-API implementation. **Execution dependencies:** [F1–F8 functional evidence](wasm-host-architecture.md#functional-acceptance-gates), stable [transaction/query semantics](transaction-query-api.md), coherent pinned dependency graph and qualified storage/worker variants. Functional correctness/liveness proof is separate from this benchmark study.
 
 **Problem:** determine which WASM boundary, concurrency, SIMD, asset-cache and batching choices meet product budgets while preserving custody, protocol behavior and durability. WASM-first Node/browser is the baseline. Native/N-API is only a separately approved follow-up comparison after a demonstrated WASM budget shortfall; no native SQLite default or acceleration promise follows from this tracked issue.
 
@@ -51,4 +51,4 @@
 
 ## Issue #12 — Coherent Common 1.1.0 migration
 
-D06a follow-up tracked as [GitHub issue #12](https://github.com/jp4g/zcash.js/issues/12) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). Align every Common/wallet/crypto edge on one pinned 1.1.0 graph, preserve lock/checksum provenance, run the first-party graph audit, compile supported targets and execute transparent/Sapling/Ironwood local/PCZT/scan/storage/reorg fixtures before replacing the coherent 1.0.0 baseline. A mixed published compile spike is not migration acceptance. Performance comparisons remain in the separate benchmark issue above.
+D06a follow-up tracked as GitHub issue #12 (historical) in the `Post-v1 — Deferred` milestone and [project board](https://github.com/users/jp4g/projects/4). Align every Common/wallet/crypto edge on one pinned 1.1.0 graph, preserve lock/checksum provenance, run the first-party graph audit, compile supported targets and execute transparent/Sapling/Ironwood local/PCZT/scan/storage/reorg fixtures before replacing the coherent 1.0.0 baseline. A mixed published compile spike is not migration acceptance. Performance comparisons remain in the separate benchmark issue above.

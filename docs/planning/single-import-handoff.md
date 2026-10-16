@@ -7,7 +7,7 @@ Parent: #165. Evidence/history: [release qualification](single-import-release.md
 The current source version is `0.1.0-rc.2`, addressing observation lag (#176) and
 enhancement scan races (#177), merged by PR #178 at
 `8aa6e41ecf3d2e7971635189f80e1b8afb920f84`. The exact post-merge artifact is
-`/home/jack/zcash-package-consumer-TFjoGs/jp4g-zcash.js-0.1.0-rc.2.tgz`, SHA-256
+`/home/jack/zcash-package-consumer-TFjoGs/zcashlabs-zcash.js-0.1.0-rc.2.tgz`, SHA-256
 `f6ae0df7944d4362759c165af044558e68121bcb34ca1fea2599bb4c833b17fd`.
 It passed fresh Node/Firefox installation and persistence checks. The earlier rc.1 registry
 artifact matched its tested tarball, but its live Node example needed manual
@@ -17,7 +17,7 @@ qualification gates below are recorded, not silently waived.
 
 ## What consumers receive
 
-One `@jp4g/zcash.js` dependency, imported through the public root. The baseline
+One `@zcashlabs/zcash.js` dependency, imported through the public root. The baseline
 wallet WASM, worker, Node/OPFS adapters, internal manifest and Sapling proving files
 ship in that package. Ordinary installation needs no Rust build or asset download.
 Wallet use loads the engine; proving loads only the assets the selected pool needs.
@@ -91,8 +91,8 @@ Publish tested bytes, not a newly packed working directory. After qualification,
 these are the **owner-only** commands for the pinned rc.2 artifact:
 
 ```sh
-sha256sum /home/jack/zcash-package-consumer-TFjoGs/jp4g-zcash.js-0.1.0-rc.2.tgz
-npm publish /home/jack/zcash-package-consumer-TFjoGs/jp4g-zcash.js-0.1.0-rc.2.tgz --ignore-scripts --access public --tag next
+sha256sum /home/jack/zcash-package-consumer-TFjoGs/zcashlabs-zcash.js-0.1.0-rc.2.tgz
+npm publish /home/jack/zcash-package-consumer-TFjoGs/zcashlabs-zcash.js-0.1.0-rc.2.tgz --ignore-scripts --access public --tag next
 ```
 
 Full live browser acceptance remains outstanding; do not describe it as qualified.
@@ -101,7 +101,7 @@ No publishing token belongs in source, issues, command arguments or test logs.
 ## Registry acceptance after owner publication
 
 Create another independent project, install the exact published version with
-`npm install @jp4g/zcash.js@0.1.0-rc.2`, and verify the registry tarball's integrity
+`npm install @zcashlabs/zcash.js@0.1.0-rc.2`, and verify the registry tarball's integrity
 against the owner-published artifact. Re-run public-import Node/browser wallet
 loading, independent Ironwood send/receipt/restart and duplicate-prevention checks.
 Only then can #171 and the parent be closed. Neither a passing tarball test nor

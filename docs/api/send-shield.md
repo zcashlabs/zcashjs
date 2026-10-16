@@ -9,8 +9,8 @@ wallet](wallet-runtime.md) for defaults and overrides.
 ## Send a payment
 
 ```ts
-import { parseZec } from '@jp4g/zcash.js';
-import type { AccountRecord, PendingPayment, WalletClient } from '@jp4g/zcash.js';
+import { parseZec } from '@zcashlabs/zcash.js';
+import type { AccountRecord, PendingPayment, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function sendPayment(
   wallet: WalletClient, account: AccountRecord, recipient: string, requestId: string,
@@ -71,8 +71,8 @@ Open the wallet with an explicit policy that admits owned transparent inputs.
 This keeps shielded spending and change in Ironwood, matching the receive example:
 
 ```ts
-import { createWalletClient, parseZec } from '@jp4g/zcash.js';
-import type { WalletStorage } from '@jp4g/zcash.js';
+import { createWalletClient, parseZec } from '@zcashlabs/zcash.js';
+import type { WalletStorage } from '@zcashlabs/zcash.js';
 
 export function openForShielding(endpoint: string, storage: WalletStorage) {
   return createWalletClient(endpoint, {
@@ -95,8 +95,8 @@ the wallet when finished. The ordinary default policy disallows transparent
 inputs and cannot be used for this recipe.
 
 ```ts
-import { parseZec } from '@jp4g/zcash.js';
-import type { AccountRecord, WalletClient } from '@jp4g/zcash.js';
+import { parseZec } from '@zcashlabs/zcash.js';
+import type { AccountRecord, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function shield(wallet: WalletClient, account: AccountRecord, requestId: string) {
   const pending = await wallet.shield({

@@ -1,5 +1,5 @@
-import { accountIndex } from "@jp4g/zcash.js";
-import type { Birthday, SecretInput, WalletClient } from "@jp4g/zcash.js";
+import { accountIndex } from "@zcashlabs/zcash.js";
+import type { Birthday, SecretInput, WalletClient } from "@zcashlabs/zcash.js";
 
 declare const wallet: WalletClient;
 declare const mnemonic: SecretInput; // supplied by application BIP39 tooling

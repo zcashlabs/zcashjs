@@ -3,7 +3,7 @@ import test from 'node:test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createLightClient, createWalletClient, defineNetwork, encodeNetworkParameters } from '@jp4g/zcash.js';
+import { createLightClient, createWalletClient, defineNetwork, encodeNetworkParameters } from '@zcashlabs/zcash.js';
 import { blockBytes, tipBytes, bytesField, scalar, concat, revision } from '../clients/light-chain-reads-fixtures.js';
 import { networkBinding } from '../../dist/src/network.js';
 import { initializeAccount } from '../../examples/testnet/initialize.js';

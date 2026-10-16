@@ -3,7 +3,7 @@
 ## Issue an address from a wallet
 
 ```ts
-import type { AccountRecord, WalletClient } from '@jp4g/zcash.js';
+import type { AccountRecord, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function receiveAddress(wallet: WalletClient, account: AccountRecord) {
   const issued = await wallet.addresses.next({
@@ -23,8 +23,8 @@ Use `{ format: 'transparent' }` for a transparent address. Explicit unified rece
 ## Derive without a wallet database
 
 ```ts
-import { accountFromViewingKey, addresses, diversifierIndex } from '@jp4g/zcash.js';
-import type { Network } from '@jp4g/zcash.js';
+import { accountFromViewingKey, addresses, diversifierIndex } from '@zcashlabs/zcash.js';
+import type { Network } from '@zcashlabs/zcash.js';
 
 export async function deriveAddress(network: Network, encoded: string) {
   const account = await accountFromViewingKey({
@@ -53,8 +53,8 @@ Use a reviewed proposal's context when available. For standalone selection,
 derive one from the registered network and intended transaction height:
 
 ```ts
-import { addresses, getConsensusContext } from '@jp4g/zcash.js';
-import type { Network, Pool } from '@jp4g/zcash.js';
+import { addresses, getConsensusContext } from '@zcashlabs/zcash.js';
+import type { Network, Pool } from '@zcashlabs/zcash.js';
 
 export async function receiver(network: Network, targetHeight: number, encoded: string, pool: Pool) {
   const context = getConsensusContext({ network, targetHeight });

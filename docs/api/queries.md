@@ -3,8 +3,8 @@
 Wallet queries describe the local database at its scan state. Sync first when your UI needs current chain data.
 
 ```ts
-import { formatZec } from '@jp4g/zcash.js';
-import type { AccountRecord, WalletClient } from '@jp4g/zcash.js';
+import { formatZec } from '@zcashlabs/zcash.js';
+import type { AccountRecord, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function accountOverview(wallet: WalletClient, account: AccountRecord) {
   const balance = await wallet.getBalance({ accountId: account.id });
@@ -22,7 +22,7 @@ A `null` amount means unavailable accounting, not zero. Pool balances distinguis
 ## Read all history pages
 
 ```ts
-import type { AccountRecord, HistoryEntry, WalletClient } from '@jp4g/zcash.js';
+import type { AccountRecord, HistoryEntry, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function history(wallet: WalletClient, account: AccountRecord) {
   const entries: HistoryEntry[] = [];

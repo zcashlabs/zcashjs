@@ -5,8 +5,8 @@ A stored account tracks wallet history. A signer holds authorization capability.
 ## Recover an existing mnemonic account
 
 ```ts
-import { accountIndex } from '@jp4g/zcash.js';
-import type { WalletClient } from '@jp4g/zcash.js';
+import { accountIndex } from '@zcashlabs/zcash.js';
+import type { WalletClient } from '@zcashlabs/zcash.js';
 
 export async function importAccount(wallet: WalletClient, mnemonic: Uint8Array, index: number) {
   return wallet.accounts.import({
@@ -73,7 +73,7 @@ phrase instead of generating a replacement.
 Use the existing account ID from `accounts.list()` or `accounts.get()`. There is no birthday lookup, network request, reimport or temporary wallet.
 
 ```ts
-import type { AccountRecord, WalletClient } from '@jp4g/zcash.js';
+import type { AccountRecord, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function restoreSigning(wallet: WalletClient, accountId: AccountRecord['id'], mnemonic: Uint8Array) {
   const signer = await wallet.accounts.restoreSigner({ accountId, mnemonic });
@@ -96,8 +96,8 @@ The bundled baseline runtime supports restoration. Previously reviewed external 
 Choose a height at or before the account's earliest relevant activity. The helper fetches and validates the preceding tree state; it does not discover when the account was first used.
 
 ```ts
-import { accountIndex, resolveBirthday } from '@jp4g/zcash.js';
-import type { LightClient, WalletClient } from '@jp4g/zcash.js';
+import { accountIndex, resolveBirthday } from '@zcashlabs/zcash.js';
+import type { LightClient, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function importAtHeight(
   wallet: WalletClient, light: LightClient, mnemonic: Uint8Array, index: number, firstScanHeight: number,
@@ -110,7 +110,7 @@ export async function importAtHeight(
 ## Import viewing authority
 
 ```ts
-import type { WalletClient } from '@jp4g/zcash.js';
+import type { WalletClient } from '@zcashlabs/zcash.js';
 
 export async function importWatchOnly(wallet: WalletClient, viewingKey: string) {
   return wallet.accounts.import({

@@ -1,5 +1,5 @@
-import { createLightClient } from "@jp4g/zcash.js";
-import type { CompactBlock, HeightRange } from "@jp4g/zcash.js";
+import { createLightClient } from "@zcashlabs/zcash.js";
+import type { CompactBlock, HeightRange } from "@zcashlabs/zcash.js";
 
 declare const lightUrl: string; // application-selected fixture endpoint
 declare const range: HeightRange;

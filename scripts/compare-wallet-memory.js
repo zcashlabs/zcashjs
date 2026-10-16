@@ -10,7 +10,7 @@ import { promisify } from 'node:util';
 
 assert.equal(process.argv.length, 5, 'usage: node scripts/compare-wallet-memory.js CONSUMER CERT KEY');
 const [consumer, cert, key] = process.argv.slice(2).map(value => resolve(value));
-const directory = join(consumer, 'node_modules/@jp4g/zcash.js/dist/src/runtime/assets/wallet');
+const directory = join(consumer, 'node_modules/@zcashlabs/zcash.js/dist/src/runtime/assets/wallet');
 const manifestBytes = await readFile(join(directory, 'manifest.json'));
 const manifest = JSON.parse(manifestBytes);
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

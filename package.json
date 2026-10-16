@@ -1,5 +1,5 @@
 {
-  "name": "@jp4g/zcash.js",
+  "name": "@zcashlabs/zcash.js",
   "description": "Zcash JavaScript SDK with a bundled, lazily loaded wallet runtime and local proving assets.",
   "repository": {
     "type": "git",

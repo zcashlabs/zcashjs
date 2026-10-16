@@ -3,7 +3,7 @@
 SDK failures are structured errors. Use `isZcashError` to distinguish them from application errors and inspect the error code and any retained payment state.
 
 ```ts
-import { isZcashError } from '@jp4g/zcash.js';
+import { isZcashError } from '@zcashlabs/zcash.js';
 
 export async function attempt<T>(work: () => Promise<T>) {
   try {
@@ -61,7 +61,7 @@ compatibility and are not currently emitted by the bundled runtime.
 ## Cancel a read
 
 ```ts
-import type { PublicClient } from '@jp4g/zcash.js';
+import type { PublicClient } from '@zcashlabs/zcash.js';
 
 export async function cancellableTip(client: PublicClient) {
   const controller = new AbortController();

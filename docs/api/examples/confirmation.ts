@@ -1,4 +1,4 @@
-import type { WalletClient, PendingPayment } from '@jp4g/zcash.js';
+import type { WalletClient, PendingPayment } from '@zcashlabs/zcash.js';
 
 export async function waitForConfirmation(wallet: WalletClient, pending: PendingPayment) {
   const timeoutMs = 900_000;

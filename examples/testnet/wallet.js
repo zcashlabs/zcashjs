@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
-import { addresses, createLightClient, createWalletClient, formatZec, parseZec, resolveBirthday } from '@jp4g/zcash.js';
+import { addresses, createLightClient, createWalletClient, formatZec, parseZec, resolveBirthday } from '@zcashlabs/zcash.js';
 import { waitForConfirmation } from './confirmation.js';
 import { initializeAccount } from './initialize.js';
 

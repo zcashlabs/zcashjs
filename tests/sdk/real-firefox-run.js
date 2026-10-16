@@ -74,18 +74,18 @@ try {
   const [pack] = JSON.parse(command('npm', ['pack', '--offline', '--cache', join(runRoot, 'npm-cache'), '--ignore-scripts', '--json', '--pack-destination', runRoot]));
   assert.ok(pack.files.every(file => !file.path.startsWith('qualification/') && !file.path.startsWith('tests/')));
   const consumer = join(runRoot, 'consumer');
-  await mkdir(join(consumer, 'node_modules/@jp4g/zcash.js'), { recursive: true });
+  await mkdir(join(consumer, 'node_modules/@zcashlabs/zcash.js'), { recursive: true });
   // Give the consumer its own package scope, so zcash.js cannot self-resolve to this repo.
   await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'zcash-browser-test-consumer', private: true, type: 'module' }));
   // Extract the locally packed archive directly; no package install or registry access.
-  command('tar', ['-xzf', join(runRoot, pack.filename), '--strip-components=1', '-C', join(consumer, 'node_modules/@jp4g/zcash.js')]);
-  const packageRoot = join(consumer, 'node_modules/@jp4g/zcash.js');
+  command('tar', ['-xzf', join(runRoot, pack.filename), '--strip-components=1', '-C', join(consumer, 'node_modules/@zcashlabs/zcash.js')]);
+  const packageRoot = join(consumer, 'node_modules/@zcashlabs/zcash.js');
   const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json')));
   assert.deepEqual(Object.keys(manifest.exports), ['.', './grpc-node']);
   assert.equal(manifest.exports['.'].import, './dist/src/index.js');
   assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.4' });
   const entry = join(consumer, 'entry.mjs');
-  await writeFile(entry, "import * as sdk from '@jp4g/zcash.js';\nimport { readRpc } from './node_modules/@jp4g/zcash.js/dist/src/http.js';\nexport { sdk, readRpc };\n");
+  await writeFile(entry, "import * as sdk from '@zcashlabs/zcash.js';\nimport { readRpc } from './node_modules/@zcashlabs/zcash.js/dist/src/http.js';\nexport { sdk, readRpc };\n");
   const code = await bundle(consumer, stop.signal);
   const packet=await verifiedPacket();
   const vector=packet.vectors.find(value=>value.branch===0x76b809bb);

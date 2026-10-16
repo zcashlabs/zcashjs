@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createPublicClient, defineNetwork, httpTransport, readGenesisHash } from '@jp4g/zcash.js';
+import { createPublicClient, defineNetwork, httpTransport, readGenesisHash } from '@zcashlabs/zcash.js';
 import { publicClientBinding } from '../../dist/src/public.js';
 import { httpSourceId, readRpc } from '../../dist/src/http.js';
 

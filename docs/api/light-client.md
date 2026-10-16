@@ -3,7 +3,7 @@
 `createLightClient` combines the network codecs with a lightwallet transport. `grpc` selects native gRPC on Node and gRPC-Web in browsers. The endpoint must serve the corresponding protocol.
 
 ```ts
-import { createLightClient } from '@jp4g/zcash.js';
+import { createLightClient } from '@zcashlabs/zcash.js';
 
 export async function connectTestnet(endpoint: string) {
   const light = await createLightClient(endpoint, { network: 'testnet' });
@@ -23,8 +23,8 @@ the preset. Optional `transportOptions` overrides individual transport fields;
 `readRetry`, if provided, supplies both `attempts` and `delayMs`.
 
 ```ts
-import { createLightClient } from '@jp4g/zcash.js';
-import type { NetworkDefinition } from '@jp4g/zcash.js';
+import { createLightClient } from '@zcashlabs/zcash.js';
+import type { NetworkDefinition } from '@zcashlabs/zcash.js';
 
 export async function customLight(endpoint: string, network: NetworkDefinition) {
   return createLightClient(endpoint, {
@@ -37,8 +37,8 @@ export async function customLight(endpoint: string, network: NetworkDefinition) 
 The explicit transport form is synchronous and supports custom adapters:
 
 ```ts
-import { createLightClient, grpc } from '@jp4g/zcash.js';
-import type { Network } from '@jp4g/zcash.js';
+import { createLightClient, grpc } from '@zcashlabs/zcash.js';
+import type { Network } from '@zcashlabs/zcash.js';
 
 export function connectLight(network: Network, endpoint: string) {
   return createLightClient({
@@ -78,7 +78,7 @@ See [custom network setup](networks-amounts.md).
 ## Stream a finite block range
 
 ```ts
-import type { LightClient } from '@jp4g/zcash.js';
+import type { LightClient } from '@zcashlabs/zcash.js';
 
 export async function readBlocks(
   light: LightClient, fromHeight: number, toHeight: number, signal: AbortSignal,
@@ -99,4 +99,4 @@ Use an `AbortController` to stop a long stream, or break a `for await` loop. Do 
 
 Reported transport and protocol failures reject. Some backends can hide failures behind empty replies, which the SDK cannot distinguish from valid empty results. Check your provider's behavior before treating an empty result as complete.
 
-For an application-owned byte transport, `CustomLightTransport` accepts bounded protobuf messages at the supported protocol revision. The Node-only `@jp4g/zcash.js/grpc-node` entry exports `createGrpcNodeTransport`; ordinary applications can use `grpc` without importing that lower-level adapter.
+For an application-owned byte transport, `CustomLightTransport` accepts bounded protobuf messages at the supported protocol revision. The Node-only `@zcashlabs/zcash.js/grpc-node` entry exports `createGrpcNodeTransport`; ordinary applications can use `grpc` without importing that lower-level adapter.

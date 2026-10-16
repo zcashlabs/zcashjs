@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { defineNetwork, grpc, httpTransport, isZcashError } from '@jp4g/zcash.js';
+import { defineNetwork, grpc, httpTransport, isZcashError } from '@zcashlabs/zcash.js';
 
 const safe = pattern => error => {
   assert.ok(isZcashError(error));

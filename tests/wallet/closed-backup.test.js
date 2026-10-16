@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { createWalletClient, defineNetwork } from '@jp4g/zcash.js';
+import { createWalletClient, defineNetwork } from '@zcashlabs/zcash.js';
 
 // Same-candidate cold backup qualification; not an online backup or schema migration test.
 test('closed Linux wallet snapshot preserves accounts and address exposure in a fresh restored directory', async t => {

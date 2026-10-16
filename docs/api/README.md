@@ -34,7 +34,7 @@ their networks; it does not create or own them.
 ## A first example
 
 ```ts
-import { formatZec, parseZec } from '@jp4g/zcash.js';
+import { formatZec, parseZec } from '@zcashlabs/zcash.js';
 
 const amount = parseZec('0.00125');
 console.log(amount);           // 125000n zatoshis

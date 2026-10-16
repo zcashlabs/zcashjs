@@ -1,4 +1,4 @@
-import { createLightClient, createWalletClient, defineNetwork, isZcashError } from '@jp4g/zcash.js';
+import { createLightClient, createWalletClient, defineNetwork, isZcashError } from '@zcashlabs/zcash.js';
 
 const form = document.querySelector('#client');
 const result = document.querySelector('#result');

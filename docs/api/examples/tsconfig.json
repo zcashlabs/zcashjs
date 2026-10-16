@@ -10,7 +10,7 @@
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "paths": {
-      "@jp4g/zcash.js": ["../public-api.ts"]
+      "@zcashlabs/zcash.js": ["../public-api.ts"]
     }
   },
   "include": ["./*.ts", "../public-api.ts"]

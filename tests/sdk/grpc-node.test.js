@@ -204,7 +204,7 @@ test('browser condition excludes native entry and root dependency graph stays br
   assert.doesNotMatch(code, /grpc-js|node:http2|node:net/);
   await assert.rejects(build({ configFile: false, logLevel: 'silent', resolve: { conditions: ['browser'] },
     plugins: [{ name: 'native-entry-probe', resolveId(id) { if (id === 'probe') return '\0probe'; },
-      load(id) { if (id === '\0probe') return "import { createGrpcNodeTransport } from '@jp4g/zcash.js/grpc-node'; export { createGrpcNodeTransport };"; } }],
+      load(id) { if (id === '\0probe') return "import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node'; export { createGrpcNodeTransport };"; } }],
     build: { write: false, lib: { entry: 'probe', formats: ['es'] } } }),
     /No known conditions|Missing|Failed to resolve|Could not resolve|Cannot resolve/);
 });

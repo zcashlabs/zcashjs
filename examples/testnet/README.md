@@ -2,7 +2,7 @@
 
 Copy this directory into a new project outside the SDK repository. Before
 publication install the candidate tarball with `npm install /absolute/package.tgz`;
-after owner publication use `npm install @jp4g/zcash.js@VERSION`. The only additional
+after owner publication use `npm install @zcashlabs/zcash.js@VERSION`. The only additional
 dependency is `@scure/bip39`, used by this application to generate fresh recovery
 phrases. The SDK supplies its own engine, workers and proving assets.
 

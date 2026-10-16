@@ -1,5 +1,5 @@
-import { createWalletClient } from '@jp4g/zcash.js';
-import type { WalletEndpointOptions } from '@jp4g/zcash.js';
+import { createWalletClient } from '@zcashlabs/zcash.js';
+import type { WalletEndpointOptions } from '@zcashlabs/zcash.js';
 
 declare const endpoint: string;
 const options: WalletEndpointOptions = {

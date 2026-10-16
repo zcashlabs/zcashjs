@@ -3,7 +3,7 @@
 Sync downloads and scans data for the wallet's accounts. It is explicit: opening a wallet or consuming a light-client stream does not start a general scan.
 
 ```ts
-import type { WalletClient } from '@jp4g/zcash.js';
+import type { WalletClient } from '@zcashlabs/zcash.js';
 
 export async function syncWallet(wallet: WalletClient, signal: AbortSignal) {
   const status = await wallet.sync({ signal });
@@ -23,7 +23,7 @@ rejections remain errors; they are not blindly retried.
 ## Follow scan progress
 
 ```ts
-import type { SyncStatus, WalletClient } from '@jp4g/zcash.js';
+import type { SyncStatus, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function followSync(
   wallet: WalletClient, signal: AbortSignal, render: (status: SyncStatus) => void,

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createPublicClient, defineNetwork, httpTransport, readGenesisHash } from '@jp4g/zcash.js';
+import { createPublicClient, defineNetwork, httpTransport, readGenesisHash } from '@zcashlabs/zcash.js';
 import { genesis, blockOne, transportOptions } from '../clients/public-chain-reads-fixtures.js';
 import { publicNetworkDefinition, publicResponse } from './public-client-fixture.js';
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createServer } from 'node:http';
-import * as sdk from '@jp4g/zcash.js';
+import * as sdk from '@zcashlabs/zcash.js';
 
 const internal = await import('../../dist/src/http.js');
 const options = (extra = {}) => ({ sourceId: 'synthetic', timeoutMs: 1000,

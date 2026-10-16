@@ -3,7 +3,7 @@
 Use a public client when you need chain data without opening a wallet:
 
 ```ts
-import { createPublicClient } from '@jp4g/zcash.js';
+import { createPublicClient } from '@zcashlabs/zcash.js';
 
 export async function readTip(rpcUrl: string) {
   const client = await createPublicClient(rpcUrl);
@@ -38,7 +38,7 @@ Keep credentials out of the RPC URL; credential-bearing URLs are rejected. Suppl
 headers through the asynchronous callback, which runs for each HTTP attempt:
 
 ```ts
-import { createPublicClient } from '@jp4g/zcash.js';
+import { createPublicClient } from '@zcashlabs/zcash.js';
 
 export async function authenticatedClient(
   rpcUrl: string,
@@ -60,8 +60,8 @@ The same `headers` option is available on `httpTransport`.
 ## Read a transaction
 
 ```ts
-import { txId } from '@jp4g/zcash.js';
-import type { PublicClient } from '@jp4g/zcash.js';
+import { txId } from '@zcashlabs/zcash.js';
+import type { PublicClient } from '@zcashlabs/zcash.js';
 
 export async function inspectTransaction(client: PublicClient, displayTxid: string) {
   const id = txId(displayTxid);
@@ -76,8 +76,8 @@ A transaction contains owned raw bytes and an observation. Status can be `notSee
 ## Watch or wait for confirmation
 
 ```ts
-import { txId } from '@jp4g/zcash.js';
-import type { PublicClient, TransactionObservation } from '@jp4g/zcash.js';
+import { txId } from '@zcashlabs/zcash.js';
+import type { PublicClient, TransactionObservation } from '@zcashlabs/zcash.js';
 
 export async function watchTransaction(
   client: PublicClient,

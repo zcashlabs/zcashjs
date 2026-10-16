@@ -5,7 +5,7 @@
 Use Node **22.12 or newer** for Node applications.
 
 ```sh
-npm install @jp4g/zcash.js@0.1.0-rc.5
+npm install @zcashlabs/zcash.js@0.1.0-rc.5
 ```
 
 The package includes TypeScript declarations, the wallet engine, workers, and
@@ -20,7 +20,7 @@ applications can use their existing TypeScript/ESM bundler.
 In `index.ts`:
 
 ```ts
-import { createLightClient } from '@jp4g/zcash.js';
+import { createLightClient } from '@zcashlabs/zcash.js';
 
 const light = await createLightClient('https://testnet.zec.rocks:443', {
   network: 'testnet',

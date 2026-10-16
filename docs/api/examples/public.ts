@@ -1,5 +1,5 @@
-import { createPublicClient } from "@jp4g/zcash.js";
-import type { Network } from "@jp4g/zcash.js";
+import { createPublicClient } from "@zcashlabs/zcash.js";
+import type { Network } from "@zcashlabs/zcash.js";
 
 declare const network: Network;
 declare const rpcUrl: string; // application-selected fixture endpoint

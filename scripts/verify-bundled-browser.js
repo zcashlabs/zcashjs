@@ -20,7 +20,7 @@ await writeFile(join(consumer, 'memory.mjs'), `
 const samples = {};
 const sample = name => { globalThis.gc?.(); samples[name] = process.memoryUsage(); };
 sample('beforeImport');
-const { createWalletClient, defineNetwork } = await import('@jp4g/zcash.js');
+const { createWalletClient, defineNetwork } = await import('@zcashlabs/zcash.js');
 sample('afterImport');
 const network = await defineNetwork({identity:'memory-probe',genesisHash:'03'.repeat(32),parametersFormat:'zcash-js-network/1',parameters:new TextEncoder().encode(JSON.stringify({encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100}))});
 const runtime = process.env.MEMORY_RUNTIME ? {baseline:JSON.parse(process.env.MEMORY_RUNTIME)} : undefined;
@@ -41,7 +41,7 @@ if (process.argv.includes('--node-only')) {
 const fixture = JSON.parse(await readFile(join(root, 'tests/fixtures/wallet/bundle/tests/views-fixture.json')));
 await writeFile(join(consumer, 'index.html'), '<!doctype html><meta charset="utf-8"><title>Installed wallet acceptance</title><script type="module" src="/app.js"></script>');
 await writeFile(join(consumer, 'app.js'), `
-import {createWalletClient, defineNetwork} from '@jp4g/zcash.js';
+import {createWalletClient, defineNetwork} from '@zcashlabs/zcash.js';
 window.runWallet = async () => {
   const network = await defineNetwork({identity:'browser-bundled',genesisHash:'03'.repeat(32),parametersFormat:'zcash-js-network/1',parameters:new TextEncoder().encode(JSON.stringify({encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100}))});
   const name='bundled-'+crypto.randomUUID();

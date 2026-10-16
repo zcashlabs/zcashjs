@@ -34,7 +34,7 @@ try {
   // Preserve line numbers; remove only the suppression, not the forbidden expression.
   writeFileSync(join(temp, 'negative.ts'), lines.map(line => line.includes('@ts-expect-error') ? '' : line).join('\n'));
   const config = JSON.parse(readFileSync(join(root, 'docs/api/examples/tsconfig.json'), 'utf8'));
-  config.compilerOptions.paths = { '@jp4g/zcash.js': [join(root, 'docs/api/public-api.ts')] };
+  config.compilerOptions.paths = { '@zcashlabs/zcash.js': [join(root, 'docs/api/public-api.ts')] };
   config.include = ['./negative.ts'];
   writeFileSync(join(temp, 'tsconfig.json'), JSON.stringify(config));
   const negative = compile(join(temp, 'tsconfig.json'));
@@ -53,6 +53,6 @@ for (const name of readdirSync(join(root, 'docs/api/examples')).filter(name => n
   assert.doesNotMatch(source, /\b(?:saveOperationId|loadOperationId|savedOperationId)\b/, name);
 }
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-assert.equal(pkg.name, '@jp4g/zcash.js');
+assert.equal(pkg.name, '@zcashlabs/zcash.js');
 console.log('PASS: ID-free active examples and package identity');
 console.log('No runtime recovery, protocol or durability test was executed.');

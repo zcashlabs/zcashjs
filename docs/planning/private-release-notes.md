@@ -1,6 +1,6 @@
 # Private delivery status
 
-This is the private conformance record, not a publication announcement or live-chain result. The owner authorized local distribution qualification and subsequently MIT licensing; `private: true` remains intentional. The bounded offline work in #122–124 is complete; [#121](https://github.com/jp4g/zcash.js/issues/121) remains open for the owner-assisted live-chain check on hold in #125. The receipts below retain their original tested source identities; later documentation does not change those identities.
+This is the private conformance record, not a publication announcement or live-chain result. The owner authorized local distribution qualification and subsequently MIT licensing; `private: true` remains intentional. The bounded offline work in #122–124 is complete; #121 (historical) remains open for the owner-assisted live-chain check on hold in #125. The receipts below retain their original tested source identities; later documentation does not change those identities.
 
 ## Qualified scope
 
@@ -18,14 +18,14 @@ Node log: `/tmp/final-wallet-gaps-node-05.log`, SHA-256 `731d191116fa8eff4e3d010
 
 ## Known limitations and dispositions
 
-- [#98](https://github.com/jp4g/zcash.js/issues/98) is resolved: mnemonic account creation/import no longer accepts `enabledPools`; native HD allocation retains the full supported key set. Viewing imports and spend/address policy remain separate.
-- [#97](https://github.com/jp4g/zcash.js/issues/97) now has passing actual Node/Firefox evidence for canonical UFVK-fingerprint lookup through a custom adapter and native key correspondence. The correction is integrated through [PR #114](https://github.com/jp4g/zcash.js/pull/114); this scoped result does not close the remaining qualification obligations.
-- [#102](https://github.com/jp4g/zcash.js/issues/102) is explicitly deferred. Native import can retain verified finalized transparent scripts, but wallet finalization rejects already-finalized transparent inputs with `METHOD_NOT_SUPPORTED`. External signing that returns partial signatures and ordinary local sending remain in scope.
-- [#107](https://github.com/jp4g/zcash.js/issues/107) is implemented and qualified on actual Node and Firefox: current shared wallet startup, native scan parity, persistence/reopen, signer lifetime, cancellation and bootstrap cleanup. See the final threaded result in [wallet qualification](wallet-payments-qualification.md).
+- #98 (historical) is resolved: mnemonic account creation/import no longer accepts `enabledPools`; native HD allocation retains the full supported key set. Viewing imports and spend/address policy remain separate.
+- #97 (historical) now has passing actual Node/Firefox evidence for canonical UFVK-fingerprint lookup through a custom adapter and native key correspondence. The correction is integrated through PR #114 (historical); this scoped result does not close the remaining qualification obligations.
+- #102 (historical) is explicitly deferred. Native import can retain verified finalized transparent scripts, but wallet finalization rejects already-finalized transparent inputs with `METHOD_NOT_SUPPORTED`. External signing that returns partial signatures and ordinary local sending remain in scope.
+- #107 (historical) is implemented and qualified on actual Node and Firefox: current shared wallet startup, native scan parity, persistence/reopen, signer lifetime, cancellation and bootstrap cleanup. See the final threaded result in [wallet qualification](wallet-payments-qualification.md).
 
-- [#115](https://github.com/jp4g/zcash.js/issues/115) is reconciled for the retained SDK/runtime distribution: owned code is MIT, and the package carries the original permissive dependency notices. See [MIT distribution closeout](mit-distribution.md).
-- [#116](https://github.com/jp4g/zcash.js/issues/116) is complete: both current packages passed actual OPFS space exhaustion, interrupted writes and interrupted opening migration. The [source-bound receipt](../api/installation.md#current-opfs-fault-recovery-116) records rollback/retry/reopen and cleanup, independently of older fault and dispatch-interruption results.
-- [#123](https://github.com/jp4g/zcash.js/issues/123) resolves restore applicability: there is no public database backup/restore API. Conditional explicit-restore cases are not applicable, not passed tests. [External copies/rollback remain outside restore guarantees](../api/wallet-runtime.md#backup-and-restore-scope).
+- #115 (historical) is reconciled for the retained SDK/runtime distribution: owned code is MIT, and the package carries the original permissive dependency notices. See [MIT distribution closeout](mit-distribution.md).
+- #116 (historical) is complete: both current packages passed actual OPFS space exhaustion, interrupted writes and interrupted opening migration. The [source-bound receipt](../api/installation.md#current-opfs-fault-recovery-116) records rollback/retry/reopen and cleanup, independently of older fault and dispatch-interruption results.
+- #123 (historical) resolves restore applicability: there is no public database backup/restore API. Conditional explicit-restore cases are not applicable, not passed tests. [External copies/rollback remain outside restore guarantees](../api/wallet-runtime.md#backup-and-restore-scope).
 
 The deferred [#10–#12](future-issues.md) and #102 scope is unchanged. Whole-process/power-loss recovery, every browser/platform, performance budgets and independent security auditing are not established by the scoped synthetic receipts. Publication and deployment remain outside authorization.
 
@@ -51,4 +51,4 @@ The [MIT distribution closeout](mit-distribution.md) supersedes the missing-noti
 
 ## Owner handoff: live-chain check
 
-[#125](https://github.com/jp4g/zcash.js/issues/125) remains on hold. The owner will provide the test network/endpoint and coordinate a small test-funded wallet after offline closeout. Agree one public-API receive/sync/balance/send/confirmation/reopen workflow and the Node/browser execution scope before contacting that endpoint. No test funds, keys or live transaction have been requested or used by these offline checks. No further implementation feature is implied by the handoff.
+#125 (historical) remains on hold. The owner will provide the test network/endpoint and coordinate a small test-funded wallet after offline closeout. Agree one public-API receive/sync/balance/send/confirmation/reopen workflow and the Node/browser execution scope before contacting that endpoint. No test funds, keys or live transaction have been requested or used by these offline checks. No further implementation feature is implied by the handoff.

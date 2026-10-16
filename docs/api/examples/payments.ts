@@ -1,5 +1,5 @@
 import { waitForConfirmation } from './confirmation.js';
-import type { AccountId, Signer, WalletClient } from "@jp4g/zcash.js";
+import type { AccountId, Signer, WalletClient } from "@zcashlabs/zcash.js";
 
 declare const wallet: WalletClient;
 declare const accountId: AccountId;

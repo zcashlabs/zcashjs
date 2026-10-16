@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import * as sdk from '@jp4g/zcash.js';
+import * as sdk from '@zcashlabs/zcash.js';
 
 function invalid(action) {
   assert.throws(action, (error) => {

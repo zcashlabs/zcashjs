@@ -67,7 +67,7 @@ npm pack --pack-destination /tmp/zcash-package
 assets and licenses. Install the resulting tarball from your application:
 
 ```sh
-npm install /tmp/zcash-package/jp4g-zcash.js-0.1.0-rc.5.tgz
+npm install /tmp/zcash-package/zcashlabs-zcash.js-0.1.0-rc.5.tgz
 ```
 
 Use the filename printed by `npm pack` for the current version.

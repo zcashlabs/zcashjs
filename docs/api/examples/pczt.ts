@@ -1,5 +1,5 @@
 import { waitForConfirmation } from './confirmation.js';
-import type { PcztArtifact, ReviewedOutput, WalletClient } from "@jp4g/zcash.js";
+import type { PcztArtifact, ReviewedOutput, WalletClient } from "@zcashlabs/zcash.js";
 
 declare const wallet: WalletClient;
 declare const prepared: PcztArtifact; // single-step, required proofs already satisfied

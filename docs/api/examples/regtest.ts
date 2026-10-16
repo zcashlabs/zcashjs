@@ -1,6 +1,6 @@
 import {
   createPublicClient, defineNetwork, encodeNetworkParameters, httpTransport, readGenesisHash,
-} from '@jp4g/zcash.js';
+} from '@zcashlabs/zcash.js';
 
 export async function connectRegtest(rpcUrl: string) {
   const transport = httpTransport(rpcUrl, {

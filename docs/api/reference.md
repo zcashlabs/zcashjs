@@ -19,7 +19,7 @@ Use the chapter links for examples. The [package entry point](https://github.com
 | `createCustomSigner`, `pczt` | Signer integration and standalone PCZT tools | [Signing](signing.md) |
 | `isZcashError` | Narrow a structured SDK failure | [Errors](errors-lifecycle.md) |
 
-`@jp4g/zcash.js/grpc-node` additionally exports `createGrpcNodeTransport` for explicit Node byte-transport use.
+`@zcashlabs/zcash.js/grpc-node` additionally exports `createGrpcNodeTransport` for explicit Node byte-transport use.
 
 ## Wallet methods
 

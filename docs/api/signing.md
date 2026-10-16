@@ -9,7 +9,7 @@ The ordinary path is `wallet.send` with an attached memory signer. A memory sign
 This function starts with an artifact whose required proof state has already been prepared. Your exchange callback owns the device/file/transport interaction and review UX.
 
 ```ts
-import type { PcztArtifact, WalletClient } from '@jp4g/zcash.js';
+import type { PcztArtifact, WalletClient } from '@zcashlabs/zcash.js';
 
 export async function externalSign(
   wallet: WalletClient,
@@ -39,8 +39,8 @@ The standalone `pczt` namespace provides `parse`, `inspect`, `serialize`, `combi
 ## Inspect standalone PCZT bytes
 
 ```ts
-import { pczt } from '@jp4g/zcash.js';
-import type { ConsensusContext } from '@jp4g/zcash.js';
+import { pczt } from '@zcashlabs/zcash.js';
+import type { ConsensusContext } from '@zcashlabs/zcash.js';
 
 export async function inspectPczt(bytes: Uint8Array, context: ConsensusContext) {
   const handle = await pczt.parse({ bytes, context, maxBytes: 4 * 1024 * 1024 });

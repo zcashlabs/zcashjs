@@ -4,7 +4,7 @@ A wallet owns a local database and a worker. Supply an endpoint and choose where
 to store its data:
 
 ```ts
-import { createWalletClient } from '@jp4g/zcash.js';
+import { createWalletClient } from '@zcashlabs/zcash.js';
 
 const wallet = await createWalletClient('https://testnet.zec.rocks:443', {
   network: 'testnet',
@@ -70,7 +70,7 @@ Pass a preset name, a registered `Network`, or a full `NetworkDefinition` as
 `network`. Configure the endpoint through `transportOptions`:
 
 ```ts
-import { createWalletClient } from '@jp4g/zcash.js';
+import { createWalletClient } from '@zcashlabs/zcash.js';
 
 export async function openWallet(endpoint: string) {
   return createWalletClient(endpoint, {
@@ -100,8 +100,8 @@ For separate scanning and submission routes, offline wallets, or a custom
 transport, supply the components directly:
 
 ```ts
-import { createWalletClient } from '@jp4g/zcash.js';
-import type { LightClient, WalletStorage } from '@jp4g/zcash.js';
+import { createWalletClient } from '@zcashlabs/zcash.js';
+import type { LightClient, WalletStorage } from '@zcashlabs/zcash.js';
 
 export function openReadOnly(light: LightClient, storage: WalletStorage) {
   return createWalletClient({

@@ -7,8 +7,8 @@ Starting with a new wallet instead? Follow [create a new mnemonic account](accou
 Before running it, supply a matching network, a functioning light source and broadcaster, and a mnemonic account with sufficient eligible funds. The package supplies the baseline wallet runtime and local proving material by default. `sync()` discovers funds; it does not create them. The example assumes derivation index zero and uses a full scan for explicit recovery.
 
 ```ts
-import { accountIndex, createWalletClient, formatZec, parseZec } from '@jp4g/zcash.js';
-import type { MemorySigner, PendingPayment, Proposal, SignerBinding, WalletClient, WalletOptions } from '@jp4g/zcash.js';
+import { accountIndex, createWalletClient, formatZec, parseZec } from '@zcashlabs/zcash.js';
+import type { MemorySigner, PendingPayment, Proposal, SignerBinding, WalletClient, WalletOptions } from '@zcashlabs/zcash.js';
 
 export async function walletWalkthrough(
   options: WalletOptions,

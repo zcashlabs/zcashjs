@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": { "dev": "vite --host 127.0.0.1", "build": "vite build", "preview": "vite preview --host 127.0.0.1" },
-  "dependencies": { "@jp4g/zcash.js": "0.1.0-rc.5" },
+  "dependencies": { "@zcashlabs/zcash.js": "0.1.0-rc.5" },
   "devDependencies": { "vite": "8.2.2" }
 }

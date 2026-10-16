@@ -1,4 +1,4 @@
-import * as sdk from '@jp4g/zcash.js';
+import * as sdk from '@zcashlabs/zcash.js';
 import { readRpc } from '../../dist/src/http.js';
 
 export async function run() {

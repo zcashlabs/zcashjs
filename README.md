@@ -11,10 +11,10 @@ An experimental TypeScript SDK for Zcash chain queries and local wallets on Node
 - Local accounts, scanning, proposals, signing, submission, and recorded payment recovery through `createWalletClient`.
 - Exact bigint amounts, validated network/identifier values, viewing/address tools, and PCZT utilities.
 
-`@jp4g/zcash.js@0.1.0-rc.5` is the next experimental release candidate; registry publication remains owner-controlled. It includes codec capsules, the baseline wallet engine, workers, and local Sapling proving assets. Wallet execution loads the bundled engine automatically; proving assets load only when needed. Mainnet/testnet presets include genesis hashes and activation schedules; applications supply endpoints and storage. Custom network definitions remain supported. See [wallet setup](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/wallet-runtime.md) and [platform limits](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/platforms.md).
+`@zcashlabs/zcash.js@0.1.0-rc.5` is an experimental release candidate. It includes codec capsules, the baseline wallet engine, workers, and local Sapling proving assets. Wallet execution loads the bundled engine automatically; proving assets load only when needed. Mainnet/testnet presets include genesis hashes and activation schedules; applications supply endpoints and storage. Custom network definitions remain supported. See [wallet setup](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/wallet-runtime.md) and [platform limits](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/platforms.md).
 
 ```js
-import { createLightClient, createWalletClient } from '@jp4g/zcash.js';
+import { createLightClient, createWalletClient } from '@zcashlabs/zcash.js';
 
 const light = await createLightClient('https://testnet.zec.rocks:443', { network: 'testnet' });
 // Use light.network and light when creating your wallet.

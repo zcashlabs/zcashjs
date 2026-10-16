@@ -59,12 +59,12 @@ test('packed release candidate imports and typechecks in an isolated Node consum
     if (!path.startsWith('node_modules/') || dependency.dev || dependency.devOptional) continue;
     await cp(join(repository, path), join(consumer, path), { recursive: true });
   }
-  const installed = join(consumer, 'node_modules/@jp4g/zcash.js');
+  const installed = join(consumer, 'node_modules/@zcashlabs/zcash.js');
   await mkdir(installed, { recursive: true });
   await exec('tar', ['-xzf', join(folder, packed.filename), '--strip-components=1', '-C', installed]);
-  const manifest = JSON.parse(await readFile(join(consumer, 'node_modules/@jp4g/zcash.js/package.json'), 'utf8'));
+  const manifest = JSON.parse(await readFile(join(consumer, 'node_modules/@zcashlabs/zcash.js/package.json'), 'utf8'));
   assert.notEqual(manifest.private, true);
-  assert.equal(manifest.name, '@jp4g/zcash.js');
+  assert.equal(manifest.name, '@zcashlabs/zcash.js');
   assert.equal(manifest.version, lock.version);
   assert.equal(manifest.version, lock.packages[''].version);
   assert.equal(manifest.version, JSON.parse(await readFile(join(repository, 'examples/testnet/package.json'), 'utf8')).dependencies[manifest.name]);
@@ -92,20 +92,20 @@ test('packed release candidate imports and typechecks in an isolated Node consum
     const originalWasm = globalThis.WebAssembly;
     Object.defineProperty(globalThis, 'WebAssembly', { configurable: true, get() { throw Error('WASM forbidden'); } });
     globalThis.fetch = () => { throw Error('Import/construction must be lazy'); };
-    const sdk = await import('@jp4g/zcash.js');
-    const native = await import('@jp4g/zcash.js/grpc-node');
+    const sdk = await import('@zcashlabs/zcash.js');
+    const native = await import('@zcashlabs/zcash.js/grpc-node');
     assert.deepEqual(Object.keys(native), ['createGrpcNodeTransport']);
     assert.equal(native.createGrpcNodeTransport('http://127.0.0.1:1', { sourceId: 'fixture', timeoutMs: 10 }).kind, 'custom-lightwallet');
     assert.equal(sdk.parseZec('9007199254740993.00000001'), 900719925474099300000001n);
     sdk.httpTransport('https://synthetic.invalid', { sourceId: 'fixture', timeoutMs: 10, readRetry: { attempts: 1, delayMs: 0 }, maxResponseBytes: 256 });
-    await assert.rejects(import('@jp4g/zcash.js/dist/src/http.js'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
+    await assert.rejects(import('@zcashlabs/zcash.js/dist/src/http.js'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
     Object.defineProperty(globalThis, 'WebAssembly', { configurable: true, value: originalWasm });
     const network = await sdk.defineNetwork({identity:'bundled-consumer',genesisHash:'03'.repeat(32),parametersFormat:'zcash-js-network/1',parameters:new TextEncoder().encode(JSON.stringify({encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100}))});
     const wallet = await sdk.createWalletClient({network,storage:{kind:'memory'},confirmations:{trusted:1,untrusted:1,allowZeroConfirmationShielding:false},observation:{pollIntervalMs:1000,maxBufferedUpdates:16},recovery:{mode:'offline'}});
     try { assert.deepEqual(await wallet.accounts.list(), []); } finally { await wallet.close(); }
     // Corrupt only this disposable installed copy, then restore it for bundler checks.
     const fs = await import('node:fs/promises');
-    const wasmPath = new URL('./node_modules/@jp4g/zcash.js/dist/src/runtime/assets/wallet/bindings_bg.wasm', import.meta.url);
+    const wasmPath = new URL('./node_modules/@zcashlabs/zcash.js/dist/src/runtime/assets/wallet/bindings_bg.wasm', import.meta.url);
     const originalBytes = await fs.readFile(wasmPath);
     const options = {network,storage:{kind:'memory'},confirmations:{trusted:1,untrusted:1,allowZeroConfirmationShielding:false},observation:{pollIntervalMs:1000,maxBufferedUpdates:16},recovery:{mode:'offline'}};
     try {
@@ -121,7 +121,7 @@ test('packed release candidate imports and typechecks in an isolated Node consum
   assert.deepEqual(JSON.parse(runtime.stdout), implemented);
   // Resolve the actual installed exports, without aliases into the repository.
   await writeFile(join(consumer,'webpack-entry.mjs'), `
-    import * as sdk from '@jp4g/zcash.js';
+    import * as sdk from '@zcashlabs/zcash.js';
     export const names=Object.keys(sdk).sort();
     export const wallet=sdk.createWalletClient;
     export const amount=sdk.formatZec(sdk.parseZec('1.00000001'));
@@ -130,10 +130,10 @@ test('packed release candidate imports and typechecks in an isolated Node consum
   for(const variant of ['full','query',...(process.env.WALLET_WEBPACK_OUTPUT?['wallet']:[])]){
     const queryOnly=variant==='query',walletOnly=variant==='wallet';
     if(walletOnly)await writeFile(join(consumer,'webpack-entry.mjs'),`
-      import {createWalletClient,defineNetwork} from '@jp4g/zcash.js';
+      import {createWalletClient,defineNetwork} from '@zcashlabs/zcash.js';
       export async function runWallet(options){const network=await defineNetwork(options.network);const wallet=await createWalletClient({...options,network,confirmations:{trusted:1,untrusted:1,allowZeroConfirmationShielding:false},observation:{pollIntervalMs:1000,maxBufferedUpdates:16},recovery:{mode:'offline'}});let count;try{count=(await wallet.accounts.list()).length;await wallet.getSyncStatus();}finally{await wallet.close();}if(count!==0)throw Error('fresh bundled wallet must be empty');return {closed:true,accounts:count};}
     `);
-    if(queryOnly)await writeFile(join(consumer,'webpack-entry.mjs'),"import {parseZec,formatZec,createPublicClient,httpTransport} from '@jp4g/zcash.js'; export {createPublicClient,httpTransport}; export const amount=formatZec(parseZec('1.00000001'));\n");
+    if(queryOnly)await writeFile(join(consumer,'webpack-entry.mjs'),"import {parseZec,formatZec,createPublicClient,httpTransport} from '@zcashlabs/zcash.js'; export {createPublicClient,httpTransport}; export const amount=formatZec(parseZec('1.00000001'));\n");
     const compiler=webpack({mode:'production',context:consumer,target:['web','es2022'],entry:'./webpack-entry.mjs',devtool:false,...(walletOnly?{experiments:{outputModule:true}}:{}),
       performance:{hints:false},module:{parser:{javascript:{dynamicImportMode:'eager'}}},optimization:{minimize:false},output:{path:join(consumer,'webpack'),filename:'bundle.js',library:walletOnly?{type:'module'}:{name:'SDKProbe',type:'var'},...(walletOnly?{module:true}:{}),globalObject:'globalThis',publicPath:''}});
     let stats;try{stats=await new Promise((resolve,reject)=>compiler.run((error,result)=>error?reject(error):resolve(result)));}finally{await new Promise((resolve,reject)=>compiler.close(error=>error?reject(error):resolve()));}
@@ -142,7 +142,7 @@ test('packed release candidate imports and typechecks in an isolated Node consum
     // Variable imports are confined to Node-only branches; never execute in this web target.
     assert.deepEqual(details.warnings.map(warning=>({module:warning.moduleName,message:warning.message})),queryOnly?[]:[
       'grpc.js','wallet/host.js','wallet/host.js'
-    ].map(name=>({module:'./node_modules/@jp4g/zcash.js/dist/src/'+name,message:'Critical dependency: the request of a dependency is an expression'})));
+    ].map(name=>({module:'./node_modules/@zcashlabs/zcash.js/dist/src/'+name,message:'Critical dependency: the request of a dependency is an expression'})));
     const code=await readFile(join(consumer,'webpack/bundle.js'),'utf8');
     if(walletOnly){
       const output=resolve(process.env.WALLET_WEBPACK_OUTPUT);await mkdir(output,{recursive:true});
@@ -174,7 +174,7 @@ test('packed release candidate imports and typechecks in an isolated Node consum
         import assert from 'node:assert/strict';
         import {readdir} from 'node:fs/promises';
         import {tmpdir} from 'node:os';
-        import {createWalletClient,defineNetwork} from '@jp4g/zcash.js';
+        import {createWalletClient,defineNetwork} from '@zcashlabs/zcash.js';
         const before=(await readdir(tmpdir())).filter(x=>x.startsWith('zcash-wallet-runtime-')).sort();
         const network=await defineNetwork({identity:'fixture',genesisHash:'03'.repeat(32),parametersFormat:'zcash-js-network/1',parameters:new TextEncoder().encode(JSON.stringify({encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100}))});
         const options={network,storage:{kind:'node-filesystem',path:process.env.CONSUMER_WALLET_PATH},runtime:{baseline:{manifestUrl:process.env.CONSUMER_MANIFEST_URL,manifestSha256:process.env.CONSUMER_MANIFEST_SHA},threading:{mode:'baseline'},maxMemoryBytes:512*1024*1024,maxQueuedBytes:65536,maxQueuedJobs:8,scanBatchSize:10,maxPcztBytes:1048576},confirmations:{trusted:1,untrusted:1,allowZeroConfirmationShielding:false},observation:{pollIntervalMs:1000,maxBufferedUpdates:16},recovery:{mode:'offline'}};
@@ -188,14 +188,14 @@ test('packed release candidate imports and typechecks in an isolated Node consum
   }else t.diagnostic('Actual installed wallet check requires WALLET_RUNTIME_PACKAGE and trusted WALLET_TLS_CERT/WALLET_TLS_KEY.');
 
   await writeFile(join(consumer, 'consumer.ts'), `
-    import { parseZec, formatZec, txId, blockHash, accountIndex, diversifierIndex, httpTransport, grpc, createLightClient, createPublicClient, isZcashError, defineNetwork, getConsensusContext } from '@jp4g/zcash.js';
-    import type { TxId, BlockHash, AccountIndex, DiversifierIndex, HttpTransport, LightClient, ZcashError, Network, NetworkDefinition } from '@jp4g/zcash.js';
-    import type { AccountId, SecretInput, CompactBlock, HeightRange } from '@jp4g/zcash.js';
+    import { parseZec, formatZec, txId, blockHash, accountIndex, diversifierIndex, httpTransport, grpc, createLightClient, createPublicClient, isZcashError, defineNetwork, getConsensusContext } from '@zcashlabs/zcash.js';
+    import type { TxId, BlockHash, AccountIndex, DiversifierIndex, HttpTransport, LightClient, ZcashError, Network, NetworkDefinition } from '@zcashlabs/zcash.js';
+    import type { AccountId, SecretInput, CompactBlock, HeightRange } from '@zcashlabs/zcash.js';
     // @ts-expect-error Account IDs retain their database identity brand.
     const rawAccountId: AccountId = 'not-a-database-account';
     const definition: NetworkDefinition = null!;
     const network: Promise<Network> = defineNetwork(definition);
-    const context: import('@jp4g/zcash.js').ConsensusContext = getConsensusContext({ network: null! as Network, targetHeight: 20 });
+    const context: import('@zcashlabs/zcash.js').ConsensusContext = getConsensusContext({ network: null! as Network, targetHeight: 20 });
     const light: LightClient = createLightClient({ network: null! as Network, transport: grpc('https://synthetic.invalid', {
       sourceId: 'fixture', timeoutMs: 1000, readRetry: { attempts: 1, delayMs: 0 }, maxResponseBytes: 4096,
     }) });
@@ -203,7 +203,7 @@ test('packed release candidate imports and typechecks in an isolated Node consum
     const text: string = formatZec(amount);
     const tx: TxId = txId('a'.repeat(64));
     const hash: BlockHash = blockHash('b'.repeat(64));
-    const publicClient: import('@jp4g/zcash.js').PublicClient = createPublicClient({ network: null! as Network, transport: httpTransport('https://synthetic.invalid', { sourceId: 'public', timeoutMs: 1000, readRetry: { attempts: 1, delayMs: 0 }, maxResponseBytes: 4096 }), observation: { pollIntervalMs: 1000, maxBufferedUpdates: 4 } });
+    const publicClient: import('@zcashlabs/zcash.js').PublicClient = createPublicClient({ network: null! as Network, transport: httpTransport('https://synthetic.invalid', { sourceId: 'public', timeoutMs: 1000, readRetry: { attempts: 1, delayMs: 0 }, maxResponseBytes: 4096 }), observation: { pollIntervalMs: 1000, maxBufferedUpdates: 4 } });
     const account: AccountIndex = accountIndex(0);
     const index: DiversifierIndex = diversifierIndex(0n);
     const transport: HttpTransport = httpTransport('https://synthetic.invalid', {
@@ -211,8 +211,8 @@ test('packed release candidate imports and typechecks in an isolated Node consum
     });
     const caught: unknown = null;
     if (isZcashError(caught)) { const error: ZcashError = caught; error.paymentState?.steps; error.syncStatus?.scan; }
-    import { createWalletClient, createZcashClient } from '@jp4g/zcash.js';
-    import type { WalletClient, WalletOptions, ZcashClient } from '@jp4g/zcash.js';
+    import { createWalletClient, createZcashClient } from '@zcashlabs/zcash.js';
+    import type { WalletClient, WalletOptions, ZcashClient } from '@zcashlabs/zcash.js';
     const wallet: Promise<WalletClient> = createWalletClient(null! as WalletOptions);
     const combined: ZcashClient = createZcashClient({public: publicClient, light, wallet: null! as WalletClient});
     // @ts-expect-error Transport has no public raw-request escape hatch.
@@ -231,20 +231,20 @@ test('packed release candidate imports and typechecks in an isolated Node consum
   await exec(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '-p', join(consumer, 'tsconfig.json'), '--module', 'ESNext', '--moduleResolution', 'Bundler']);
   // Native declarations resolve under NodeNext, while browser Bundler conditions exclude them.
   await writeFile(join(consumer, 'native.ts'), `
-    import { createGrpcNodeTransport } from '@jp4g/zcash.js/grpc-node';
-    import type { GrpcNodeOptions } from '@jp4g/zcash.js/grpc-node';
+    import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node';
+    import type { GrpcNodeOptions } from '@zcashlabs/zcash.js/grpc-node';
     const options: GrpcNodeOptions = { sourceId: 'fixture', timeoutMs: 10 };
     const transport = createGrpcNodeTransport('http://127.0.0.1:1', options);
     const result: Promise<Uint8Array> = transport.unary({ method: 'GetLatestBlock', request: new Uint8Array() });
     // @ts-expect-error Unary methods exclude streaming RPCs.
     transport.unary({ method: 'GetBlockRange', request: new Uint8Array() });
     // @ts-expect-error Native transport is absent from the root API.
-    import { createGrpcNodeTransport as rootNative } from '@jp4g/zcash.js';
+    import { createGrpcNodeTransport as rootNative } from '@zcashlabs/zcash.js';
   `);
   await exec(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--ignoreConfig', '--noEmit', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', join(consumer, 'native.ts')]);
   await writeFile(join(consumer, 'native.ts'), `
     // @ts-expect-error Node-only subpath is unavailable to browser bundlers.
-    import { createGrpcNodeTransport } from '@jp4g/zcash.js/grpc-node';
+    import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node';
   `);
   await exec(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--ignoreConfig', '--noEmit', '--strict', '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'Bundler', join(consumer, 'native.ts')]);
 });

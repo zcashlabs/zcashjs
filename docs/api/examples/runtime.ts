@@ -1,4 +1,4 @@
-import type { RuntimeOptions, WasmArtifact } from "@jp4g/zcash.js";
+import type { RuntimeOptions, WasmArtifact } from "@zcashlabs/zcash.js";
 
 // Application-owned synthetic pins; no deployed artifacts or valid release digests implied.
 export const baseline = {
