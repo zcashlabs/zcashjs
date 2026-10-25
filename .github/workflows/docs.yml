@@ -22,6 +22,8 @@ jobs:
       - run: npm ci
       - run: npm run docs:typecheck
       - run: npm run docs:build -- --base /zcashjs/
+      - run: npm run docs:validate -- --base /zcashjs/
+      - run: node --test scripts/check-docs-site.test.js
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vitepress';
+import { srcExclude } from './publication.js';
 
 const summary = readFileSync(new URL('../api/SUMMARY.md', import.meta.url), 'utf8');
 const book = [...summary.matchAll(/^- \[(.+?)\]\(([^)]+)\.md\)$/gm)]
@@ -11,6 +12,7 @@ export default defineConfig({
   lang: 'en-US',
   base: '/',
   cleanUrls: false,
+  srcExclude,
   ignoreDeadLinks: false,
   themeConfig: {
     siteTitle: 'zcash.js / docs',
@@ -44,8 +46,7 @@ export default defineConfig({
             href = href
               .replace(/^(?:\.\.\/)?CONTRIBUTING\.md(?=#|$)/, '/contributing')
               .replace(/^docs\//, '/')
-              .replace(/^(?:\.\/)?\.\.\//, '/')
-              .replace(/public-api\.ts(?=#|$)/, 'public-api');
+              .replace(/^(?:\.\/)?\.\.\//, '/');
             token.attrSet('href', href);
           }
         }

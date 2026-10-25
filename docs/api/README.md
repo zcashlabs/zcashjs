@@ -5,7 +5,8 @@ Build a Zcash application with TypeScript: read the chain, maintain a local wall
 The SDK is available from npm as an experimental release candidate. Start with
 [Installation](installation.md). Public and light queries use the included
 codecs. Wallet operations automatically load the included baseline WASM runtime;
-local proving assets are included and loaded when needed.
+local proving assets are included and loaded when needed. See [platforms and
+current limits](platforms.md#current-limits) before choosing a deployment.
 
 ## Choose your starting point
 
