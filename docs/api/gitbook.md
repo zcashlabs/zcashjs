@@ -1,22 +1,14 @@
 # Maintain and publish this guide
 
-This guide uses ordinary Markdown and TypeScript fences, so the same chapters work in GitBook, on GitHub, and in the local VitePress preview. `SUMMARY.md` is the reading order. Internal specifications and historical planning documents are outside that navigation.
+The [developer guide](https://zcashlabs.github.io/zcashjs/) is built with VitePress from Markdown and TypeScript fences. `SUMMARY.md` defines its reading order and sidebar. Planning, research, and internal specification pages are excluded from the site and local search by `srcExclude` in the VitePress configuration. Their source files remain in the [repository](https://github.com/zcashlabs/zcashjs/tree/main/docs); link to GitHub when historical context is needed. The current [API reference](reference.md) links directly to implemented exports and source contracts. This page retains its `gitbook.html` URL for existing links.
 
 ## GitHub Pages
 
-The workflow targets `https://zcashlabs.github.io/zcashjs/` and deploys from `main` after the project checks pass once Pages is enabled. The existing workflow builds VitePress with `--base /zcashjs/`, uploads the static site, and deploys it to GitHub Pages. Enable Repository Settings → Pages with **GitHub Actions** as its source.
+GitHub Pages uses **GitHub Actions** as its publishing source. The **Documentation / GitHub Pages** workflow checks pull requests targeting `main`, pushes to `main`, and manual dispatches. It uses Node from `.nvmrc`, runs `npm ci`, `npm run docs:typecheck`, `npm run docs:build -- --base /zcashjs/`, and `npm run docs:validate -- --base /zcashjs/`. Only runs on `main` upload the static site and deploy to the `github-pages` environment at `https://zcashlabs.github.io/zcashjs/`.
 
-To check the production build locally, run `npm run docs:build -- --base /zcashjs/`, then `npm run docs:preview -- --base /zcashjs/` and open `http://127.0.0.1:4173/zcashjs/`. An ordinary local build or dev server still uses `/`.
+These checks build the documentation and typecheck its examples; SDK/native builds and tests are separate contributor checks.
 
-## Optional GitBook Git Sync
-
-1. Create or open your GitBook documentation space and enable GitHub Git Sync.
-2. Grant GitBook access to `zcashlabs/zcashjs` and select `main`.
-3. Import from GitHub for the initial sync so the repository supplies the guide.
-4. For a space mapped to the repository root, the root `.gitbook.yaml` selects `docs/api`. If mapping the space directly to `docs/api`, its `README.md` and `SUMMARY.md` use GitBook's defaults.
-5. Review the imported chapters and configure the site's visibility/domain in GitBook before publishing.
-
-The repository configuration supplies the content and navigation. It does not create a GitBook account, connect a space, or publish a site. See GitBook's [content configuration](https://gitbook.com/docs/docs-as-code/git-sync/content-configuration) for the current space-mapping controls.
+To check the production build locally, run `npm run docs:build -- --base /zcashjs/`, `npm run docs:validate -- --base /zcashjs/`, then `npm run docs:preview -- --base /zcashjs/` and open `http://127.0.0.1:4173/zcashjs/`. An ordinary local build or dev server still uses `/`.
 
 ## Edit and check
 
@@ -25,9 +17,14 @@ Edit the chapters directly; their displayed TypeScript blocks are the checked ex
 ```sh
 npm run docs:typecheck
 npm run docs:build
+npm run docs:validate
 npm run docs:dev
 ```
 
 The typecheck command checks guide snippets against `src/index.ts`, the actual package entry. It also retains the existing internal specification example checks. Typechecking does not execute transactions or prove backend compatibility.
 
-When adding a chapter, include it in `SUMMARY.md`. The local site's API sidebar uses that same file. Make documentation changes in a focused PR from synced `main`.
+When adding a chapter, include it in `SUMMARY.md`. The site's developer guide sidebar uses that same file. Make documentation changes in a focused PR from synced `main`.
+
+The built-site validator checks excluded routes in output and local search, local HTML links, asset references, and HTML fragment targets. It treats GitHub links as external URLs; it does not fetch external sites or execute browser JavaScript. Pass the same `--base` used for the build.
+
+After a `/zcashjs/` build, run `node --test scripts/check-docs-site.test.js` to exercise the validator against missing pages/assets/anchors, wrong-base links, excluded output and search entries, and a valid GitHub source link. The test temporarily changes generated output and restores it; run it without a concurrent build.

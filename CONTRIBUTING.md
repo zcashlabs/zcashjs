@@ -18,7 +18,7 @@ Run checks relevant to the change. [tests/README.md](https://github.com/zcashlab
 
 ## API and documentation
 
-`src/index.ts` owns package exports; `src/types.ts` owns shared contracts. The developer guide lives in `docs/api` and uses `SUMMARY.md` for both GitBook and local sidebar navigation. Update usage examples alongside API changes. Displayed TypeScript fences are checked against the actual package entry by `npm run docs:typecheck`.
+`src/index.ts` owns package exports; `src/types.ts` owns shared contracts. The developer guide lives in `docs/api` and uses `SUMMARY.md` for VitePress sidebar navigation. Update usage examples alongside API changes. Displayed TypeScript fences are checked against the actual package entry by `npm run docs:typecheck`.
 
 Use `npm run docs:dev` to edit the guide and `npm run docs:preview` to preview its build at `http://127.0.0.1:4173/`. The older host specifications and example files are retained for internal reference. Planning/research record historical decisions, not alternate current APIs or standing deployment instructions.
 

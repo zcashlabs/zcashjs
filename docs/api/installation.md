@@ -2,7 +2,7 @@
 
 ## Install from npm
 
-Use Node **22.12 or newer** for Node applications.
+Use Node **22.23.4**, matching the package engine and repository pin, for Node applications.
 
 ```sh
 npm install @zcashlabs/zcash.js@0.1.0-rc.5

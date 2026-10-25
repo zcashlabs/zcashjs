@@ -1,4 +1,4 @@
-name: Project checks
+name: Documentation / GitHub Pages
 
 on:
   push:
@@ -20,12 +20,10 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npm run check
-      - name: Check wallet worker bundle
-        run: node scripts/build-wallet-worker.js "$RUNNER_TEMP/wallet-worker.mjs"
       - run: npm run docs:typecheck
-      - run: npm run docs:check-recovery
       - run: npm run docs:build -- --base /zcashjs/
+      - run: npm run docs:validate -- --base /zcashjs/
+      - run: node --test scripts/check-docs-site.test.js
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:

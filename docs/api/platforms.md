@@ -39,4 +39,6 @@ Fresh wallet databases, reopening, and the [closed-wallet Linux backup/restore
 procedure](operations.md#closed-wallet-backup-on-linux) have same-candidate tests. Historical database migration is not yet qualified; same-version reopen
 tests are not evidence of upgrade compatibility for an older wallet database.
 
-The repository runs Node tests in CI. Actual Firefox SDK and wallet-host checks are separate runnable checks; a passing bundle build is not a browser execution test. The [test guide](https://github.com/zcashlabs/zcashjs/blob/main/tests/README.md) describes which checks execute real native fixtures and which need external runtime/proving packages.
+The complete live-browser send/receive round trip is not yet qualified.
+
+The GitHub Pages workflow checks documentation only. Run `npm run check` locally for linting and the Node test suite. Actual Firefox SDK and wallet-host checks are separate runnable checks; a passing bundle build is not a browser execution test. The [test guide](https://github.com/zcashlabs/zcashjs/blob/main/tests/README.md) describes which checks execute real native fixtures and which need external runtime/proving packages.

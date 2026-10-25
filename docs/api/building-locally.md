@@ -7,7 +7,7 @@ or post-install downloads.
 
 - macOS (Apple Silicon/Intel) or Linux x86_64. On Windows, use WSL2 x86_64 and
   keep the checkout in its Linux filesystem.
-- Node 22.13+ within v22, or Node 24+, npm, Git, curl and [rustup](https://rustup.rs/).
+- Node 22.23.4 (pinned in `.nvmrc`), npm, Git, curl and [rustup](https://rustup.rs/).
 - C compiler and binutils: `xcode-select --install` on macOS; `build-essential`
   and `ca-certificates` on Debian/Ubuntu/WSL.
 
@@ -80,4 +80,4 @@ npm run docs:build
 npm run docs:dev
 ```
 
-Preview at `http://127.0.0.1:4173/`. See [Maintain and publish](gitbook.md) for deployment.
+Preview at `http://127.0.0.1:4173/`. The guide is published at [zcashlabs.github.io/zcashjs](https://zcashlabs.github.io/zcashjs/). See [Maintain and publish](gitbook.md) for GitHub Pages deployment and production preview instructions.
