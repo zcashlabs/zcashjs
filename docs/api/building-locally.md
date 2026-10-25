@@ -80,4 +80,4 @@ npm run docs:build
 npm run docs:dev
 ```
 
-Preview at `http://127.0.0.1:4173/`. See [Maintain and publish](gitbook.md) for deployment.
+Preview at `http://127.0.0.1:4173/`. The guide is published at [zcashlabs.github.io/zcashjs](https://zcashlabs.github.io/zcashjs/). See [Maintain and publish](gitbook.md) for GitHub Pages deployment and production preview instructions.
