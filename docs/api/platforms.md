@@ -2,7 +2,7 @@
 
 | Capability | Node | Browser |
 | --- | --- | --- |
-| ESM package imports | Node 22.12+ | ESM bundler with modern WebAssembly support |
+| ESM package imports | Node 22.23.4 | ESM bundler with modern WebAssembly support |
 | Public queries | HTTP JSON-RPC | HTTP JSON-RPC with CORS |
 | Light queries | Native gRPC | gRPC-Web endpoint with CORS |
 | Durable wallet storage | `node-filesystem` on Linux with `/usr/bin/flock` | `browser-opfs` in a secure context |
