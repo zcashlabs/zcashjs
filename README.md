@@ -31,7 +31,7 @@ reopening are verified; these do not establish older-database compatibility.
 
 ## Build and test
 
-Install the [build prerequisites](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/building-locally.md), then:
+Use Node 22.23.4 (pinned in `.nvmrc`). Install the [build prerequisites](https://github.com/zcashlabs/zcashjs/blob/main/docs/api/building-locally.md), then:
 
 ```sh
 npm ci

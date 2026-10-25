@@ -1,6 +1,6 @@
 # Contributing
 
-Install the [source-build prerequisites](docs/api/building-locally.md).
+Use Node 22.23.4 (pinned in `.nvmrc`). Install the [source-build prerequisites](docs/api/building-locally.md).
 
 ## Workflow
 
