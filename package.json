@@ -9,7 +9,7 @@
   "homepage": "https://github.com/zcashlabs/zcashjs#readme",
   "publishConfig": {
     "access": "public",
-    "tag": "next",
+    "tag": "latest",
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
@@ -44,7 +44,7 @@
     "vitepress": "2.0.0-alpha.20",
     "webpack": "5.110.3"
   },
-  "version": "0.1.0-rc.5",
+  "version": "0.1.1",
   "type": "module",
   "files": [
     "dist/src",

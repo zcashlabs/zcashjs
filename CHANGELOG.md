@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+- Pin Node to 22.23.4 for the Brotli security update.
+- Publish the public developer guide on GitHub Pages and update installation
+  instructions and examples for 0.1.1 under the npm `latest` tag.
+- The SDK remains experimental. This release adds no new transaction
+  qualification.
+
 ## 0.1.0-rc.5
 
 - Publish under `@zcashlabs/zcash.js`; update application imports to this scope.

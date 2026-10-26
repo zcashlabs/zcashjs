@@ -11,7 +11,7 @@ An experimental TypeScript SDK for Zcash chain queries and local wallets on Node
 - Local accounts, scanning, proposals, signing, submission, and recorded payment recovery through `createWalletClient`.
 - Exact bigint amounts, validated network/identifier values, viewing/address tools, and PCZT utilities.
 
-`@zcashlabs/zcash.js@0.1.0-rc.5` is an experimental release candidate. It includes codec capsules, the baseline wallet engine, workers, and local Sapling proving assets. Wallet execution loads the bundled engine automatically; proving assets load only when needed. Mainnet/testnet presets include genesis hashes and activation schedules; applications supply endpoints and storage. Custom network definitions remain supported. See [wallet setup](https://zcashlabs.github.io/zcashjs/api/wallet-runtime.html) and [platform limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
+`@zcashlabs/zcash.js@0.1.1` is an experimental release. It includes codec capsules, the baseline wallet engine, workers, and local Sapling proving assets. Wallet execution loads the bundled engine automatically; proving assets load only when needed. Mainnet/testnet presets include genesis hashes and activation schedules; applications supply endpoints and storage. Custom network definitions remain supported. See [wallet setup](https://zcashlabs.github.io/zcashjs/api/wallet-runtime.html) and [platform limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
 
 ```js
 import { createLightClient, createWalletClient } from '@zcashlabs/zcash.js';

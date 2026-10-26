@@ -33,7 +33,7 @@ async function exec(command, args, options = {}) {
 }
 const implemented = ['accountFromViewingKey', 'accountIndex', 'addresses', 'blockHash', 'createCustomSigner', 'createLightClient', 'createPublicClient', 'createWalletClient', 'createZcashClient', 'defineNetwork', 'diversifierIndex', 'encodeNetworkParameters', 'formatZec', 'getConsensusContext', 'grpc', 'httpTransport', 'isZcashError', 'parseZec', 'pczt', 'readGenesisHash', 'resolveBirthday', 'txId', 'viewing'];
 
-test('packed release candidate imports and typechecks in an isolated Node consumer', async (t) => {
+test('packed release imports and typechecks in an isolated Node consumer', async (t) => {
   const folder = await mkdtemp(join(tmpdir(), 'zcash-sdk-consumer-'));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const { stdout } = await exec('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', folder]);
@@ -68,7 +68,7 @@ test('packed release candidate imports and typechecks in an isolated Node consum
   assert.equal(manifest.version, lock.version);
   assert.equal(manifest.version, lock.packages[''].version);
   assert.equal(manifest.version, JSON.parse(await readFile(join(repository, 'examples/testnet/package.json'), 'utf8')).dependencies[manifest.name]);
-  assert.deepEqual(manifest.publishConfig, { access: 'public', tag: 'next', registry: 'https://registry.npmjs.org/' });
+  assert.deepEqual(manifest.publishConfig, { access: 'public', tag: 'latest', registry: 'https://registry.npmjs.org/' });
   assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.4' });
   for (const hook of ['preinstall', 'install', 'postinstall']) assert.equal(manifest.scripts[hook], undefined);
   const assetPrefix = 'dist/src/runtime/assets/';
