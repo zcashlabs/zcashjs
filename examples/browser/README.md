@@ -14,7 +14,9 @@ npm run dev
 
 Open the local URL printed by Vite. Supply your own matching **gRPC-Web** endpoint
 with CORS enabled for that origin, select its network, and click **Read chain tip**.
-A native gRPC endpoint is not enough. No provider is selected automatically.
+A native gRPC endpoint is not enough. The URL must be an HTTP(S) origin without
+a path prefix, query, fragment, or URL credentials; see [light endpoint requirements](../../docs/api/light-client.md).
+No provider is selected automatically.
 
 **List local accounts** opens a named OPFS wallet, lists its stored accounts and
 closes it. A new wallet returns `[]`; this action does not create accounts or scan.

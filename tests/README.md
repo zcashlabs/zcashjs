@@ -1,7 +1,9 @@
 # Running tests
 
-For development use Node ^22.13.0 or >=24, as required by ESLint, and the
-[source-build prerequisites](../docs/api/building-locally.md). From a fresh checkout:
+For development use Node 22.23.4 (pinned in [.nvmrc](../.nvmrc)) and the
+[source-build prerequisites](../docs/api/building-locally.md). The full test suite
+requires Linux with `/usr/bin/flock` for filesystem wallets; macOS can build the
+SDK but cannot run the full suite. From a fresh checkout on Linux:
 
 ```sh
 npm ci
@@ -33,8 +35,9 @@ a nested-base Vite application, checks lazy network loading and OPFS persistence
 and retains `result.json`, asset sizes, a tarball digest and Node memory snapshots.
 It needs registry access, Firefox and geckodriver. This is not a live-chain test;
 the separate [testnet application](../examples/testnet/README.md) requires funding
-and the appropriate network endpoint. Publication and live acceptance status are
-tracked in [the release report](../docs/planning/single-import-release.md).
+and the appropriate network endpoint. See [current platform limits](../docs/api/platforms.md)
+and [historical rc.2 qualification evidence](../docs/planning/single-import-release.md);
+the historical report does not establish rc.5 qualification or publication status.
 
 For an opt-in runtime recovery check, close a testnet wallet containing an
 observed finalized payment, let it fall behind the chain, then run:

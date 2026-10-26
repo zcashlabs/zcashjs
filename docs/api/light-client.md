@@ -2,6 +2,11 @@
 
 `createLightClient` combines the network codecs with a lightwallet transport. `grpc` selects native gRPC on Node and gRPC-Web in browsers. The endpoint must serve the corresponding protocol.
 
+The endpoint must be an HTTP(S) origin, such as `https://light.example.com:443`,
+with no path prefix, query string, fragment, or URL credentials. Configure your
+provider or proxy to serve RPC routes at that origin. Pass supported authentication
+metadata through the `transportOptions.headers` callback, not URL tokens or paths.
+
 ```ts
 import { createLightClient } from '@zcashlabs/zcash.js';
 

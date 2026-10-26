@@ -13,17 +13,26 @@ An experimental TypeScript SDK for Zcash chain queries and local wallets on Node
 
 `@zcashlabs/zcash.js@0.1.0-rc.5` is an experimental release candidate. It includes codec capsules, the baseline wallet engine, workers, and local Sapling proving assets. Wallet execution loads the bundled engine automatically; proving assets load only when needed. Mainnet/testnet presets include genesis hashes and activation schedules; applications supply endpoints and storage. Custom network definitions remain supported. See [wallet setup](https://zcashlabs.github.io/zcashjs/api/wallet-runtime.html) and [platform limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
 
+Install with Node 22.23.4 (the repository recommendation):
+
+```sh
+npm install @zcashlabs/zcash.js@0.1.0-rc.5
+```
+
+Save as `index.mjs` and run `node index.mjs`:
+
 ```js
-import { createLightClient, createWalletClient } from '@zcashlabs/zcash.js';
+import { createLightClient } from '@zcashlabs/zcash.js';
 
 const light = await createLightClient('https://testnet.zec.rocks:443', { network: 'testnet' });
-// Use light.network and light when creating your wallet.
+const tip = await light.getTip();
+console.log(tip.height, tip.hash);
 ```
 
 The same import works in Node and browser applications. No separate runtime
 package, Rust installation, or post-install asset download is required. Browser
 bundlers emit the lazy WASM/worker/proving files alongside the application; deploy
-those files too. Persistent Node wallets currently require Linux and `flock`.
+those files too. Persistent Node wallets currently require Linux and `/usr/bin/flock`.
 
 Historical wallet-database migration and the complete live-browser send/receive
 round trip are not yet qualified. Fresh database creation and same-candidate
@@ -40,7 +49,9 @@ npm run build
 
 The complete SDK is generated in `dist/`. The first build takes several minutes;
 later builds reuse cached native components and proving parameters.
-Run `npm run check` for lint, build and tests, or `npm pack` for a local tarball.
+On Linux with `/usr/bin/flock`, run `npm run check` for lint, build and the full
+test suite. macOS supports source builds, but not the full suite. Use `npm pack`
+for a local tarball.
 See [tests/README.md](https://github.com/zcashlabs/zcashjs/blob/main/tests/README.md) for additional checks.
 
 ## Documentation

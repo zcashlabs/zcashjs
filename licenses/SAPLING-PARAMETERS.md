@@ -23,5 +23,7 @@ Source repository: https://github.com/howardwu/wagyu-zcash-parameters
 (the historical `AleoHQ/wagyu-zcash-parameters` URL redirects there).
 
 These are public proving parameters, not secret setup contributions or wallet
-secrets. Ordinary builds verify and copy committed bytes; they do not download
-parameters or execute a new trusted setup.
+secrets. Source builds download missing parameters into `.cache/proving`, verify
+their sizes and hashes, and bundle them. Prebuilt npm installations include these
+files and load them only when needed, without a post-install download. Neither
+path executes a new trusted setup.

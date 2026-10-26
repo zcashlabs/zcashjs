@@ -6,6 +6,9 @@ after owner publication use `npm install @zcashlabs/zcash.js@VERSION`. The only 
 dependency is `@scure/bip39`, used by this application to generate fresh recovery
 phrases. The SDK supplies its own engine, workers and proving assets.
 
+The persistent wallets used by `init` and the wallet commands require **Linux
+with `/usr/bin/flock`**; see [platform requirements](../../docs/api/platforms.md).
+
 `npm run probe` performs read-only testnet network checks. `npm run init` creates
 independent A/B wallets and prints their receive addresses. Recovery phrases and
 databases stay under `private/` (ignored by Git); keep that directory private and

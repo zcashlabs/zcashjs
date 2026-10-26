@@ -4,21 +4,21 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Pre-implementation: no usable SDK or validated wallet runtime.**
+        **Experimental release candidate.** See [platform requirements and current limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
 
         Do not submit credentials, mnemonics, keys, wallet identifiers, addresses, txids, PCZTs, database contents, or sensitive logs. Use synthetic examples and placeholder URLs/paths only.
   - type: textarea
     id: problem
     attributes:
       label: What is wrong?
-      description: Link the document or proposed declaration and describe expected versus actual behavior.
+      description: Link the document or API and describe expected versus actual behavior.
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
       label: Synthetic reproduction
-      description: Give minimal steps and safe environment/version categories. There is no SDK release yet.
+      description: Give minimal steps, SDK version, and Node/browser version using synthetic data.
     validations:
       required: true
   - type: checkboxes

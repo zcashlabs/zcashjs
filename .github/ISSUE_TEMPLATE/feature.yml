@@ -1,10 +1,10 @@
 name: Feature proposal
-description: Propose a developer journey or an improvement to the planned API.
+description: Propose a developer journey or an improvement to the API.
 body:
   - type: markdown
     attributes:
       value: |
-        **Pre-implementation: no usable SDK or validated wallet runtime.**
+        **Experimental release candidate.** See [platform requirements and current limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
 
         Do not submit credentials, mnemonics, keys, wallet identifiers, addresses, txids, PCZTs, database contents, or sensitive logs. Use synthetic examples and placeholder URLs/paths only.
   - type: textarea

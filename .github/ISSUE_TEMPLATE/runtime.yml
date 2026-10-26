@@ -1,24 +1,24 @@
-name: Configuration or runtime design
-description: Discuss docs tooling configuration or proposed runtime requirements.
+name: Configuration or runtime issue
+description: Discuss SDK or docs tooling configuration and runtime requirements.
 body:
   - type: markdown
     attributes:
       value: |
-        **Pre-implementation: no usable SDK or validated wallet runtime.**
+        **Experimental release candidate.** See [platform requirements and current limits](https://zcashlabs.github.io/zcashjs/api/platforms.html).
 
         Do not submit credentials, mnemonics, keys, wallet identifiers, addresses, txids, PCZTs, database contents, or sensitive logs. Use synthetic examples and placeholder URLs/paths only.
   - type: textarea
     id: context
     attributes:
       label: Configuration context
-      description: Specify docs tooling or proposed Node/browser runtime. Proposed wallet support is not implemented.
+      description: Specify the SDK version, Node/browser version, and SDK or docs tooling configuration.
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
       label: Question or failure
-      description: Use synthetic configuration, placeholder paths/URLs, safe error codes, and expected behavior. Do not paste raw logs.
+      description: Give minimal reproduction steps with synthetic configuration, placeholder paths/URLs, safe error codes, and expected behavior. Do not paste raw logs.
     validations:
       required: true
   - type: checkboxes

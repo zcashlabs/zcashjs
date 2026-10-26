@@ -1,7 +1,9 @@
 # Open a wallet
 
 A wallet owns a local database and a worker. Supply an endpoint and choose where
-to store its data:
+to store its data. The filesystem examples require **Linux with `/usr/bin/flock`**;
+see [platform requirements](platforms.md). For a disposable session on other
+platforms, use `{ kind: 'memory' }`, which loses state when closed.
 
 ```ts
 import { createWalletClient } from '@zcashlabs/zcash.js';
@@ -55,7 +57,7 @@ Storage is required: the SDK never silently chooses a temporary wallet.
 
 | Environment | Storage |
 | --- | --- |
-| Node | `{ kind: 'node-filesystem', path: './my-wallet' }` |
+| Node/Linux with `/usr/bin/flock` | `{ kind: 'node-filesystem', path: './my-wallet' }` |
 | Browser | `{ kind: 'browser-opfs', name: 'my-wallet' }` |
 | Disposable session | `{ kind: 'memory' }` |
 

@@ -26,7 +26,9 @@ The first build downloads inputs, takes several minutes and needs several GB of
 disk space. Later builds verify and reuse native/proving caches. SDK output is
 regenerated in ignored `dist/`; tracked files stay unchanged.
 
-Run `npm run check` for lint, build and Node tests. See
+Source builds support macOS and Linux. The full `npm run check` suite (lint,
+build and Node tests) requires **Linux with `/usr/bin/flock`** for filesystem
+wallets; it is not supported on macOS. See [platform requirements](platforms.md) and
 [tests/README.md](https://github.com/zcashlabs/zcashjs/blob/main/tests/README.md)
 for browser and optional integration tests.
 

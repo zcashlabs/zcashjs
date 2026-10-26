@@ -4,14 +4,33 @@ This example imports an existing mnemonic account, scans it, issues a receive ad
 
 Starting with a new wallet instead? Follow [create a new mnemonic account](accounts-signers.md#create-a-new-mnemonic-account) to generate and confirm a backup before receiving funds.
 
-Before running it, supply a matching network, a functioning light source and broadcaster, and a mnemonic account with sufficient eligible funds. The package supplies the baseline wallet runtime and local proving material by default. `sync()` discovers funds; it does not create them. The example assumes derivation index zero and uses a full scan for explicit recovery.
+Before running it, supply a matching network, a functioning light source and broadcaster, storage, an explicit `transactionPolicy`, and a mnemonic account with sufficient eligible funds. The package supplies the baseline wallet runtime and local proving material by default. `sync()` discovers funds; it does not create them. The example assumes derivation index zero and uses a full scan for explicit recovery.
+
+The component form used here does not inherit the endpoint overload's transaction
+policy. Include this complete Ironwood-only policy in the `options` you pass to
+`walletWalkthrough`; funds and the recipient must support Ironwood. If you also
+supply `options.confirmations`, they must match the policy. Filesystem storage
+requires [Linux with `/usr/bin/flock`](platforms.md).
+
+```ts
+import type { TransactionPolicy } from '@zcashlabs/zcash.js';
+
+export const transactionPolicy: TransactionPolicy = {
+  spendPools: ['ironwood'], transparent: 'disallow', changePool: 'ironwood',
+  feeRule: 'zip317-standard',
+  confirmations: { trusted: 3, untrusted: 3, allowZeroConfirmationShielding: false },
+  expiry: { kind: 'offset', blocks: 80 }, lockExpiryBlocks: 20,
+  shieldingThreshold: 10_000n,
+  freshness: { mode: 'require-synced', maxLagBlocks: 0 },
+};
+```
 
 ```ts
 import { accountIndex, createWalletClient, formatZec, parseZec } from '@zcashlabs/zcash.js';
 import type { MemorySigner, PendingPayment, Proposal, SignerBinding, WalletClient, WalletOptions } from '@zcashlabs/zcash.js';
 
 export async function walletWalkthrough(
-  options: WalletOptions,
+  options: WalletOptions & Required<Pick<WalletOptions, 'transactionPolicy'>>,
   mnemonic: Uint8Array,
   recipient: string,
   requestId: string,
