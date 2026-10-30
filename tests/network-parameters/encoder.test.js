@@ -1,12 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { defineNetwork, encodeNetworkParameters } from '@zcashlabs/zcash.js';
+import { defineNetwork, encodeNetworkParameters, getConsensusContext } from '@zcashlabs/zcash.js';
 
 const schedule = {
   encoding: 'regtest', Overwinter: 1, Sapling: 1, Blossom: 1, Heartwood: 1,
   Canopy: 1, Nu5: 1, Nu6: 1, Nu6_1: null, Nu6_2: null, Nu6_3: null,
 };
 const identity = { identity: 'local', genesisHash: 'ab'.repeat(32) };
+
+test('NU7 reaches native consensus only at its explicit activation height', async () => {
+  const network = await defineNetwork({ ...identity, ...encodeNetworkParameters({
+    ...schedule, Nu6_1: 1, Nu6_2: 1, Nu6_3: 1, Nu7: 10,
+  }) });
+  assert.equal(getConsensusContext({ network, targetHeight: 9 }).branchId, 0x37a5165b);
+  assert.equal(getConsensusContext({ network, targetHeight: 10 }).branchId, 0x77190ad9);
+});
 
 test('typed schedules encode independently of key order and retain native admission', async () => {
   const input = Object.fromEntries(Object.entries(schedule).reverse());

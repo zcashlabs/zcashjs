@@ -44,15 +44,26 @@ export async function loadNetwork(
 For custom definitions, your application supplies the genesis hash and exact
 consensus schedule. `encodeNetworkParameters` accepts fields in any order and produces
 the canonical bytes and format tag for `defineNetwork`. Every activation field is
-required; the encoder does not infer or fill in consensus rules. The object's `identity` remains a label, not a preset selector.
+required through `Nu6_3`; the encoder does not infer activation heights. An explicit
+`Nu7` field selects version 2 of the document. Omitting it retains the exact legacy
+version-1 bytes, with NU7 inactive. The object's `identity` remains a label, not a preset selector.
 Full objects replace the preset; they are not partially merged into mainnet.
 
 Preset provenance: [zcash_protocol 0.10.6 consensus](https://docs.rs/zcash_protocol/0.10.6/src/zcash_protocol/consensus.rs.html)
 and [Zcash genesis definitions](https://github.com/zcash/zcash/blob/master/src/chainparams.cpp).
 
 Advanced callers can still provide `parametersFormat: 'zcash-js-network/1'` and
-`parameters: Uint8Array` directly. This byte form retains strict validation.
+`parameters: Uint8Array` directly. Version 2 uses `parametersFormat: 'zcash-js-network/2'`
+and requires `Nu7` after `Nu6_3`, including when its value is `null` (inactive).
+The format tag must match the document; both versions retain strict validation.
 The parameter document is canonical UTF-8 JSON: `encoding` (`main`, `test`, or `regtest`), followed by `Overwinter`, `Sapling`, `Blossom`, `Heartwood`, `Canopy`, `Nu5`, `Nu6`, `Nu6_1`, `Nu6_2`, and `Nu6_3`, in that order. Each upgrade is a nondecreasing activation height or `null`; no activated upgrade may follow an inactive one. Whitespace, duplicate keys, and extra keys are rejected. Obtain the matching document from your deployment configuration; changing a label does not change consensus rules. The [validator](https://github.com/zcashlabs/zcashjs/blob/main/src/network-parameters.ts) defines the exact format.
+
+A wallet database retains its exact network parameter bytes. Adding `Nu7` to an
+existing version-1 definition changes that identity, even with the same genesis
+hash; opening that database under the new definition rejects with
+`NETWORK_MISMATCH`. This change does not provide an automatic schedule migration.
+Keep the original database intact and use the account recovery flow with a new
+database when changing a custom schedule.
 
 ## Bootstrap a local regtest endpoint
 
@@ -80,7 +91,7 @@ export async function connectRegtest(rpcUrl: string) {
     ...encodeNetworkParameters({
       encoding: 'regtest',
       Overwinter: 1, Sapling: 1, Blossom: 1, Heartwood: 1, Canopy: 1,
-      Nu5: 1, Nu6: 1, Nu6_1: null, Nu6_2: null, Nu6_3: null,
+      Nu5: 1, Nu6: 1, Nu6_1: 1, Nu6_2: 1, Nu6_3: 1, Nu7: 1,
     }),
   });
   const client = createPublicClient({
