@@ -17,8 +17,9 @@ incoming amounts, confirmation delay, duplicate sync, a same-height reorg,
 Ironwood spending with the SDK's default policy under NU7, and recovery using
 the mnemonic and saved birthday after closing the wallet. Run with `--sapling`
 to exercise Sapling spending instead.
-Three confirmations are required; shielded spendability also requires an older
-anchor. Recovery uses memory storage and does not qualify persistent Node storage
+The test checks confirmations two, three and four individually. With the configured
+three-block anchor depth, shielded funds become spendable at four confirmations.
+Recovery must reproduce the exact per-pool balances as well as confirmed transaction IDs. Recovery uses memory storage and does not qualify persistent Node storage
 on macOS. Native database reopen tests cover that separate layer.
 
 Full-history recovery with `birthday: 'fullScan'` is not qualified by this test.
@@ -32,6 +33,6 @@ JSON evidence and the THS launcher log are written under `.cache/ths-nu7/`.
 Use `--fail-after-start` to exercise cleanup after an application exception; that
 control intentionally exits nonzero, with a passing resource-cleanup check.
 
-The SDK release must pin a published native release containing NU7 support.
-During development the native build and SDK build must identify the same clean
-native commit. Never label a local candidate as the existing `v0.1.0` release.
+The review branch pins an exact public native commit containing NU7 support.
+The native build receipt and SDK build must identify that same clean commit.
+Maintainers can replace this review pin with their native release before publication. Never label a local candidate as the existing `v0.1.0` release.

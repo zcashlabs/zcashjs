@@ -142,8 +142,16 @@ try {
     return { records: history.items.length };
   });
   await check('confirmed deposit becomes spendable with a valid anchor', async () => {
-    await mine(3);
-    await sync();
+    // ZIP 218 also requires the anchor to sit behind the current tip. With
+    // this three-block anchor depth, a new note becomes spendable at four confirmations.
+    for (const expected of [2, 3, 4]) {
+      await mine(1);
+      await sync();
+      assert.equal((await rpc('getrawtransaction', [deposit, 1])).confirmations, expected);
+      const pending = await wallet.getBalance({ accountId });
+      assert.equal(pending.amounts.total, 1_000_000n);
+      assert.equal(pending.amounts[pool].spendable, expected < 4 ? 0n : 1_000_000n);
+    }
     const balance = await wallet.getBalance({ accountId });
     assert.equal(balance.amounts[pool].spendable, 1_000_000n);
     return balance;
@@ -182,6 +190,7 @@ try {
   });
   await check('mnemonic and saved birthday recover the same confirmed payments after wallet close', async () => {
     const prior = await wallet.getHistory({ accountId });
+    const priorAmounts = (await wallet.getBalance({ accountId })).amounts;
     await binding.dispose(); binding = undefined;
     await wallet.close(); wallet = undefined;
     await signer.dispose(); signer = undefined;
@@ -190,6 +199,8 @@ try {
     signer = recovered.signer;
     await sync();
     const after = await wallet.getHistory({ accountId: recovered.account.id });
+    const recoveredAmounts = (await wallet.getBalance({ accountId: recovered.account.id })).amounts;
+    assert.deepEqual(recoveredAmounts, priorAmounts, 'seed recovery preserves exact per-pool balances');
     assert.deepEqual(after.items.filter(x => x.minedHeight !== null).map(x => x.txid).sort(),
       prior.items.filter(x => x.minedHeight !== null).map(x => x.txid).sort());
     return { confirmedTransactions: after.items.filter(x => x.minedHeight !== null).length,

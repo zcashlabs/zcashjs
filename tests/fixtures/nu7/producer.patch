@@ -1,0 +1,28 @@
+--- a/tests/wallet-views/pczt_build.rs
++++ b/tests/wallet-views/pczt_build.rs
+@@ -63,6 +63,7 @@
+         input.as_object_mut().unwrap().remove("payments");input["kind"]=json!("shield");input["threshold"]=json!("10000");input["policy"]["spendPools"]=json!(["transparent"]);input["policy"]["transparent"]=json!("allow-owned");
+     }
+     if mode=="fixture"{return(path,g,input,token);}
++    input["idempotencyKey"]=json!("legacy-retained-payment");
+     let plan:Value=serde_json::from_str(&crate::wallet::proposal::proposal_call(g,"proposal_create",&input.to_string()).unwrap()).unwrap();
+     (path,g,plan,token)
+ }
+@@ -245,7 +246,16 @@
+         if !ironwood {let state=payment(g,"payment_reconcile",json!({"operationId":plan["operationId"],"wallTimeMs":3000000})).unwrap();assert_eq!(state["state"]["steps"][0]["attempts"].as_array().unwrap().len(),2);let conn=rusqlite::Connection::open(&path).unwrap();assert_eq!(conn.query_row("SELECT automatic_count FROM ext_wallet_submission",[],|r|r.get::<_,i64>(0)).unwrap(),1);assert_eq!(conn.query_row("SELECT max_attempts FROM ext_wallet_submission",[],|r|r.get::<_,i64>(0)).unwrap(),1);}
+     }
+     crate::wallet::storage_close(g).unwrap();crate::wallet::signer::signer_release(token).unwrap();
+-    if finalize && !ironwood { payment_expiry_branch_edges(&path,&plan); }
++    if finalize && !ironwood {
++        let root=std::env::var("WALLET_TEST_ROOT").unwrap();
++        std::fs::copy(&path,format!("{root}/legacy-payment.db")).unwrap();
++        std::fs::write(format!("{root}/legacy-payment.json"),json!({"parameters":hex::encode(PARAMS),"genesis":"03".repeat(32),"plan":plan,"artifact":proven}).to_string()).unwrap();
++        let (pending_path,pending_generation,pending_plan)=prepared(true);
++        crate::wallet::storage_close(pending_generation).unwrap();
++        std::fs::copy(pending_path,format!("{root}/legacy-proposed.db")).unwrap();
++        std::fs::write(format!("{root}/legacy-proposed.json"),json!({"parameters":hex::encode(PARAMS),"genesis":"03".repeat(32),"plan":pending_plan}).to_string()).unwrap();
++        payment_expiry_branch_edges(&path,&plan);
++    }
+ }
+ 
+ fn payment(g:u32,command:&str,input:Value)->std::result::Result<Value,String>{
