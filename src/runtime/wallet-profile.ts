@@ -21,7 +21,7 @@ export const walletProfile = {
       decodeTransaction: '1',
     },
     protobuf: 'not-used',
-    networkParameters: 'zcash-js-network/1',
+    networkParameters: 'zcash-js-network/2',
     database: 'wallet-storage/7',
     hostServices: { nodeFilesystem: 'linux-flock/1', browserOpfs: 'sync-access-handle/1', storage: 'scalar-vfs/1' },
   },

@@ -35,24 +35,34 @@ export function verifyNativeBuild(output, revision) {
   return receipt;
 }
 
-export function buildNative() {
-  assert.match(nativeSource.release, /^v\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/);
-  const cache = join(root, '.cache/native');
-  const directory = join(cache, nativeSource.release);
-  const tag = `refs/tags/${nativeSource.release}`;
+export function checkoutNativeSource(input, cache) {
+  const commit = Object.hasOwn(input, 'revision');
+  assert.notEqual(commit, Object.hasOwn(input, 'release'), 'native source requires exactly one pin');
+  const pin = commit ? input.revision : input.release;
+  assert.equal(typeof pin, 'string', 'invalid native source pin');
+  assert.match(pin, commit ? /^[a-f0-9]{40}$/ : /^v\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/, 'invalid native source pin');
+  const directory = join(cache, pin);
+  const ref = commit ? pin : `refs/tags/${pin}`;
   const source = join(directory, 'source');
   const git = (...args) => execFileSync('git', ['-C', source, ...args], { encoding: 'utf8' }).trim();
   if (!existsSync(source)) {
     mkdirSync(source, { recursive: true });
     git('init', '--quiet');
-    git('remote', 'add', 'origin', nativeSource.repository);
-    git('fetch', '--depth', '1', 'origin', `${tag}:${tag}`);
-    git('checkout', '--detach', tag);
+    git('remote', 'add', 'origin', input.repository);
+    git('fetch', '--depth', '1', 'origin', commit ? ref : `${ref}:${ref}`);
+    git('checkout', '--detach', ref);
   }
-  const revision = git('rev-parse', `${tag}^{commit}`);
-  const output = join(cache, revision, 'sdk');
+  const revision = git('rev-parse', `${ref}^{commit}`);
   assert.equal(git('rev-parse', 'HEAD'), revision, `remove stale native checkout: ${source}`);
   assert.equal(git('status', '--porcelain', '--untracked-files=no'), '', `modified native checkout: ${source}`);
+  return { source, revision };
+}
+
+export function buildNative() {
+  const cache = join(root, '.cache/native');
+  const { source, revision } = checkoutNativeSource(nativeSource, cache);
+  const git = (...args) => execFileSync('git', ['-C', source, ...args], { encoding: 'utf8' }).trim();
+  const output = join(cache, revision, 'sdk');
   if (!existsSync(join(output, 'build.json'))) {
     // This directory is owned by the build; an interrupted attempt has no receipt.
     rmSync(output, { recursive: true, force: true });

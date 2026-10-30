@@ -4,10 +4,10 @@ import { failure, invalidArgument } from './errors.js';
 import { blockHash } from './primitives.js';
 
 const invalidParameters = () => failure('INVALID_ARGUMENT', 'validation', 'correct-input',
-  'Network parameters must be canonical zcash-js-network/1 JSON with encoding and every upgrade in order, '
+  'Network parameters must be canonical zcash-js-network/1 or zcash-js-network/2 JSON '
+  + 'with encoding and every upgrade in order, '
   + 'using nondecreasing heights followed by null.');
 
-const format = 'zcash-js-network/1';
 const upgrades = [
   'Overwinter',
   'Sapling',
@@ -19,6 +19,7 @@ const upgrades = [
   'Nu6_1',
   'Nu6_2',
   'Nu6_3',
+  'Nu7',
 ] as const;
 
 /** Encode a complete typed schedule for defineNetwork without exposing canonical JSON details. */
@@ -26,12 +27,15 @@ export function encodeNetworkParameters(
   parameters: NetworkParameters,
 ): Pick<NetworkDefinition, 'parametersFormat' | 'parameters'> {
   const input = snapshot(parameters, ['encoding', ...upgrades]);
+  const hasNu7 = Object.hasOwn(input, 'Nu7');
+  const keys = hasNu7 ? upgrades : upgrades.slice(0, -1);
+  const format = hasNu7 ? 'zcash-js-network/2' : 'zcash-js-network/1';
   // Validate primitive values before JSON serialization can coerce NaN/Infinity to null.
-  if (typeof input.encoding !== 'string' || upgrades.some(key => input[key] !== null
+  if (typeof input.encoding !== 'string' || keys.some(key => input[key] !== null
     && (typeof input[key] !== 'number' || !Number.isFinite(input[key])))) throw invalidArgument();
   const bytes = new TextEncoder().encode(JSON.stringify({
     encoding: input.encoding,
-    ...Object.fromEntries(upgrades.map(key => [key, input[key]])),
+    ...Object.fromEntries(keys.map(key => [key, input[key]])),
   }));
   parseNetworkParameters(bytes, format);
   return { parametersFormat: format, parameters: bytes };
@@ -39,7 +43,9 @@ export function encodeNetworkParameters(
 
 /** Internal document validation only; does not create or register a Network. */
 export function parseNetworkParameters(input: Uint8Array, parametersFormat: string) {
-  if (parametersFormat !== format || !(input instanceof Uint8Array)) throw invalidParameters();
+  if (!['zcash-js-network/1', 'zcash-js-network/2'].includes(parametersFormat)
+    || !(input instanceof Uint8Array)) throw invalidParameters();
+  const keys = parametersFormat === 'zcash-js-network/2' ? upgrades : upgrades.slice(0, -1);
   // Uint8Array construction copies Buffer too; Buffer.slice() would alias its input.
   let bytes: Uint8Array;
   let text: string;
@@ -55,7 +61,7 @@ export function parseNetworkParameters(input: Uint8Array, parametersFormat: stri
   const encoding = value.encoding;
   if (encoding !== 'main' && encoding !== 'test' && encoding !== 'regtest') throw invalidParameters();
   let previous: number | null = 0;
-  const heights = upgrades.map((key) => {
+  const heights = keys.map((key) => {
     const height = value[key];
     if (height !== null
       && (typeof height !== 'number' || !Number.isInteger(height) || height < 0
@@ -65,7 +71,7 @@ export function parseNetworkParameters(input: Uint8Array, parametersFormat: stri
     previous = height;
     return height;
   });
-  const canonical = JSON.stringify({ encoding, ...Object.fromEntries(upgrades.map((key, i) => [key, heights[i]])) });
+  const canonical = JSON.stringify({ encoding, ...Object.fromEntries(keys.map((key, i) => [key, heights[i]])) });
   // Also rejects duplicate/unknown/missing keys, order, whitespace, escapes and -0.
   if (text !== canonical) throw invalidParameters();
   return Object.freeze({
