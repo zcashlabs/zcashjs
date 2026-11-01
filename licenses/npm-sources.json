@@ -1,13 +1,13 @@
 {
-  "generated": "2026-09-14T00:18:23.501Z",
+  "generated": "2026-11-01T20:29:22.813Z",
   "source": "package-lock.json runtime non-dev non-optional entries",
   "entries": [
     {
       "package": "@grpc/grpc-js",
-      "version": "1.14.4",
+      "version": "1.14.7",
       "license": "Apache-2.0",
-      "lockIntegrity": "sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==",
-      "tarballIntegrity": "sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==",
+      "lockIntegrity": "sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==",
+      "tarballIntegrity": "sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==",
       "sri": "MATCH",
       "files": [
         "LICENSE",

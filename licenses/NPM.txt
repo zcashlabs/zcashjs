@@ -3,11 +3,11 @@ This file contains the complete license/notice texts extracted from the separate
 
 ================================================================================
 Package: @grpc/grpc-js
-Version: 1.14.4
+Version: 1.14.7
 Declared license: Apache-2.0
-Registry source: https://registry.npmjs.org/@grpc/grpc-js/-/grpc-js-1.14.4.tgz
-Verified source digest: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==
-Lockfile digest: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==
+Registry source: https://registry.npmjs.org/@grpc/grpc-js/-/grpc-js-1.14.7.tgz
+Verified source digest: sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==
+Lockfile digest: sha512-W4W/fcBMGRVtG6dW2c7cw2mnpS3hvbBd+oQXjh2iYFTZDk1JJmcNqkM5KSaPubQpamlUUurrlb7G1s9NJeERmQ==
 SRI verification: MATCH
 
 --- source path: LICENSE ---
