@@ -1,6 +1,6 @@
 {
-  "metadataSha256": "d3a3036f1a80dda7506d0a80bbfe70f642f387aebbaf6eda52baeb23775c0f8e",
-  "nativeSource": "061e3fcb25ae2b35f1953daf156a0fa051757b06",
+  "metadataSha256": "73e21efbc6b90a1d6313aa557547b14896c7442d2695bbb8723752615e79a375",
+  "lockSha256": "4b66a74b3554a6ca813f7a47c08b6e28f76bdcfed78cbe2eeb9c4b5b751ba8d8",
   "packages": [
     {
       "name": "addchain",
@@ -45,6 +45,27 @@
       ]
     },
     {
+      "name": "aead",
+      "version": "0.6.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/traits",
+      "archiveSha256": "1973cfbc1a2daf9cf550e74e1f088c28e7f7d8c1e1418fb6c9dc5184b7e84c99",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "b1cf9a3333ca78152b859012cd4a804156e5243e9ca20ad1df7327ba5ea7405c"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "33b32a251d445c5c03a634e64c53314c55540fc367fabdd45d9b6c8f260c028c"
+        }
+      ]
+    },
+    {
       "name": "aes",
       "version": "0.8.4",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -62,6 +83,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "f7e8ab639afef15573680c97f796166835cbeb3865175882fea41c60d106b733"
+        }
+      ]
+    },
+    {
+      "name": "aes",
+      "version": "0.9.3",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/block-ciphers",
+      "archiveSha256": "35f0f96ce78e38c3dc6d8948aa8163d06385be74000f3c7a95bf1eef35d3ea32",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "25f77efa393854f7c15eaf6a2589a2071db2d7337642742763adb12bdecf0445"
         }
       ]
     },
@@ -258,6 +300,27 @@
     },
     {
       "name": "bip32",
+      "version": "0.6.0",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Tony Arcieri <tony@iqlusion.io>"
+      ],
+      "source": "https://github.com/iqlusioninc/crates/tree/main/bip32",
+      "archiveSha256": "0271a2fe2a6f05231419e878b5f50152a5a6dbcc60c18855d924892ecc85a33a",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "45bfd35614d2fab20e9da46689e73f55d09a45084741f731690eb995ebaaa695"
+        }
+      ]
+    },
+    {
+      "name": "bip32",
       "version": "0.6.0-pre.1",
       "declaredLicense": "Apache-2.0 OR MIT",
       "selectedLicense": "MIT",
@@ -290,6 +353,72 @@
       "notices": [
         {
           "path": "LICENSE",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
+        }
+      ]
+    },
+    {
+      "name": "bitcoin-consensus-encoding",
+      "version": "1.3.0",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Andrew Poelstra <apoelstra@wpsoftware.net>",
+        "Nick Johnson <nick@yonson.dev>",
+        "Tobin C. Harding <me@tobin.cc>"
+      ],
+      "source": "https://github.com/rust-bitcoin/rust-bitcoin/",
+      "archiveSha256": "9daa31138eb443d5751b207f3f64154e2bb09cd59960562ccc7a7112be38147f",
+      "notices": [
+        {
+          "path": "README.md",
+          "sha256": "94c1c361c0e0922be88f445509503bb6dfc5543fefba7bd4905fc581248f206f"
+        },
+        {
+          "source": "hex-conservative 1.3.0/LICENSE (CC0-1.0 text)",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
+        }
+      ]
+    },
+    {
+      "name": "bitcoin-internals",
+      "version": "0.7.0",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Andrew Poelstra <apoelstra@wpsoftware.net>",
+        "The Rust Bitcoin developers"
+      ],
+      "source": "https://github.com/rust-bitcoin/rust-bitcoin/",
+      "archiveSha256": "e8bea3a9f0cfece4564e37cb49a38cc245ca5184719e50d7d0dda3268722c4e2",
+      "notices": [
+        {
+          "path": "README.md",
+          "sha256": "f5a17e52ca340a01ad9694da296ea8283bf91ef63492a10f31540d5147015078"
+        },
+        {
+          "source": "hex-conservative 1.3.0/LICENSE (CC0-1.0 text)",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
+        }
+      ]
+    },
+    {
+      "name": "bitcoin-io",
+      "version": "0.1.101",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Matt Corallo <birchneutea@mattcorallo.com>"
+      ],
+      "source": "https://github.com/rust-bitcoin/rust-bitcoin",
+      "archiveSha256": "bb5de036369d1ac59d3c1819ebc4d850f89466f5401c571a285b6ed564a4cb78",
+      "notices": [
+        {
+          "path": "README.md",
+          "sha256": "6ce9aefbf4dea12b28096eb51a69142752737643645c9f0f75e3bda870baa5cc"
+        },
+        {
+          "source": "hex-conservative 1.3.0/LICENSE (CC0-1.0 text)",
           "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
         }
       ]
@@ -445,6 +574,27 @@
       ]
     },
     {
+      "name": "block-buffer",
+      "version": "0.12.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/utils",
+      "archiveSha256": "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01"
+        }
+      ]
+    },
+    {
       "name": "bounded-vec",
       "version": "0.9.0",
       "declaredLicense": "CC0-1.0",
@@ -567,6 +717,27 @@
       ]
     },
     {
+      "name": "cbc",
+      "version": "0.2.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/block-modes",
+      "archiveSha256": "ce2dc9ee5f88d11e0beb842c88b33c8a5cf0d1329c4b19494af42b07dbfe8896",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "63af4bea227c94d021e99427f6ca3a4b8efddadcca93ab6130f708cf6138cf68"
+        }
+      ]
+    },
+    {
       "name": "cc",
       "version": "1.4.5",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -670,6 +841,27 @@
       ]
     },
     {
+      "name": "chacha20poly1305",
+      "version": "0.11.0",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/AEADs",
+      "archiveSha256": "9b89e1c441e926b9c82a8d023f6e1b7ae0adcfaa7d621814e4d60789bac751cb",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "b8c6939380a400f53e11923d50fcc4dd2fa1ba8339fd9d04cda38a0251b6c9b0"
+        }
+      ]
+    },
+    {
       "name": "chrono",
       "version": "0.4.45",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -702,6 +894,48 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "5c7bd92d1f096f12203dc1b601e3cb17484fa1b023e30b6b8edcc80e416237ec"
+        }
+      ]
+    },
+    {
+      "name": "cipher",
+      "version": "0.5.2",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/traits",
+      "archiveSha256": "e8cf2a2c93cd704877c0858356ed03480ff301ee950b43f1cbe4573b088bfa6c",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "950d712c518a02fcb7cff96950aee304a1cc5283361712c980ea21e8d6d669a5"
+        }
+      ]
+    },
+    {
+      "name": "cmov",
+      "version": "0.5.4",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/utils",
+      "archiveSha256": "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9"
         }
       ]
     },
@@ -787,6 +1021,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "726f08e6f6d48d41cd364991dc63a99787371e7addbe4bb0292800f33d7f04be"
+        }
+      ]
+    },
+    {
+      "name": "cpubits",
+      "version": "0.1.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/utils",
+      "archiveSha256": "15b85f9c39137c3a891689859392b1bd49812121d0d61c9caf00d46ed5ce06ae",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "003736bc98408b53511b9cc8ff5d1af3bf0a8f17d53841cc39d8ab1b96a195b0"
         }
       ]
     },
@@ -947,6 +1202,48 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "3521672491a3479422d5fe1aca6645dd2984090f85da6e5205abfb18fb7a6897"
+        }
+      ]
+    },
+    {
+      "name": "crypto-common",
+      "version": "0.2.2",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/traits",
+      "archiveSha256": "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963"
+        }
+      ]
+    },
+    {
+      "name": "ctutils",
+      "version": "0.4.7",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/utils",
+      "archiveSha256": "a2376ffd6f96d8a9db59875b4b6b0237d6900b5baf64279714e05493ce64828a",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "91585c36e4fb9ab4ca0d3dfac5d66d3c0c62cc51f640a0e1196542daf2267eae"
         }
       ]
     },
@@ -1158,6 +1455,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba"
+        }
+      ]
+    },
+    {
+      "name": "digest",
+      "version": "0.11.3",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/traits",
+      "archiveSha256": "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad"
         }
       ]
     },
@@ -1527,6 +1845,27 @@
       ]
     },
     {
+      "name": "fpe",
+      "version": "0.7.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Jack Grigg <thestr4d@gmail.com>"
+      ],
+      "source": "https://github.com/str4d/fpe",
+      "archiveSha256": "5045d51a6a5e85e0a18d909eedd270c4d82ad634fee57ba707692fb3b1add5a7",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
       "name": "frost-core",
       "version": "3.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -1695,6 +2034,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "42fa16951ce7f24b5a467a40e5b449a1d41e662f97ca779864f053f39e097737"
+        }
+      ]
+    },
+    {
+      "name": "getrandom",
+      "version": "0.3.4",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "The Rand Project Developers"
+      ],
+      "source": "https://github.com/rust-random/getrandom",
+      "archiveSha256": "899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "29e9fe5074bd27e0e5d5d110394fbbcd841baee2651a3c4b4560a632702cede4"
         }
       ]
     },
@@ -1948,6 +2308,45 @@
       ]
     },
     {
+      "name": "hex-conservative",
+      "version": "1.3.0",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Martin Habov\u0161tiak <martin.habovstiak@gmail.com>",
+        "Andrew Poelstra <apoelstra@wpsoftware.net>"
+      ],
+      "source": "https://github.com/rust-bitcoin/hex-conservative",
+      "archiveSha256": "271e0d19bcb473b6675739a2b536076b24a082316cb5199ad918edce10c599e8",
+      "notices": [
+        {
+          "path": "LICENSE",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
+        }
+      ]
+    },
+    {
+      "name": "hmac",
+      "version": "0.13.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/MACs",
+      "archiveSha256": "6303bc9732ae41b04cb554b844a762b4115a61bfaa81e3e83050991eeb56863f",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba"
+        }
+      ]
+    },
+    {
       "name": "hmac",
       "version": "0.13.0-pre.4",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -1986,6 +2385,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "086ed857073f4a67947c2722d6e769ccfbe1c8d8863bcd5c9b3d8bb25d3a1eab"
+        }
+      ]
+    },
+    {
+      "name": "hybrid-array",
+      "version": "0.4.15",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/hybrid-array",
+      "archiveSha256": "27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9"
         }
       ]
     },
@@ -2084,6 +2504,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "304b898acad7f02e03d6d8832d682a3b43ee729ab5d3a069af5a36979083b6b4"
+        }
+      ]
+    },
+    {
+      "name": "inout",
+      "version": "0.2.5",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/utils",
+      "archiveSha256": "3b5cf4372d022092674a83b8febf5865f7a573cc0c5baec5e49c879b6a20978f",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "a07fcacc3c60de4dc0fab10ac9d6aaba7379974e28451c99da7f7df09c25b28c"
         }
       ]
     },
@@ -2558,6 +2999,25 @@
       ]
     },
     {
+      "name": "num-bigint",
+      "version": "0.5.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/rust-num/num-bigint",
+      "archiveSha256": "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+        }
+      ]
+    },
+    {
       "name": "num-conv",
       "version": "0.2.2",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -2797,6 +3257,27 @@
       ]
     },
     {
+      "name": "poly1305",
+      "version": "0.9.1",
+      "declaredLicense": "Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/universal-hashes",
+      "archiveSha256": "6e2d0073b297041425c7c3df6eb4792d598a15323fe63346852b092eca02904c",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "b67acfaaf787b346e1d3bf7654b4fabfd20360fdeb4351cc5e9d624147824527"
+        }
+      ]
+    },
+    {
       "name": "portable-atomic",
       "version": "1.15.0",
       "declaredLicense": "Apache-2.0 OR MIT",
@@ -2873,6 +3354,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "070dbc7dda03a29296f2d58bdb9b7331af90f2abc9f31df22875d1eabaf29852"
+        }
+      ]
+    },
+    {
+      "name": "ppv-lite86",
+      "version": "0.2.21",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "The CryptoCorrosion Contributors"
+      ],
+      "source": "https://github.com/cryptocorrosion/cryptocorrosion",
+      "archiveSha256": "85eae3c4ed2f50dcfe72643da4befc30deadb458a9b590d720cde2f2b1e97da9",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f"
         }
       ]
     },
@@ -3022,6 +3524,21 @@
     },
     {
       "name": "r-efi",
+      "version": "5.3.0",
+      "declaredLicense": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/r-efi/r-efi",
+      "archiveSha256": "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f",
+      "notices": [
+        {
+          "path": "AUTHORS",
+          "sha256": "ff92bed461f50338dd703a9ba9aee496a425957873df1d91192776e4bdf5dda7"
+        }
+      ]
+    },
+    {
+      "name": "r-efi",
       "version": "6.0.0",
       "declaredLicense": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
       "selectedLicense": "MIT",
@@ -3084,6 +3601,51 @@
       ]
     },
     {
+      "name": "rand",
+      "version": "0.9.5",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers"
+      ],
+      "source": "https://github.com/rust-random/rand",
+      "archiveSha256": "b9ef1d0d795eb7d84685bca4f72f3649f064e6641543d3a8c415898726a57b41",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b"
+        }
+      ]
+    },
+    {
+      "name": "rand_chacha",
+      "version": "0.9.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers",
+        "The CryptoCorrosion Contributors"
+      ],
+      "source": "https://github.com/rust-random/rand",
+      "archiveSha256": "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b"
+        }
+      ]
+    },
+    {
       "name": "rand_core",
       "version": "0.10.1",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -3124,6 +3686,28 @@
           "path": "COPYRIGHT",
           "sha256": "90eb64f0279b0d9432accfa6023ff803bc4965212383697eee27a0f426d5f8d5"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b"
+        }
+      ]
+    },
+    {
+      "name": "rand_core",
+      "version": "0.9.5",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers"
+      ],
+      "source": "https://github.com/rust-random/rand",
+      "archiveSha256": "76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51"
@@ -3285,6 +3869,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "3521672491a3479422d5fe1aca6645dd2984090f85da6e5205abfb18fb7a6897"
+        }
+      ]
+    },
+    {
+      "name": "ripemd",
+      "version": "0.2.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/hashes",
+      "archiveSha256": "4dd4211456b4172d7e44261920c25acf07367c4f04bb5f5d54fc21b090d9b159",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "57a4d75c1d095bb94754a478f3cd15e60ac66a5c5627d844be01a918eea5fe88"
         }
       ]
     },
@@ -3472,6 +4077,24 @@
       ]
     },
     {
+      "name": "secp256k1",
+      "version": "0.33.1",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Dawid Ci\u0119\u017carkiewicz <dpc@ucore.info>",
+        "Andrew Poelstra <apoelstra@wpsoftware.net>"
+      ],
+      "source": "https://git.rust-bitcoin.org/rust-bitcoin/rust-secp256k1",
+      "archiveSha256": "d7f404a8dab7a7a5a631e741d8699aa9c8e1d689fc26ccf897c7187565490b69",
+      "notices": [
+        {
+          "path": "LICENSE",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
+        }
+      ]
+    },
+    {
       "name": "secp256k1-sys",
       "version": "0.10.1",
       "declaredLicense": "CC0-1.0",
@@ -3491,6 +4114,25 @@
         {
           "path": "depend/secp256k1/COPYING",
           "sha256": "a735999c7e5649df6fcda6fb06ab97435851c392b1b93494ae8725f37441632f"
+        }
+      ]
+    },
+    {
+      "name": "secp256k1-sys",
+      "version": "0.14.1",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [
+        "Dawid Ci\u0119\u017carkiewicz <dpc@ucore.info>",
+        "Andrew Poelstra <apoelstra@wpsoftware.net>",
+        "Steven Roose <steven@stevenroose.org>"
+      ],
+      "source": "https://git.rust-bitcoin.org/rust-bitcoin/rust-secp256k1",
+      "archiveSha256": "f6b2992d4a3cd244539a7d5d0966aadbe5ca7fb868a5d7e38c29499b9e709bbd",
+      "notices": [
+        {
+          "path": "LICENSE",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
         }
       ]
     },
@@ -3748,6 +4390,27 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "126e8a3fff46c125507966c66808ecfa001ef265f44ab7896300de25941f1816"
+        }
+      ]
+    },
+    {
+      "name": "sha2",
+      "version": "0.11.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/hashes",
+      "archiveSha256": "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25"
         }
       ]
     },
@@ -4405,6 +5068,27 @@
       ]
     },
     {
+      "name": "universal-hash",
+      "version": "0.6.1",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "RustCrypto Developers"
+      ],
+      "source": "https://github.com/RustCrypto/traits",
+      "archiveSha256": "f4987bdc12753382e0bec4a65c50738ffaabc998b9cdd1f952fb5f39b0048a96",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "efa52eb70a774b62c50cf50f5e57e2625c29d375d09b91132f4f020e47b9944e"
+        }
+      ]
+    },
+    {
       "name": "uuid",
       "version": "1.26.1",
       "declaredLicense": "Apache-2.0 OR MIT",
@@ -4508,6 +5192,29 @@
       ],
       "source": "https://github.com/bytecodealliance/wasi",
       "archiveSha256": "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
+      "name": "wasip2",
+      "version": "1.0.4+wasi-0.2.12",
+      "declaredLicense": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/bytecodealliance/wasi-rs",
+      "archiveSha256": "b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487",
       "notices": [
         {
           "path": "LICENSE-APACHE",
@@ -4663,6 +5370,31 @@
       ]
     },
     {
+      "name": "wit-bindgen",
+      "version": "0.57.1",
+      "declaredLicense": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Alex Crichton <alex@alexcrichton.com>"
+      ],
+      "source": "https://github.com/bytecodealliance/wit-bindgen",
+      "archiveSha256": "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
       "name": "wyz",
       "version": "0.5.1",
       "declaredLicense": "MIT",
@@ -4676,6 +5408,28 @@
         {
           "path": "LICENSE.txt",
           "sha256": "411781fd38700f2357a14126d0ab048164ab881f1dcb335c1bb932e232c9a2f5"
+        }
+      ]
+    },
+    {
+      "name": "zakura-address",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "e8621c37ff7444685ce23b2e36c3516d5309c241c63c89de83d4abab2fcdf8e4",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "e205942aefc85685b201f7ef18a65e40926ad2f8df962b772cf1097a165a4cbe"
         }
       ]
     },
@@ -4695,6 +5449,28 @@
           "path": "COPYRIGHT",
           "sha256": "88425d0546bb5c83897bd6551573d6e452225f3f87b115d3424ba982f5be1413"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-bellman",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "14951c09302fea912334d5053d0513930bba31db0ef9e6d6c2ae0b6c9fdd9b50",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -4732,6 +5508,28 @@
       ]
     },
     {
+      "name": "zakura-bls12-381",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "4c29fa2e8eb48b4dfec34e395515bad046355cac6292275e666818757ea4b077",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
       "name": "zakura-client-backend",
       "version": "0.1.0-rc4",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -4758,6 +5556,28 @@
       ]
     },
     {
+      "name": "zakura-client-backend",
+      "version": "0.1.0-rc9.4",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Jack Grigg <jack@z.cash>",
+        "Kris Nuttycombe <kris@electriccoin.co>"
+      ],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "7f29d97e137b6ab0fdb28d88f4c27b11017777cfd3fa41f6cb333513f3c715d5",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "5746c0bdf1827f3ae16352345242bd67da23fda8e2d7e504264bc1aaea21c678"
+        }
+      ]
+    },
+    {
       "name": "zakura-client-sqlite",
       "version": "0.1.0-rc4",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -4772,6 +5592,69 @@
         {
           "url": "https://raw.githubusercontent.com/zakura-core/wallet-libraries/a9142ee100b3a563b7d9ba7a8e94201d00ad8154/librustzcash/zcash_client_backend/LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        }
+      ]
+    },
+    {
+      "name": "zakura-client-sqlite",
+      "version": "0.1.0-rc9.4",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Jack Grigg <jack@z.cash>",
+        "Kris Nuttycombe <kris@electriccoin.co>"
+      ],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "cb382cf113b67c29041e0a8bf4a5cd29ef37df803b0394183649c4842c66043b",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291"
+        }
+      ]
+    },
+    {
+      "name": "zakura-equihash",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "b2f460f432240b51eba911f4389ac40a549399cd14589d6773cb39239583f20c",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291"
+        }
+      ]
+    },
+    {
+      "name": "zakura-filters",
+      "version": "0.0.1-rc0",
+      "declaredLicense": "CC0-1.0",
+      "selectedLicense": "CC0-1.0",
+      "authors": [],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "644854d27edb66242650c3121fc7b522450fbe9aec6a58d3103906de0c64cf7d",
+      "notices": [
+        {
+          "path": "README.md",
+          "sha256": "f568c41fa63e81c5634a2870a88519ba6d9f4e7da7e26c0af9f59429c73d5a53"
+        },
+        {
+          "source": "hex-conservative 1.3.0/LICENSE (CC0-1.0 text)",
+          "sha256": "7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309"
         }
       ]
     },
@@ -4791,6 +5674,28 @@
           "path": "COPYRIGHT",
           "sha256": "70f6537da4aba768aaed5361139f5c36b324817f09c9258c4af19336eaa9a83c"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-halo2-gadgets",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "bef6f7773ca5b921daadbe5e9af0c9f79cfcadf06d32ed064f40df2ed852ba59",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -4854,6 +5759,28 @@
       ]
     },
     {
+      "name": "zakura-halo2-poseidon",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "dd0834743e66872b7d4fb793eec6e04792fa4bf8820247ba2a074827dd9e081b",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
       "name": "zakura-halo2-proofs",
       "version": "1.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -4869,6 +5796,28 @@
           "path": "COPYRIGHT",
           "sha256": "b2e76149ab4931765fa4e9118cc12016ccc5c8ff6bc5cae6668e905423b31b71"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-halo2-proofs",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "75017874a7c0e2f8f1ffacf5b68ca96951cd4e470f2eb9aa3822becb19453d25",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -4906,6 +5855,28 @@
       ]
     },
     {
+      "name": "zakura-jubjub",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "8573c50855bc41efbac00f595fe3f93eeb0aaac33b0d508899940ad33f958699",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
       "name": "zakura-keys",
       "version": "1.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -4928,6 +5899,69 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-keys",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "1f0ecdede4e9329b2c2dd9d3e2afd3be630e69a1b7ecc67fe4f0aab5dc2a018d",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-note-encryption",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Jack Grigg <jack@electriccoin.co>",
+        "Kris Nuttycombe <kris@electriccoin.co>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "0ae22fc88267ae8e8145cdbc7010758846563766745fc3f16e1e6430dcb3fc7d",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "e205942aefc85685b201f7ef18a65e40926ad2f8df962b772cf1097a165a4cbe"
+        }
+      ]
+    },
+    {
+      "name": "zakura-one-time-ivk",
+      "version": "0.0.1-rc4",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "ba70863e6b4b43d980a2fde196e06071ad450a2ac33e1c9e0fc21464aa5ecb6b",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291"
         }
       ]
     },
@@ -4958,6 +5992,46 @@
       ]
     },
     {
+      "name": "zakura-orchard",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "ded68d0841754e5cd9c6a976e3c1bf64275fbfa4cfca0e5b4ee5ee44d5bb7e74",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-orchard-legacy",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "Apache-2.0",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "02810d2eb43f874d5dde9af4079d53deb8a971d662f900dc7144df6cfbd64dd4",
+      "notices": [
+        {
+          "url": "https://raw.githubusercontent.com/zakura-core/common/e9858a104067c9348a0ea5745e44a2f091f5e896/LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        }
+      ]
+    },
+    {
       "name": "zakura-pairing",
       "version": "1.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -4973,6 +6047,28 @@
           "path": "COPYRIGHT",
           "sha256": "ce06e146aaab2577becb18857b1ae0c4bb5c8c468b6424c7360ee92909173fbc"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-pairing",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "ed51c91aa634b4b56e6ada8ceef6053ac4102eeaba6725fb9af90c794a451551",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -5010,6 +6106,28 @@
       ]
     },
     {
+      "name": "zakura-pasta-curves",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "f6ff39b7440a3e61ae9b19afc4254f027bb6be69796b24566504e0e78a525cb6",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
       "name": "zakura-pczt",
       "version": "0.1.0-rc2",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -5023,6 +6141,46 @@
         {
           "url": "https://raw.githubusercontent.com/zakura-core/wallet-libraries/a9142ee100b3a563b7d9ba7a8e94201d00ad8154/librustzcash/zcash_client_backend/LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        }
+      ]
+    },
+    {
+      "name": "zakura-pczt",
+      "version": "0.1.0-rc9",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Jack Grigg <jack@electriccoin.co>"
+      ],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "6a0b24dfffac352758535095baf5c3f62bff1bc58dfbc7ed4455c072e5855b53",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291"
+        }
+      ]
+    },
+    {
+      "name": "zakura-pir-protocol",
+      "version": "0.0.1-rc3",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/zakura-core/wallet-libraries",
+      "archiveSha256": "0e75cdbbb1fc1980bdae38d60bbd7bf37ea42d634bcac2f5640502daccf08a02",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291"
         }
       ]
     },
@@ -5053,6 +6211,50 @@
       ]
     },
     {
+      "name": "zakura-primitives",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "c380aeac887e935cbe05aebe0f417cb1cd16ecc802ee67b05b1cbaf2294d8467",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-protocol",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "b28415ef2e0210e62bc4f9277a1d2878aecdcf13d71dc92aac5582a108cd1ff5",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "f3e4d7ec962e170da7bebee8b1b7c2d7fdb5141d665d89f8467f4770a4b9a7e0"
+        }
+      ]
+    },
+    {
       "name": "zakura-reddsa",
       "version": "1.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -5068,6 +6270,28 @@
           "path": "COPYRIGHT",
           "sha256": "e4696bf4ce0295699fe4321b2c32f79e48a3c22e826bc7edd9e1ec502034e9d9"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-reddsa",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "f78f4044021672bbbdb7a780de81e7f1e15315af85425ed6f525ad5815d38cc7",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -5105,6 +6329,28 @@
       ]
     },
     {
+      "name": "zakura-redjubjub",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "49ba9fdc71a5b108c81355e82d6b7ab2c87782617221c9629d652531c9d98a52",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
       "name": "zakura-sapling-crypto",
       "version": "1.0.0",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -5120,6 +6366,28 @@
           "path": "COPYRIGHT",
           "sha256": "41cb7503965d634bd6b0609b31e7355c9aeb20e11a5e7c253565e23d21917d17"
         },
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-sapling-crypto",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "c723f61c7b67b057185edf592111ffab15909b7f2649b6b5690ee6ac47d70d5d",
+      "notices": [
         {
           "path": "LICENSE-APACHE",
           "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
@@ -5153,6 +6421,71 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-sinsemilla",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "f7dc75ec00057cd09465b97673674581725eb3bc260043e88f0f22bf4cccc84c",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7"
+        }
+      ]
+    },
+    {
+      "name": "zakura-transparent",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Dev Ojha <ValarDragon@users.noreply.github.com>",
+        "Sean Bowe <ewillbefull@gmail.com>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "56d9a18d51d990c681baf2b6eb427173ba7899f58d9c0f8966901d2257bda9e4",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "4e4148baf65ea0c815c65481c6add35545e32611edab6653d263a0e850135d2c"
+        }
+      ]
+    },
+    {
+      "name": "zakura-zip321",
+      "version": "4.0.0",
+      "declaredLicense": "MIT OR Apache-2.0",
+      "selectedLicense": "MIT",
+      "authors": [
+        "Kris Nuttycombe <kris@electriccoin.co>"
+      ],
+      "source": "https://github.com/zakura-core/common",
+      "archiveSha256": "077cc7259ccd55e71852eca10d2709ab3fb33ab5b53bffa9989d05a059619eb2",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "4e4148baf65ea0c815c65481c6add35545e32611edab6653d263a0e850135d2c"
         }
       ]
     },
@@ -5264,6 +6597,26 @@
       ]
     },
     {
+      "name": "zcash_script",
+      "version": "0.6.0",
+      "declaredLicense": "Apache-2.0",
+      "selectedLicense": "Apache-2.0",
+      "authors": [
+        "Electric Coin Company <info@electriccoin.co>",
+        "Greg Pfeil <greg@technomadic.org>",
+        "Tamas Blummer <tamas.blummer@gmail.com>",
+        "Zcash Foundation <zebra@zfnd.org>"
+      ],
+      "source": "https://github.com/ZcashFoundation/zcash_script",
+      "archiveSha256": "10106859d08a2a4119af8a0fa8db72afe35647768b562f94b7a2124adad41275",
+      "notices": [
+        {
+          "url": "https://raw.githubusercontent.com/ZcashFoundation/zcash_script/8d2fc24b63a3f38fab25517e223e421b8f07aa68/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ]
+    },
+    {
       "name": "zcash_spec",
       "version": "0.2.1",
       "declaredLicense": "MIT OR Apache-2.0",
@@ -5304,6 +6657,52 @@
         {
           "path": "LICENSE-MIT",
           "sha256": "4e4148baf65ea0c815c65481c6add35545e32611edab6653d263a0e850135d2c"
+        }
+      ]
+    },
+    {
+      "name": "zerocopy",
+      "version": "0.8.63",
+      "declaredLicense": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/google/zerocopy",
+      "archiveSha256": "e5fe1f8f1b06191a00962174c61aa5005e0bb391a6d80d07e24d115c01a92ed8",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3"
+        },
+        {
+          "path": "LICENSE-BSD",
+          "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df"
+        }
+      ]
+    },
+    {
+      "name": "zerocopy-derive",
+      "version": "0.8.63",
+      "declaredLicense": "BSD-2-Clause OR Apache-2.0 OR MIT",
+      "selectedLicense": "MIT",
+      "authors": [],
+      "source": "https://github.com/google/zerocopy",
+      "archiveSha256": "863ad3ac83293fb4d740aedbfdc9240dd8d1a50c1099acd76ce80ce7c7230c7f",
+      "notices": [
+        {
+          "path": "LICENSE-APACHE",
+          "sha256": "9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3"
+        },
+        {
+          "path": "LICENSE-BSD",
+          "sha256": "83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32"
+        },
+        {
+          "path": "LICENSE-MIT",
+          "sha256": "1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df"
         }
       ]
     },

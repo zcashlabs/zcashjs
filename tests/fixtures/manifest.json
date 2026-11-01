@@ -26,6 +26,13 @@
     "transaction": {
       "inventorySha256": "dbf2c6891e73f69ae256f1e3ce6f756b7d7a68bb67c47123fc79a5e01cd89e18",
       "sourceRevision": "acaf7069e466c82ce1be2c45ebafb75a92b59ee9"
+    },
+    "nu7-legacy-payments": {
+      "repository": "jp4g/zakura-wasm-bindings",
+      "release": "v0.1.0",
+      "commit": "45a987e3558034ae1a62bf4581b5845ee155ba1c",
+      "patch": "nu7/producer.patch",
+      "description": "Test-only export hook; production storage and payment implementation unchanged."
     }
   },
   "sha256": {
@@ -81,6 +88,11 @@
     "wallet/bundle/tests/wallet-views/native.rs": "1bbc1a642f7f8f75b6d00601a4bc465fd396a50c374679113bd1298dcdf59fb5",
     "transaction-pin.json": "5785834a98abd73234002f283471cfe43d04d7e4c3ddea6a88ea9a4c2aa7fbc5",
     "capsule-build/primitive-capsule.mjs": "4b7630ce60aa970eaa078b929040bbbb2daceb93ffdac713d8a3a8a0753ca355",
-    "capsule-build/package-lock.json": "ff9ff85bbb4d31cbda95066586192cb855a20ab8ef1173483f18123880468440"
+    "capsule-build/package-lock.json": "ff9ff85bbb4d31cbda95066586192cb855a20ab8ef1173483f18123880468440",
+    "nu7/legacy-payment.db.gz": "4a4c18b8729970d1b5b13e9abec962a619304155d4fb623bb5454fac2cd1a5f5",
+    "nu7/legacy-payment.json": "875b175ecda642991c0a0d1c6d67bab079bb0c8a68af6876e372d8268d1319ff",
+    "nu7/legacy-proposed.db.gz": "be651eaaaacd892b868a76d76787e559393c8c3f55bdbf87db5767e87520aa07",
+    "nu7/legacy-proposed.json": "49ec97a5447a818327ccb3bee5f08a3239f150f05bb4e22b4fa1f9b40dae4a4d",
+    "nu7/producer.patch": "db3ba36c29d666338c6accc4b4556f4481025136ed0cfd8f75bdbd9347739c1e"
   }
 }

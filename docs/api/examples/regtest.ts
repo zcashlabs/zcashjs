@@ -13,7 +13,7 @@ export async function connectRegtest(rpcUrl: string) {
     ...encodeNetworkParameters({
       encoding: 'regtest',
       Overwinter: 1, Sapling: 1, Blossom: 1, Heartwood: 1, Canopy: 1,
-      Nu5: 1, Nu6: 1, Nu6_1: null, Nu6_2: null, Nu6_3: null,
+      Nu5: 1, Nu6: 1, Nu6_1: 1, Nu6_2: 1, Nu6_3: 1, Nu7: 1,
     }),
   });
   const client = createPublicClient({

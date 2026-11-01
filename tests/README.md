@@ -12,6 +12,11 @@ npm run check
 at a time. `npm test` omits lint; `npm run test:sdk` runs only SDK tests.
 The first build compiles Rust; later builds reuse verified native output.
 No live blockchain endpoint is needed.
+The `SDK regression` workflow runs this command on Linux for pull requests and
+main-branch pushes. Fork workflows may need maintainer approval before running.
+
+The network-parameter tests also migrate genuine RC4 databases containing
+prepared and finalized payments; see [fixture provenance](fixtures/nu7/README.md).
 
 Native integration tests execute the pinned WASM in [fixtures/](fixtures/README.md).
 Missing or modified fixtures fail rather than silently skipping native coverage.
@@ -29,7 +34,8 @@ npm run test:package:browser
 ```
 
 This installs the tarball and npm dependencies in a new sibling project, builds
-a nested-base Vite application, checks lazy network loading and OPFS persistence,
+a nested-base Vite application, checks lazy network loading and OPFS persistence
+for both legacy `/1` and NU7 `/2` network documents,
 and retains `result.json`, asset sizes, a tarball digest and Node memory snapshots.
 It needs registry access, Firefox and geckodriver. This is not a live-chain test;
 the separate [testnet application](../examples/testnet/README.md) requires funding

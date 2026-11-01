@@ -12382,3 +12382,1658 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
+
+NU7 dependency additions
+
+PACKAGE aead 0.6.1
+SOURCE https://github.com/RustCrypto/traits
+ARCHIVE SHA256 1973cfbc1a2daf9cf550e74e1f088c28e7f7d8c1e1418fb6c9dc5184b7e84c99
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 b1cf9a3333ca78152b859012cd4a804156e5243e9ca20ad1df7327ba5ea7405c
+NOTICE LICENSE-MIT SHA256 33b32a251d445c5c03a634e64c53314c55540fc367fabdd45d9b6c8f260c028c
+
+PACKAGE aes 0.9.3
+SOURCE https://github.com/RustCrypto/block-ciphers
+ARCHIVE SHA256 35f0f96ce78e38c3dc6d8948aa8163d06385be74000f3c7a95bf1eef35d3ea32
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 25f77efa393854f7c15eaf6a2589a2071db2d7337642742763adb12bdecf0445
+
+PACKAGE bip32 0.6.0
+SOURCE https://github.com/iqlusioninc/crates/tree/main/bip32
+ARCHIVE SHA256 0271a2fe2a6f05231419e878b5f50152a5a6dbcc60c18855d924892ecc85a33a
+DECLARED Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS Tony Arcieri <tony@iqlusion.io>
+NOTICE LICENSE-APACHE SHA256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+NOTICE LICENSE-MIT SHA256 45bfd35614d2fab20e9da46689e73f55d09a45084741f731690eb995ebaaa695
+
+PACKAGE bitcoin-consensus-encoding 1.3.0
+SOURCE https://github.com/rust-bitcoin/rust-bitcoin/
+ARCHIVE SHA256 9daa31138eb443d5751b207f3f64154e2bb09cd59960562ccc7a7112be38147f
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Andrew Poelstra <apoelstra@wpsoftware.net>; Nick Johnson <nick@yonson.dev>; Tobin C. Harding <me@tobin.cc>
+NOTICE README.md SHA256 94c1c361c0e0922be88f445509503bb6dfc5543fefba7bd4905fc581248f206f
+NOTICE hex-conservative 1.3.0/LICENSE (CC0-1.0 text) SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE bitcoin-internals 0.7.0
+SOURCE https://github.com/rust-bitcoin/rust-bitcoin/
+ARCHIVE SHA256 e8bea3a9f0cfece4564e37cb49a38cc245ca5184719e50d7d0dda3268722c4e2
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Andrew Poelstra <apoelstra@wpsoftware.net>; The Rust Bitcoin developers
+NOTICE README.md SHA256 f5a17e52ca340a01ad9694da296ea8283bf91ef63492a10f31540d5147015078
+NOTICE hex-conservative 1.3.0/LICENSE (CC0-1.0 text) SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE bitcoin-io 0.1.101
+SOURCE https://github.com/rust-bitcoin/rust-bitcoin
+ARCHIVE SHA256 bb5de036369d1ac59d3c1819ebc4d850f89466f5401c571a285b6ed564a4cb78
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Matt Corallo <birchneutea@mattcorallo.com>
+NOTICE README.md SHA256 6ce9aefbf4dea12b28096eb51a69142752737643645c9f0f75e3bda870baa5cc
+NOTICE hex-conservative 1.3.0/LICENSE (CC0-1.0 text) SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE block-buffer 0.12.1
+SOURCE https://github.com/RustCrypto/utils
+ARCHIVE SHA256 d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01
+
+PACKAGE cbc 0.2.1
+SOURCE https://github.com/RustCrypto/block-modes
+ARCHIVE SHA256 ce2dc9ee5f88d11e0beb842c88b33c8a5cf0d1329c4b19494af42b07dbfe8896
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 63af4bea227c94d021e99427f6ca3a4b8efddadcca93ab6130f708cf6138cf68
+
+PACKAGE chacha20poly1305 0.11.0
+SOURCE https://github.com/RustCrypto/AEADs
+ARCHIVE SHA256 9b89e1c441e926b9c82a8d023f6e1b7ae0adcfaa7d621814e4d60789bac751cb
+DECLARED Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 b8c6939380a400f53e11923d50fcc4dd2fa1ba8339fd9d04cda38a0251b6c9b0
+
+PACKAGE cipher 0.5.2
+SOURCE https://github.com/RustCrypto/traits
+ARCHIVE SHA256 e8cf2a2c93cd704877c0858356ed03480ff301ee950b43f1cbe4573b088bfa6c
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 950d712c518a02fcb7cff96950aee304a1cc5283361712c980ea21e8d6d669a5
+
+PACKAGE cmov 0.5.4
+SOURCE https://github.com/RustCrypto/utils
+ARCHIVE SHA256 0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a
+DECLARED Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+NOTICE LICENSE-MIT SHA256 70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9
+
+PACKAGE cpubits 0.1.1
+SOURCE https://github.com/RustCrypto/utils
+ARCHIVE SHA256 15b85f9c39137c3a891689859392b1bd49812121d0d61c9caf00d46ed5ce06ae
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 003736bc98408b53511b9cc8ff5d1af3bf0a8f17d53841cc39d8ab1b96a195b0
+
+PACKAGE crypto-common 0.2.2
+SOURCE https://github.com/RustCrypto/traits
+ARCHIVE SHA256 ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963
+
+PACKAGE ctutils 0.4.7
+SOURCE https://github.com/RustCrypto/utils
+ARCHIVE SHA256 a2376ffd6f96d8a9db59875b4b6b0237d6900b5baf64279714e05493ce64828a
+DECLARED Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+NOTICE LICENSE-MIT SHA256 91585c36e4fb9ab4ca0d3dfac5d66d3c0c62cc51f640a0e1196542daf2267eae
+
+PACKAGE digest 0.11.3
+SOURCE https://github.com/RustCrypto/traits
+ARCHIVE SHA256 f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad
+
+PACKAGE fpe 0.7.0
+SOURCE https://github.com/str4d/fpe
+ARCHIVE SHA256 5045d51a6a5e85e0a18d909eedd270c4d82ad634fee57ba707692fb3b1add5a7
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Jack Grigg <thestr4d@gmail.com>
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3
+
+PACKAGE getrandom 0.3.4
+SOURCE https://github.com/rust-random/getrandom
+ARCHIVE SHA256 899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS The Rand Project Developers
+NOTICE LICENSE-APACHE SHA256 aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf
+NOTICE LICENSE-MIT SHA256 29e9fe5074bd27e0e5d5d110394fbbcd841baee2651a3c4b4560a632702cede4
+
+PACKAGE hex-conservative 1.3.0
+SOURCE https://github.com/rust-bitcoin/hex-conservative
+ARCHIVE SHA256 271e0d19bcb473b6675739a2b536076b24a082316cb5199ad918edce10c599e8
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Martin Habovštiak <martin.habovstiak@gmail.com>; Andrew Poelstra <apoelstra@wpsoftware.net>
+NOTICE LICENSE SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE hmac 0.13.0
+SOURCE https://github.com/RustCrypto/MACs
+ARCHIVE SHA256 6303bc9732ae41b04cb554b844a762b4115a61bfaa81e3e83050991eeb56863f
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 9e0dfd2dd4173a530e238cb6adb37aa78c34c6bc7444e0e10c1ab5d8881f63ba
+
+PACKAGE hybrid-array 0.4.15
+SOURCE https://github.com/RustCrypto/hybrid-array
+ARCHIVE SHA256 27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9
+
+PACKAGE inout 0.2.5
+SOURCE https://github.com/RustCrypto/utils
+ARCHIVE SHA256 3b5cf4372d022092674a83b8febf5865f7a573cc0c5baec5e49c879b6a20978f
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 a07fcacc3c60de4dc0fab10ac9d6aaba7379974e28451c99da7f7df09c25b28c
+
+PACKAGE num-bigint 0.5.1
+SOURCE https://github.com/rust-num/num-bigint
+ARCHIVE SHA256 93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb
+
+PACKAGE poly1305 0.9.1
+SOURCE https://github.com/RustCrypto/universal-hashes
+ARCHIVE SHA256 6e2d0073b297041425c7c3df6eb4792d598a15323fe63346852b092eca02904c
+DECLARED Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 b67acfaaf787b346e1d3bf7654b4fabfd20360fdeb4351cc5e9d624147824527
+
+PACKAGE ppv-lite86 0.2.21
+SOURCE https://github.com/cryptocorrosion/cryptocorrosion
+ARCHIVE SHA256 85eae3c4ed2f50dcfe72643da4befc30deadb458a9b590d720cde2f2b1e97da9
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS The CryptoCorrosion Contributors
+NOTICE LICENSE-APACHE SHA256 0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a
+NOTICE LICENSE-MIT SHA256 4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f
+
+PACKAGE r-efi 5.3.0
+SOURCE https://github.com/r-efi/r-efi
+ARCHIVE SHA256 69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f
+DECLARED MIT OR Apache-2.0 OR LGPL-2.1-or-later
+SELECTED MIT
+AUTHORS
+NOTICE AUTHORS SHA256 ff92bed461f50338dd703a9ba9aee496a425957873df1d91192776e4bdf5dda7
+
+PACKAGE rand 0.9.5
+SOURCE https://github.com/rust-random/rand
+ARCHIVE SHA256 b9ef1d0d795eb7d84685bca4f72f3649f064e6641543d3a8c415898726a57b41
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS The Rand Project Developers; The Rust Project Developers
+NOTICE LICENSE-APACHE SHA256 35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab
+NOTICE LICENSE-MIT SHA256 209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b
+
+PACKAGE rand_chacha 0.9.0
+SOURCE https://github.com/rust-random/rand
+ARCHIVE SHA256 d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS The Rand Project Developers; The Rust Project Developers; The CryptoCorrosion Contributors
+NOTICE LICENSE-APACHE SHA256 35242e7a83f69875e6edeff02291e688c97caafe2f8902e4e19b49d3e78b4cab
+NOTICE LICENSE-MIT SHA256 209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b
+
+PACKAGE rand_core 0.9.5
+SOURCE https://github.com/rust-random/rand
+ARCHIVE SHA256 76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS The Rand Project Developers; The Rust Project Developers
+NOTICE LICENSE-APACHE SHA256 6df43f6f4b5d4587f3d8d71e45532c688fd168afa5fe89d571cb32fa09c4ef51
+NOTICE LICENSE-MIT SHA256 209fbbe0ad52d9235e37badf9cadfe4dbdc87203179c0899e738b39ade42177b
+
+PACKAGE ripemd 0.2.0
+SOURCE https://github.com/RustCrypto/hashes
+ARCHIVE SHA256 4dd4211456b4172d7e44261920c25acf07367c4f04bb5f5d54fc21b090d9b159
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 57a4d75c1d095bb94754a478f3cd15e60ac66a5c5627d844be01a918eea5fe88
+
+PACKAGE secp256k1 0.33.1
+SOURCE https://git.rust-bitcoin.org/rust-bitcoin/rust-secp256k1
+ARCHIVE SHA256 d7f404a8dab7a7a5a631e741d8699aa9c8e1d689fc26ccf897c7187565490b69
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Dawid Ciężarkiewicz <dpc@ucore.info>; Andrew Poelstra <apoelstra@wpsoftware.net>
+NOTICE LICENSE SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE secp256k1-sys 0.14.1
+SOURCE https://git.rust-bitcoin.org/rust-bitcoin/rust-secp256k1
+ARCHIVE SHA256 f6b2992d4a3cd244539a7d5d0966aadbe5ca7fb868a5d7e38c29499b9e709bbd
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS Dawid Ciężarkiewicz <dpc@ucore.info>; Andrew Poelstra <apoelstra@wpsoftware.net>; Steven Roose <steven@stevenroose.org>
+NOTICE LICENSE SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE sha2 0.11.1
+SOURCE https://github.com/RustCrypto/hashes
+ARCHIVE SHA256 47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25
+
+PACKAGE universal-hash 0.6.1
+SOURCE https://github.com/RustCrypto/traits
+ARCHIVE SHA256 f4987bdc12753382e0bec4a65c50738ffaabc998b9cdd1f952fb5f39b0048a96
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS RustCrypto Developers
+NOTICE LICENSE-APACHE SHA256 a9040321c3712d8fd0b09cf52b17445de04a23a10165049ae187cd39e5c86be5
+NOTICE LICENSE-MIT SHA256 efa52eb70a774b62c50cf50f5e57e2625c29d375d09b91132f4f020e47b9944e
+
+PACKAGE wasip2 1.0.4+wasi-0.2.12
+SOURCE https://github.com/bytecodealliance/wasi-rs
+ARCHIVE SHA256 b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487
+DECLARED Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-Apache-2.0_WITH_LLVM-exception SHA256 268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5
+NOTICE LICENSE-MIT SHA256 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3
+
+PACKAGE wit-bindgen 0.57.1
+SOURCE https://github.com/bytecodealliance/wit-bindgen
+ARCHIVE SHA256 1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e
+DECLARED Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS Alex Crichton <alex@alexcrichton.com>
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-Apache-2.0_WITH_LLVM-exception SHA256 268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5
+NOTICE LICENSE-MIT SHA256 23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3
+
+PACKAGE zakura-address 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 e8621c37ff7444685ce23b2e36c3516d5309c241c63c89de83d4abab2fcdf8e4
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 e205942aefc85685b201f7ef18a65e40926ad2f8df962b772cf1097a165a4cbe
+
+PACKAGE zakura-bellman 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 14951c09302fea912334d5053d0513930bba31db0ef9e6d6c2ae0b6c9fdd9b50
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-bls12-381 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 4c29fa2e8eb48b4dfec34e395515bad046355cac6292275e666818757ea4b077
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-client-backend 0.1.0-rc9.4
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 7f29d97e137b6ab0fdb28d88f4c27b11017777cfd3fa41f6cb333513f3c715d5
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Jack Grigg <jack@z.cash>; Kris Nuttycombe <kris@electriccoin.co>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 5746c0bdf1827f3ae16352345242bd67da23fda8e2d7e504264bc1aaea21c678
+
+PACKAGE zakura-client-sqlite 0.1.0-rc9.4
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 cb382cf113b67c29041e0a8bf4a5cd29ef37df803b0394183649c4842c66043b
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Jack Grigg <jack@z.cash>; Kris Nuttycombe <kris@electriccoin.co>
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291
+
+PACKAGE zakura-equihash 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 b2f460f432240b51eba911f4389ac40a549399cd14589d6773cb39239583f20c
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291
+
+PACKAGE zakura-filters 0.0.1-rc0
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 644854d27edb66242650c3121fc7b522450fbe9aec6a58d3103906de0c64cf7d
+DECLARED CC0-1.0
+SELECTED CC0-1.0
+AUTHORS
+NOTICE README.md SHA256 f568c41fa63e81c5634a2870a88519ba6d9f4e7da7e26c0af9f59429c73d5a53
+NOTICE hex-conservative 1.3.0/LICENSE (CC0-1.0 text) SHA256 7179683e8000e6bdc9bbc60d85edf0a4ac8e76f951857f54fcb775d5886f1309
+
+PACKAGE zakura-halo2-gadgets 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 bef6f7773ca5b921daadbe5e9af0c9f79cfcadf06d32ed064f40df2ed852ba59
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-halo2-poseidon 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 dd0834743e66872b7d4fb793eec6e04792fa4bf8820247ba2a074827dd9e081b
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-halo2-proofs 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 75017874a7c0e2f8f1ffacf5b68ca96951cd4e470f2eb9aa3822becb19453d25
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-jubjub 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 8573c50855bc41efbac00f595fe3f93eeb0aaac33b0d508899940ad33f958699
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-keys 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 1f0ecdede4e9329b2c2dd9d3e2afd3be630e69a1b7ecc67fe4f0aab5dc2a018d
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-note-encryption 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 0ae22fc88267ae8e8145cdbc7010758846563766745fc3f16e1e6430dcb3fc7d
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Jack Grigg <jack@electriccoin.co>; Kris Nuttycombe <kris@electriccoin.co>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 e205942aefc85685b201f7ef18a65e40926ad2f8df962b772cf1097a165a4cbe
+
+PACKAGE zakura-one-time-ivk 0.0.1-rc4
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 ba70863e6b4b43d980a2fde196e06071ad450a2ac33e1c9e0fc21464aa5ecb6b
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291
+
+PACKAGE zakura-orchard 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 ded68d0841754e5cd9c6a976e3c1bf64275fbfa4cfca0e5b4ee5ee44d5bb7e74
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-orchard-legacy 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 02810d2eb43f874d5dde9af4079d53deb8a971d662f900dc7144df6cfbd64dd4
+DECLARED MIT OR Apache-2.0
+SELECTED Apache-2.0
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE https://raw.githubusercontent.com/zakura-core/common/e9858a104067c9348a0ea5745e44a2f091f5e896/LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+
+PACKAGE zakura-pairing 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 ed51c91aa634b4b56e6ada8ceef6053ac4102eeaba6725fb9af90c794a451551
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-pasta-curves 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 f6ff39b7440a3e61ae9b19afc4254f027bb6be69796b24566504e0e78a525cb6
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-pczt 0.1.0-rc9
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 6a0b24dfffac352758535095baf5c3f62bff1bc58dfbc7ed4455c072e5855b53
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Jack Grigg <jack@electriccoin.co>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291
+
+PACKAGE zakura-pir-protocol 0.0.1-rc3
+SOURCE https://github.com/zakura-core/wallet-libraries
+ARCHIVE SHA256 0e75cdbbb1fc1980bdae38d60bbd7bf37ea42d634bcac2f5640502daccf08a02
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 bf145b7a25b6cc65f07176f8b8a6e789ca1d1c762bfbd3c53450bf8031ef5291
+
+PACKAGE zakura-primitives 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 c380aeac887e935cbe05aebe0f417cb1cd16ecc802ee67b05b1cbaf2294d8467
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-protocol 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 b28415ef2e0210e62bc4f9277a1d2878aecdcf13d71dc92aac5582a108cd1ff5
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2
+NOTICE LICENSE-MIT SHA256 f3e4d7ec962e170da7bebee8b1b7c2d7fdb5141d665d89f8467f4770a4b9a7e0
+
+PACKAGE zakura-reddsa 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 f78f4044021672bbbdb7a780de81e7f1e15315af85425ed6f525ad5815d38cc7
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-redjubjub 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 49ba9fdc71a5b108c81355e82d6b7ab2c87782617221c9629d652531c9d98a52
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-sapling-crypto 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 c723f61c7b67b057185edf592111ffab15909b7f2649b6b5690ee6ac47d70d5d
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-sinsemilla 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 f7dc75ec00057cd09465b97673674581725eb3bc260043e88f0f22bf4cccc84c
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 faaf24f6a66f3436cb333c284db042b52c1daa9f60dc3b7deadf5aa5cbc364a7
+
+PACKAGE zakura-transparent 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 56d9a18d51d990c681baf2b6eb427173ba7899f58d9c0f8966901d2257bda9e4
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Dev Ojha <ValarDragon@users.noreply.github.com>; Sean Bowe <ewillbefull@gmail.com>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 4e4148baf65ea0c815c65481c6add35545e32611edab6653d263a0e850135d2c
+
+PACKAGE zakura-zip321 4.0.0
+SOURCE https://github.com/zakura-core/common
+ARCHIVE SHA256 077cc7259ccd55e71852eca10d2709ab3fb33ab5b53bffa9989d05a059619eb2
+DECLARED MIT OR Apache-2.0
+SELECTED MIT
+AUTHORS Kris Nuttycombe <kris@electriccoin.co>
+NOTICE LICENSE-APACHE SHA256 3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026
+NOTICE LICENSE-MIT SHA256 4e4148baf65ea0c815c65481c6add35545e32611edab6653d263a0e850135d2c
+
+PACKAGE zcash_script 0.6.0
+SOURCE https://github.com/ZcashFoundation/zcash_script
+ARCHIVE SHA256 10106859d08a2a4119af8a0fa8db72afe35647768b562f94b7a2124adad41275
+DECLARED Apache-2.0
+SELECTED Apache-2.0
+AUTHORS Electric Coin Company <info@electriccoin.co>; Greg Pfeil <greg@technomadic.org>; Tamas Blummer <tamas.blummer@gmail.com>; Zcash Foundation <zebra@zfnd.org>
+NOTICE https://raw.githubusercontent.com/ZcashFoundation/zcash_script/8d2fc24b63a3f38fab25517e223e421b8f07aa68/LICENSE SHA256 c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+
+PACKAGE zerocopy 0.8.63
+SOURCE https://github.com/google/zerocopy
+ARCHIVE SHA256 e5fe1f8f1b06191a00962174c61aa5005e0bb391a6d80d07e24d115c01a92ed8
+DECLARED BSD-2-Clause OR Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3
+NOTICE LICENSE-BSD SHA256 83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32
+NOTICE LICENSE-MIT SHA256 1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df
+
+PACKAGE zerocopy-derive 0.8.63
+SOURCE https://github.com/google/zerocopy
+ARCHIVE SHA256 863ad3ac83293fb4d740aedbfdc9240dd8d1a50c1099acd76ce80ce7c7230c7f
+DECLARED BSD-2-Clause OR Apache-2.0 OR MIT
+SELECTED MIT
+AUTHORS
+NOTICE LICENSE-APACHE SHA256 9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3
+NOTICE LICENSE-BSD SHA256 83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32
+NOTICE LICENSE-MIT SHA256 1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df
+
+
+===== NOTICE TEXT SHA256 003736bc98408b53511b9cc8ff5d1af3bf0a8f17d53841cc39d8ab1b96a195b0 =====
+Copyright (c) 2023-2026 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 0218327e7a480793ffdd4eb792379a9709e5c135c7ba267f709d6f6d4d70af0a =====
+                              Apache License
+                        Version 2.0, January 2004
+                     http://www.apache.org/licenses/
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+   "License" shall mean the terms and conditions for use, reproduction,
+   and distribution as defined by Sections 1 through 9 of this document.
+
+   "Licensor" shall mean the copyright owner or entity authorized by
+   the copyright owner that is granting the License.
+
+   "Legal Entity" shall mean the union of the acting entity and all
+   other entities that control, are controlled by, or are under common
+   control with that entity. For the purposes of this definition,
+   "control" means (i) the power, direct or indirect, to cause the
+   direction or management of such entity, whether by contract or
+   otherwise, or (ii) ownership of fifty percent (50%) or more of the
+   outstanding shares, or (iii) beneficial ownership of such entity.
+
+   "You" (or "Your") shall mean an individual or Legal Entity
+   exercising permissions granted by this License.
+
+   "Source" form shall mean the preferred form for making modifications,
+   including but not limited to software source code, documentation
+   source, and configuration files.
+
+   "Object" form shall mean any form resulting from mechanical
+   transformation or translation of a Source form, including but
+   not limited to compiled object code, generated documentation,
+   and conversions to other media types.
+
+   "Work" shall mean the work of authorship, whether in Source or
+   Object form, made available under the License, as indicated by a
+   copyright notice that is included in or attached to the work
+   (an example is provided in the Appendix below).
+
+   "Derivative Works" shall mean any work, whether in Source or Object
+   form, that is based on (or derived from) the Work and for which the
+   editorial revisions, annotations, elaborations, or other modifications
+   represent, as a whole, an original work of authorship. For the purposes
+   of this License, Derivative Works shall not include works that remain
+   separable from, or merely link (or bind by name) to the interfaces of,
+   the Work and Derivative Works thereof.
+
+   "Contribution" shall mean any work of authorship, including
+   the original version of the Work and any modifications or additions
+   to that Work or Derivative Works thereof, that is intentionally
+   submitted to Licensor for inclusion in the Work by the copyright owner
+   or by an individual or Legal Entity authorized to submit on behalf of
+   the copyright owner. For the purposes of this definition, "submitted"
+   means any form of electronic, verbal, or written communication sent
+   to the Licensor or its representatives, including but not limited to
+   communication on electronic mailing lists, source code control systems,
+   and issue tracking systems that are managed by, or on behalf of, the
+   Licensor for the purpose of discussing and improving the Work, but
+   excluding communication that is conspicuously marked or otherwise
+   designated in writing by the copyright owner as "Not a Contribution."
+
+   "Contributor" shall mean Licensor and any individual or Legal Entity
+   on behalf of whom a Contribution has been received by Licensor and
+   subsequently incorporated within the Work.
+
+2. Grant of Copyright License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   copyright license to reproduce, prepare Derivative Works of,
+   publicly display, publicly perform, sublicense, and distribute the
+   Work and such Derivative Works in Source or Object form.
+
+3. Grant of Patent License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   (except as stated in this section) patent license to make, have made,
+   use, offer to sell, sell, import, and otherwise transfer the Work,
+   where such license applies only to those patent claims licensable
+   by such Contributor that are necessarily infringed by their
+   Contribution(s) alone or by combination of their Contribution(s)
+   with the Work to which such Contribution(s) was submitted. If You
+   institute patent litigation against any entity (including a
+   cross-claim or counterclaim in a lawsuit) alleging that the Work
+   or a Contribution incorporated within the Work constitutes direct
+   or contributory patent infringement, then any patent licenses
+   granted to You under this License for that Work shall terminate
+   as of the date such litigation is filed.
+
+4. Redistribution. You may reproduce and distribute copies of the
+   Work or Derivative Works thereof in any medium, with or without
+   modifications, and in Source or Object form, provided that You
+   meet the following conditions:
+
+   (a) You must give any other recipients of the Work or
+       Derivative Works a copy of this License; and
+
+   (b) You must cause any modified files to carry prominent notices
+       stating that You changed the files; and
+
+   (c) You must retain, in the Source form of any Derivative Works
+       that You distribute, all copyright, patent, trademark, and
+       attribution notices from the Source form of the Work,
+       excluding those notices that do not pertain to any part of
+       the Derivative Works; and
+
+   (d) If the Work includes a "NOTICE" text file as part of its
+       distribution, then any Derivative Works that You distribute must
+       include a readable copy of the attribution notices contained
+       within such NOTICE file, excluding those notices that do not
+       pertain to any part of the Derivative Works, in at least one
+       of the following places: within a NOTICE text file distributed
+       as part of the Derivative Works; within the Source form or
+       documentation, if provided along with the Derivative Works; or,
+       within a display generated by the Derivative Works, if and
+       wherever such third-party notices normally appear. The contents
+       of the NOTICE file are for informational purposes only and
+       do not modify the License. You may add Your own attribution
+       notices within Derivative Works that You distribute, alongside
+       or as an addendum to the NOTICE text from the Work, provided
+       that such additional attribution notices cannot be construed
+       as modifying the License.
+
+   You may add Your own copyright statement to Your modifications and
+   may provide additional or different license terms and conditions
+   for use, reproduction, or distribution of Your modifications, or
+   for any such Derivative Works as a whole, provided Your use,
+   reproduction, and distribution of the Work otherwise complies with
+   the conditions stated in this License.
+
+5. Submission of Contributions. Unless You explicitly state otherwise,
+   any Contribution intentionally submitted for inclusion in the Work
+   by You to the Licensor shall be under the terms and conditions of
+   this License, without any additional terms or conditions.
+   Notwithstanding the above, nothing herein shall supersede or modify
+   the terms of any separate license agreement you may have executed
+   with Licensor regarding such Contributions.
+
+6. Trademarks. This License does not grant permission to use the trade
+   names, trademarks, service marks, or product names of the Licensor,
+   except as required for reasonable and customary use in describing the
+   origin of the Work and reproducing the content of the NOTICE file.
+
+7. Disclaimer of Warranty. Unless required by applicable law or
+   agreed to in writing, Licensor provides the Work (and each
+   Contributor provides its Contributions) on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+   implied, including, without limitation, any warranties or conditions
+   of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+   PARTICULAR PURPOSE. You are solely responsible for determining the
+   appropriateness of using or redistributing the Work and assume any
+   risks associated with Your exercise of permissions under this License.
+
+8. Limitation of Liability. In no event and under no legal theory,
+   whether in tort (including negligence), contract, or otherwise,
+   unless required by applicable law (such as deliberate and grossly
+   negligent acts) or agreed to in writing, shall any Contributor be
+   liable to You for damages, including any direct, indirect, special,
+   incidental, or consequential damages of any character arising as a
+   result of this License or out of the use or inability to use the
+   Work (including but not limited to damages for loss of goodwill,
+   work stoppage, computer failure or malfunction, or any and all
+   other commercial damages or losses), even if such Contributor
+   has been advised of the possibility of such damages.
+
+9. Accepting Warranty or Additional Liability. While redistributing
+   the Work or Derivative Works thereof, You may choose to offer,
+   and charge a fee for, acceptance of support, warranty, indemnity,
+   or other liability obligations and/or rights consistent with this
+   License. However, in accepting such obligations, You may act only
+   on Your own behalf and on Your sole responsibility, not on behalf
+   of any other Contributor, and only if You agree to indemnify,
+   defend, and hold each Contributor harmless for any liability
+   incurred by, or claims asserted against, such Contributor by reason
+   of your accepting any such warranty or additional liability.
+
+END OF TERMS AND CONDITIONS
+
+APPENDIX: How to apply the Apache License to your work.
+
+   To apply the Apache License to your work, attach the following
+   boilerplate notice, with the fields enclosed by brackets "[]"
+   replaced with your own identifying information. (Don't include
+   the brackets!)  The text should be enclosed in the appropriate
+   comment syntax for the file format. We also recommend that a
+   file or class name and description of purpose be included on the
+   same "printed page" as the copyright notice for easier
+   identification within third-party archives.
+
+Copyright 2019 The CryptoCorrosion Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+===== NOTICE TEXT SHA256 1a2f5c12ddc934d58956aa5dbdd3255fe55fd957633ab7d0d39e4f0daa73f7df =====
+Copyright 2023 The Fuchsia Authors
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+
+===== NOTICE TEXT SHA256 25f77efa393854f7c15eaf6a2589a2071db2d7337642742763adb12bdecf0445 =====
+Copyright (c) 2018-2024 The RustCrypto Project Developers
+Copyright (c) 2018 Artyom Pavlov
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 29e9fe5074bd27e0e5d5d110394fbbcd841baee2651a3c4b4560a632702cede4 =====
+Copyright (c) 2018-2025 The rust-random Project Developers
+Copyright (c) 2014 The Rust Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 33b32a251d445c5c03a634e64c53314c55540fc367fabdd45d9b6c8f260c028c =====
+Copyright (c) 2019-2026 The RustCrypto Project Developers
+Copyright (c) 2019 MobileCoin, LLC
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 4cada0bd02ea3692eee6f16400d86c6508bbd3bafb2b65fed0419f36d4f83e8f =====
+Copyright (c) 2019 The CryptoCorrosion Contributors
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 57a4d75c1d095bb94754a478f3cd15e60ac66a5c5627d844be01a918eea5fe88 =====
+Copyright (c) 2021-2026 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 6ce9aefbf4dea12b28096eb51a69142752737643645c9f0f75e3bda870baa5cc =====
+Rust-Bitcoin IO Library
+=======================
+
+The `std::io` module is not exposed in `no-std` Rust so building `no-std` applications which require
+reading and writing objects via standard traits is not generally possible. Thus, this library exists
+to export a minmal version of `std::io`'s traits which we use in `rust-bitcoin` so that we can
+support `no-std` applications.
+
+These traits are not one-for-one drop-ins, but are as close as possible while still implementing
+`std::io`'s traits without unnecessary complexity.
+
+
+===== NOTICE TEXT SHA256 70c9d40f1f9545c3f133b8a67206e89da850f6468eed072281bb3701514114a9 =====
+Copyright (c) 2022-2026 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 831e0f43ad0bf014c1c4fec5767aae470434c1d66d6e671be2d823e729063e25 =====
+Copyright (c) 2016-2026 The RustCrypto Project Developers
+Copyright (c) 2016 Artyom Pavlov
+Copyright (c) 2009-2013 Mozilla Foundation
+Copyright (c) 2006-2009 Graydon Hoare
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 83c1763356e822adde0a2cae748d938a73fdc263849ccff6b27776dff213bd32 =====
+Copyright 2019 The Fuchsia Authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+===== NOTICE TEXT SHA256 91585c36e4fb9ab4ca0d3dfac5d66d3c0c62cc51f640a0e1196542daf2267eae =====
+Copyright (c) 2025-2026 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 94c1c361c0e0922be88f445509503bb6dfc5543fefba7bd4905fc581248f206f =====
+# Bitcoin Consensus Encoding
+
+Sans-IO encoding and decoding support used by the `rust-bitcoin` ecosystem for objects that have a
+consensus-specified byte encoding.
+
+## History
+
+Historically `rust-bitcoin` supported consensus encoding/decoding by way of the
+[`bitcoin::consensus`](https://docs.rs/bitcoin/0.32.0/bitcoin/consensus/) module. This code
+included the `std::io::Error` type which turned out to be the cause of a lot of pain, including
+but not restricted to, creation of the [`bitcoin_io`](https://crates.io/crates/bitcoin-io) crate.
+
+The solution was to re-write the consensus encoding/decoding logic using the sans-IO paradigm.
+
+As part of developing this crate we fuzz against the latest `bitcoin 0.32` release. If interested
+see `rust-bitcoin/fuzz/fuzz_targets/bitcoin/compare_consensus_encoding.rs`.
+
+
+===== NOTICE TEXT SHA256 950d712c518a02fcb7cff96950aee304a1cc5283361712c980ea21e8d6d669a5 =====
+Copyright (c) 2016-2025 RustCrypto Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 98181e7249d0c01737645ec982499ce99a0f07eb8f7d625b8840d799d10dbc01 =====
+Copyright (c) 2018-2025 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 9d185ac6703c4b0453974c0d85e9eee43e6941009296bb1f5eb0b54e2329e9f3 =====
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 The Fuchsia Authors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+
+===== NOTICE TEXT SHA256 a07fcacc3c60de4dc0fab10ac9d6aaba7379974e28451c99da7f7df09c25b28c =====
+Copyright (c) 2022-2025 The RustCrypto Project Developers
+Copyright (c) 2022 Artyom Pavlov
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 af59cea35d7f5e2777a713b8d155d65efa2c339eb43f3c14e868c6ac8506edad =====
+Copyright (c) 2017-2025 RustCrypto Developers
+Copyright (c) 2017 Artyom Pavlov
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 b67acfaaf787b346e1d3bf7654b4fabfd20360fdeb4351cc5e9d624147824527 =====
+Copyright (c) 2015-2026 The RustCrypto Project Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 d2e7ec5355c96eeade56b09187ceb48a6a30299da3ce7531a66d3d11405ab963 =====
+Copyright (c) 2021-2026 RustCrypto Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 efa52eb70a774b62c50cf50f5e57e2625c29d375d09b91132f4f020e47b9944e =====
+Copyright (c) 2019-2025 RustCrypto Developers
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+
+===== NOTICE TEXT SHA256 f568c41fa63e81c5634a2870a88519ba6d9f4e7da7e26c0af9f59429c73d5a53 =====
+# zakura-filters
+
+The byte codec shared by transparent activity filters and receiver-directory filters.
+It contains a Golomb-coded set writer, a bit reader, and canonical CompactSize
+integer encoding/decoding. It does not interpret scripts, addresses, transactions,
+chain identities, or publication metadata.
+
+The writer and bit operations were extracted from rust-bitcoin **0.32.102**
+(`src/bip158.rs`, CC0-1.0), whose attribution to Tamas Blummer's murmel
+implementation is retained in the source. CompactSize follows that version's
+`src/consensus/encode.rs`. SipHash is provided by the pinned `bitcoin_hashes`
+library; no hash implementation is maintained here. Tests use the exactly pinned
+Bitcoin implementation as an independent oracle.
+
+Callers must validate the full filter: bound counts and allocations, check decoded
+ranges, padding and trailing bytes, and choose the correct application keys and
+parameters. The low-level reader alone makes no claim about a filter's validity
+or completeness. Filter profiles and their wire formats remain in the consumers.
+
+
+===== NOTICE TEXT SHA256 f5a17e52ca340a01ad9694da296ea8283bf91ef63492a10f31540d5147015078 =====
+# Rust Bitcoin Internals
+
+This crate is only meant to be used internally by crates in the
+[rust-bitcoin](https://github.com/rust-bitcoin) ecosystem.
+
+This crate will never be stabilized, depend on it at your own risk.
+
+
+===== NOTICE TEXT SHA256 ff92bed461f50338dd703a9ba9aee496a425957873df1d91192776e4bdf5dda7 =====
+LICENSE:
+        This project is triple-licensed under the MIT License, the Apache
+        License, Version 2.0, and the GNU Lesser General Public License,
+        Version 2.1+.
+
+AUTHORS-MIT:
+        Permission is hereby granted, free of charge, to any person obtaining a
+        copy of this software and associated documentation files (the
+        "Software"), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, sublicense, and/or sell copies of the Software, and to
+        permit persons to whom the Software is furnished to do so, subject to
+        the following conditions:
+
+        The above copyright notice and this permission notice shall be included
+        in all copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+        OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+        IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+        CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+        TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+        SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AUTHORS-ASL:
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+                http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+AUTHORS-LGPL:
+        This program is free software; you can redistribute it and/or modify it
+        under the terms of the GNU Lesser General Public License as published
+        by the Free Software Foundation; either version 2.1 of the License, or
+        (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful, but
+        WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+        Lesser General Public License for more details.
+
+        You should have received a copy of the GNU Lesser General Public License
+        along with this program; If not, see <http://www.gnu.org/licenses/>.
+
+COPYRIGHT: (ordered alphabetically)
+        Copyright (C) 2017-2023 Red Hat, Inc.
+        Copyright (C) 2019-2023 Microsoft Corporation
+        Copyright (C) 2022-2023 David Rheinsberg
+
+AUTHORS: (ordered alphabetically)
+        Alex James <theracermaster@gmail.com>
+        Ayush Singh <ayushsingh1325@gmail.com>
+        Boris-Chengbiao Zhou <bobo1239@web.de>
+        Bret Barkelew <bret@corthon.com>
+        Christopher Zurcher <christopher.zurcher@microsoft.com>
+        David Rheinsberg <david@readahead.eu>
+        Dmitry Mostovenko <trueberserker@gmail.com>
+        Hiroki Tokunaga <tokusan441@gmail.com>
+        Joe Richey <joerichey@google.com>
+        John Schock <joschock@microsoft.com>
+        Michael Kubacki <michael.kubacki@microsoft.com>
+        Oliver Smith-Denny <osde@microsoft.com>
+        Richard Wiedenhöft <richard@wiedenhoeft.xyz>
+        Rob Bradford <robert.bradford@intel.com>, <rbradford@rivosinc.com>
+        Tom Gundersen <teg@jklm.no>
+        Trevor Gross <tmgross@umich.edu>
+

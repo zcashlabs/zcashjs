@@ -41,9 +41,12 @@ if (process.argv.includes('--node-only')) {
 const fixture = JSON.parse(await readFile(join(root, 'tests/fixtures/wallet/bundle/tests/views-fixture.json')));
 await writeFile(join(consumer, 'index.html'), '<!doctype html><meta charset="utf-8"><title>Installed wallet acceptance</title><script type="module" src="/app.js"></script>');
 await writeFile(join(consumer, 'app.js'), `
-import {createWalletClient, defineNetwork} from '@zcashlabs/zcash.js';
+import {createWalletClient, defineNetwork, encodeNetworkParameters} from '@zcashlabs/zcash.js';
 window.runWallet = async () => {
-  const network = await defineNetwork({identity:'browser-bundled',genesisHash:'03'.repeat(32),parametersFormat:'zcash-js-network/1',parameters:new TextEncoder().encode(JSON.stringify({encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100}))});
+  const schedules = [];
+  for (const nu7 of [false, true]) {
+  const schedule={encoding:'regtest',Overwinter:10,Sapling:20,Blossom:30,Heartwood:40,Canopy:50,Nu5:60,Nu6:70,Nu6_1:80,Nu6_2:90,Nu6_3:100,...(nu7?{Nu7:110}:{})};
+  const network = await defineNetwork({identity:'browser-bundled-'+nu7,genesisHash:'03'.repeat(32),...encodeNetworkParameters(schedule)});
   const name='bundled-'+crypto.randomUUID();
   const options={network,storage:{kind:'browser-opfs',name},confirmations:{trusted:1,untrusted:1,allowZeroConfirmationShielding:false},observation:{pollIntervalMs:1000,maxBufferedUpdates:16},recovery:{mode:'offline'}};
   let account,address;
@@ -57,8 +60,10 @@ window.runWallet = async () => {
         if((await wallet.getBalance({accountId:account.id})).amounts!==null)throw Error('unsynced balance');
       } finally { await wallet.close(); }
     }
-    return {persisted:true,engine:'bundled',storage:'opfs',userAgent:navigator.userAgent};
+    schedules.push({format:encodeNetworkParameters(schedule).parametersFormat,persisted:true});
   } finally {await (await navigator.storage.getDirectory()).removeEntry(name,{recursive:true});}
+  }
+  return {persisted:true,schedules,engine:'bundled',storage:'opfs',userAgent:navigator.userAgent};
 };
 `);
 if (example) {
@@ -137,6 +142,9 @@ try {
     form.querySelector('[value=accounts]').click();
   ` : 'const done=arguments[arguments.length-1]; window.runWallet().then(done,error=>done({error:String(error),stack:error.stack}));', args: [] });
   assert.equal(example ? report.wallet.opened : report.wallet.persisted, true, JSON.stringify(report.wallet));
+  if (!example) assert.deepEqual(report.wallet.schedules, [
+    { format: 'zcash-js-network/1', persisted: true }, { format: 'zcash-js-network/2', persisted: true },
+  ]);
   assert.ok(requests.some(path => /\.wasm/.test(path)), 'wallet engine was loaded');
   assert.ok(!requests.some(path => /\.params/.test(path)), 'read-only wallet must not download proving files');
   report.status = 'passed';

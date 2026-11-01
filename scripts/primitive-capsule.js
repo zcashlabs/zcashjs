@@ -74,7 +74,7 @@ export {consensusContext,decodeTransaction,openViewingAuthority,decodeViewingAdd
     await writeFile(join(output, `${profile.name}-capsule.json`), JSON.stringify({
       format: 'zcash-js-pure-codec-capsule/1', profile: profile.name,
       generatorSha256, lockSha256, nativeReceipt: sha(receiptBytes),
-      nativeRelease: nativeSource.release, nativeRevision: nativeReceipt.revision,
+      nativeRelease: nativeSource.release ?? null, nativeRevision: nativeReceipt.revision,
       inputs, modules, sha256: sha(code),
     }, null, 2) + '\n');
     await copyFile(join(root, `src/runtime/${profile.name}-capsule.d.mts`),

@@ -36,7 +36,11 @@ This repo builds the TypeScript SDK, worker and npm package. The Rust crate
 `zakura-network-bindings` and native codecs live in
 [zakura-wasm-bindings](https://github.com/jp4g/zakura-wasm-bindings), built via
 `cargo xtask build`. [native-source.json](https://github.com/zcashlabs/zcashjs/blob/main/scripts/native-source.json)
-selects its release tag. Build receipts retain the resolved commit; the toolchain,
+selects either a release tag (`release`) or an exact 40-character Git commit
+(`revision`), never both. Branch names and abbreviated commits are rejected.
+The NU7 draft pins a public commit of the companion native review branch; it is
+not an upstream release. Maintainers must approve that dependency before merging.
+Build receipts retain the resolved commit; the toolchain,
 lockfiles and tool hashes pin the build inputs.
 
 Sapling parameters come from `https://download.z.cash/downloads/`, checked against
@@ -50,7 +54,7 @@ Run one build at a time per checkout. Remove the relevant cache and retry:
 | Problem | Remove |
 | --- | --- |
 | Rebuild native output | `.cache/native/<revision>/sdk/` |
-| Interrupted source fetch | `.cache/native/<release>/` |
+| Interrupted source fetch | `.cache/native/<release-or-revision>/source/` |
 | Checksum mismatch | The cached file named in the error |
 | Reset all SDK build caches | `.cache/native/`, `.cache/proving/`, `dist/` |
 

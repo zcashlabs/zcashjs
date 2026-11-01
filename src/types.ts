@@ -38,6 +38,8 @@ export interface NetworkParameters {
   readonly Nu6_1: number | null;
   readonly Nu6_2: number | null;
   readonly Nu6_3: number | null;
+  /** Omit for a legacy version-1 schedule; null explicitly disables NU7 in version 2. */
+  readonly Nu7?: number | null;
 }
 export interface NetworkDefinition {
   readonly identity: string;
