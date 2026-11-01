@@ -194,7 +194,7 @@ test('local validation, pre-abort and stalled metadata never dispatch', async ()
 
 test('browser condition excludes native entry and root dependency graph stays browser safe', async () => {
   const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url)));
-  assert.equal(pkg.dependencies['@grpc/grpc-js'], '1.14.4');
+  assert.equal(pkg.dependencies['@grpc/grpc-js'], '1.14.7');
   assert.equal(pkg.exports['./grpc-node'].default, undefined);
   assert.equal(pkg.exports['./grpc-node'].import, undefined);
   // Resolve with browser conditions and without Node conditions using installed Vite.

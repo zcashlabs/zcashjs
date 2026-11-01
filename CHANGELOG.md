@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.2
+
+- Add explicit `Nu7` custom network schedules using `zcash-js-network/2`,
+  preserving version-1 bytes when `Nu7` is omitted (#23).
+- Add regression coverage for legacy wallet/payment database reopen and browser
+  OPFS persistence with both schedule formats. Changing an existing wallet's
+  schedule still requires a new database; automatic schedule migration is not provided.
+- Add THS NU7 Regtest checks for Ironwood/Sapling spending and saved-birthday
+  recovery. Full-history recovery remains unqualified; the SDK remains experimental.
+- Target native `zakura-wasm-bindings` v0.1.1 from `jp4g/zakura-wasm-bindings`.
+- Update `@grpc/grpc-js` to 1.14.7 for GHSA-m9gg-hp2v-232j.
+
 ## 0.1.1
 
 - Pin Node to 22.23.4 for the Brotli security update.
