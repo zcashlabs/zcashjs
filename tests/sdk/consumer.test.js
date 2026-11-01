@@ -69,7 +69,7 @@ test('packed release imports and typechecks in an isolated Node consumer', async
   assert.equal(manifest.version, lock.packages[''].version);
   assert.equal(manifest.version, JSON.parse(await readFile(join(repository, 'examples/testnet/package.json'), 'utf8')).dependencies[manifest.name]);
   assert.deepEqual(manifest.publishConfig, { access: 'public', tag: 'latest', registry: 'https://registry.npmjs.org/' });
-  assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.4' });
+  assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.7' });
   for (const hook of ['preinstall', 'install', 'postinstall']) assert.equal(manifest.scripts[hook], undefined);
   const assetPrefix = 'dist/src/runtime/assets/';
   const inventory = JSON.parse(await readFile(join(installed, assetPrefix, 'inventory.json'), 'utf8'));
