@@ -95,6 +95,9 @@ test('packed release imports and typechecks in an isolated Node consumer', async
     const sdk = await import('@zcashlabs/zcash.js');
     const native = await import('@zcashlabs/zcash.js/grpc-node');
     assert.deepEqual(Object.keys(native), ['createGrpcNodeTransport']);
+    const testing = await import('@zcashlabs/zcash.js/testing');
+    assert.deepEqual(Object.keys(testing), ['createTestTHSClient']);
+    assert.throws(() => testing.createTestTHSClient().config(), /ready/i);
     assert.equal(native.createGrpcNodeTransport('http://127.0.0.1:1', { sourceId: 'fixture', timeoutMs: 10 }).kind, 'custom-lightwallet');
     assert.equal(sdk.parseZec('9007199254740993.00000001'), 900719925474099300000001n);
     sdk.httpTransport('https://synthetic.invalid', { sourceId: 'fixture', timeoutMs: 10, readRetry: { attempts: 1, delayMs: 0 }, maxResponseBytes: 256 });
@@ -233,16 +236,27 @@ test('packed release imports and typechecks in an isolated Node consumer', async
   await writeFile(join(consumer, 'native.ts'), `
     import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node';
     import type { GrpcNodeOptions } from '@zcashlabs/zcash.js/grpc-node';
+    import { createTestTHSClient } from '@zcashlabs/zcash.js/testing';
+    import type { TestTHSClient, TestTHSConfig } from '@zcashlabs/zcash.js/testing';
+    const ths: TestTHSClient = createTestTHSClient({ timeoutMs: 1000 });
+    const ready: Promise<TestTHSConfig> = ths.start();
+    ths.produceBlock(1); ths.reorg(1, { keepTransactions: true }); ths.rollback(1); ths.stop();
+    // @ts-expect-error Counts must be numbers.
+    ths.produceBlock('1');
     const options: GrpcNodeOptions = { sourceId: 'fixture', timeoutMs: 10 };
     const transport = createGrpcNodeTransport('http://127.0.0.1:1', options);
     const result: Promise<Uint8Array> = transport.unary({ method: 'GetLatestBlock', request: new Uint8Array() });
     // @ts-expect-error Unary methods exclude streaming RPCs.
     transport.unary({ method: 'GetBlockRange', request: new Uint8Array() });
+    // @ts-expect-error Testing helper is absent from the root API.
+    import { createTestTHSClient as rootTesting } from '@zcashlabs/zcash.js';
     // @ts-expect-error Native transport is absent from the root API.
     import { createGrpcNodeTransport as rootNative } from '@zcashlabs/zcash.js';
   `);
   await exec(process.execPath, [resolve('node_modules/typescript/bin/tsc'), '--ignoreConfig', '--noEmit', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', join(consumer, 'native.ts')]);
   await writeFile(join(consumer, 'native.ts'), `
+    // @ts-expect-error Node-only testing subpath is unavailable to browser bundlers.
+    import { createTestTHSClient } from '@zcashlabs/zcash.js/testing';
     // @ts-expect-error Node-only subpath is unavailable to browser bundlers.
     import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node';
   `);

@@ -21,6 +21,8 @@ Use the chapter links for examples. The [package entry point](https://github.com
 
 `@zcashlabs/zcash.js/grpc-node` additionally exports `createGrpcNodeTransport` for explicit Node byte-transport use.
 
+`@zcashlabs/zcash.js/testing` exports the Node-only `createTestTHSClient` helper. See [Native Regtest tests](testing.md).
+
 ## Wallet methods
 
 | Group | Methods | Effect |

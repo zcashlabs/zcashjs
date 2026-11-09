@@ -18,5 +18,6 @@
 - [Wallet walkthrough](walkthrough.md)
 - [Platforms and limits](platforms.md)
 - [API reference](reference.md)
+- [Native Regtest tests](testing.md)
 - [Build from source](building-locally.md)
 - [Maintain and publish](gitbook.md)

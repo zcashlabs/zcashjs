@@ -61,6 +61,12 @@
         "types": "./dist/src/clients/grpc-node.d.ts",
         "import": "./dist/src/clients/grpc-node.js"
       }
+    },
+    "./testing": {
+      "node": {
+        "types": "./dist/src/testing.d.ts",
+        "import": "./dist/src/testing.js"
+      }
     }
   },
   "types": "./dist/src/index.d.ts",
