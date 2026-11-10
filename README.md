@@ -43,6 +43,12 @@ later builds reuse cached native components and proving parameters.
 Run `npm run check` for lint, build and tests, or `npm pack` for a local tarball.
 See [tests/README.md](https://github.com/zcashlabs/zcashjs/blob/main/tests/README.md) for additional checks.
 
+For application tests against a local Regtest chain, the Node-only
+`@zcashlabs/zcash.js/testing` entry provides isolated THS startup and cleanup,
+wallet funding, mining, reorgs, rollback, and RPC access. See
+[Native Regtest tests](https://zcashlabs.github.io/zcashjs/api/testing.html) for setup and usage. It requires a
+native-capable THS installation and a matching runtime bundle.
+
 ## Documentation
 
 ```sh

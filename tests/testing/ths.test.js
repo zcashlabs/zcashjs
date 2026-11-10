@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { build } from 'vite';
 import { readFile } from 'node:fs/promises';
 import { createTestTHSClient } from '@zcashlabs/zcash.js/testing';
+import * as testing from '@zcashlabs/zcash.js/testing';
 const executable = new URL('./ths-fixture.mjs', import.meta.url).pathname;
 const client = runtimeDir => createTestTHSClient({ executable, runtimeDir, timeoutMs: 2000 });
 
@@ -130,3 +131,190 @@ test('startup cancellation with native code 1 waits for cleanup and preserves th
   await assert.rejects(ths.stop(), /failure logs retained.*|interrupted/);
   assert.ok(Date.now() - began >= 140); await rejected; await ths.stop();
 });
+
+test('test scope returns the callback result and closes its sandbox', async () => {
+  let endpoint;
+  const result = await testing.withTestTHS(async ths => {
+    endpoint = ths.config().dashboard;
+    await ths.produceBlock(2);
+    return 42;
+  }, { executable, runtimeDir: 'normal', timeoutMs: 2000 });
+  assert.equal(result, 42);
+  await assert.rejects(fetch(endpoint));
+});
+
+test('test scope preserves an assertion failure and still closes the sandbox', async () => {
+  const failure = new Error('application assertion failed');
+  let endpoint;
+  await assert.rejects(testing.withTestTHS(ths => {
+    endpoint = ths.config().dashboard;
+    throw failure;
+  }, { executable, runtimeDir: 'normal', timeoutMs: 2000 }), error => error === failure);
+  await assert.rejects(fetch(endpoint));
+});
+
+test('test scope reports both the test failure and unexpected launcher failure', async () => {
+  const failure = new Error('application assertion failed');
+  await assert.rejects(testing.withTestTHS(async () => {
+    await delay(400);
+    throw failure;
+  }, { executable, runtimeDir: 'late-exit', timeoutMs: 2000 }), error => {
+    assert.ok(error instanceof AggregateError);
+    assert.equal(error.errors[0], failure);
+    assert.match(error.errors[1].message, /9|late service failure/);
+    return true;
+  });
+});
+
+test('test scope never invokes the application when startup fails', async () => {
+  let invoked = false;
+  await assert.rejects(testing.withTestTHS(() => { invoked = true; },
+    { executable, runtimeDir: 'genesis', timeoutMs: 2000 }), /genesis/i);
+  assert.equal(invoked, false);
+});
+
+test('concurrent test scopes have separate instances and clean up independently', async () => {
+  let other;
+  await testing.withTestTHS(async outer => {
+    const own = outer.config();
+    await testing.withTestTHS(inner => {
+      other = inner.config();
+      assert.notEqual(other.instance, own.instance);
+      assert.notEqual(other.dashboard, own.dashboard);
+    }, { executable, runtimeDir: 'normal', timeoutMs: 2000 });
+    await assert.rejects(fetch(other.dashboard));
+    assert.equal(await outer.rpc('getblockcount'), 200);
+  }, { executable, runtimeDir: 'normal', timeoutMs: 2000 });
+});
+
+test('a successful callback cannot hide a launcher cleanup failure', async () => {
+  await assert.rejects(testing.withTestTHS(async () => {
+    await delay(400); return 42;
+  }, { executable, runtimeDir: 'late-exit', timeoutMs: 2000 }), /9|late service failure/);
+});
+
+test('test cancellation closes the sandbox even while application code is waiting', async () => {
+  const controller = new AbortController();
+  const failure = new Error('application test cancelled');
+  let ready, resume, endpoint;
+  const entered = new Promise(resolve => { ready = resolve; });
+  const blocked = new Promise(resolve => { resume = resolve; });
+  const finished = testing.withTestTHS(async ths => {
+    endpoint = ths.config().dashboard; ready(); await blocked;
+  }, { executable, runtimeDir: 'normal', timeoutMs: 2000, signal: controller.signal })
+    .then(() => undefined, error => error);
+  await entered; controller.abort(failure);
+  try {
+    const error = await Promise.race([finished, delay(1000).then(() => new Error('cancellation did not finish'))]);
+    assert.equal(error, failure);
+    await assert.rejects(fetch(endpoint));
+  } finally { resume(); await finished; }
+});
+
+test('an already cancelled scope never starts a launcher or calls the application', async () => {
+  const failure = new Error('test already cancelled');
+  let called = false;
+  await assert.rejects(testing.withTestTHS(() => { called = true; },
+    { executable: '/nonexistent/ths', signal: AbortSignal.abort(failure) }), error => error === failure);
+  assert.equal(called, false);
+});
+
+test('cancellation during startup waits for launcher cleanup without calling the application', async () => {
+  const controller = new AbortController();
+  const failure = new Error('startup cancelled by the test');
+  let called = false;
+  const running = testing.withTestTHS(() => { called = true; },
+    { executable, runtimeDir: 'slow', timeoutMs: 2000, signal: controller.signal });
+  const rejected = assert.rejects(running, error => error === failure);
+  await delay(200); controller.abort(failure); await rejected;
+  assert.equal(called, false);
+});
+
+test('RPC and wait handles expose chain changes without mining extra blocks', async t => {
+  const ths = client('normal'); t.after(() => ths.stop()); await ths.start();
+  assert.equal(await ths.rpc('getblockcount'), 200);
+  assert.equal(await ths.rpc('generate', [3]), 203);
+  await ths.waitUntilSettled();
+  const details = await (await fetch(`${ths.config().dashboard}/fixture`)).json();
+  assert.equal(details.height, 203);
+  assert.ok(details.pending < 0);
+  assert.deepEqual(details.calls, [['rpc', 'getblockcount', []], ['rpc', 'generate', [3]]]);
+  for (const method of ['', ' ', 1, null]) await assert.rejects(ths.rpc(method));
+  await assert.rejects(ths.rpc('generate', {}));
+  await assert.rejects(ths.rpc('fail'), /fixture RPC rejected/);
+  await assert.rejects(ths.rpc('bad-id'), /RPC/i);
+  await assert.rejects(ths.rpc('missing-result'), /RPC/i);
+  await fetch(`${ths.config().dashboard}/fixture`, { method: 'POST' });
+  await assert.rejects(ths.rpc('generate', [1]), /identity/i);
+  assert.equal((await (await fetch(`${ths.config().dashboard}/fixture`)).json()).height, 203);
+});
+
+test('RPC timeout is bounded and stop cancels an in-flight request', async () => {
+  const ths = createTestTHSClient({ executable, runtimeDir: 'normal', timeoutMs: 500 });
+  try {
+    await ths.start();
+    await assert.rejects(ths.rpc('hang'), /timeout|aborted/i);
+    const rejected = assert.rejects(ths.rpc('hang'), /cancel|aborted|fetch/i);
+    await delay(30); await ths.stop(); await rejected;
+  } finally { await ths.stop(); }
+});
+
+test('RPC captures parameters before asynchronous identity checks', async t => {
+  const ths = client('normal'); t.after(() => ths.stop()); await ths.start();
+  const params = [2];
+  const mining = ths.rpc('generate', params);
+  params[0] = 100;
+  assert.equal(await mining, 202);
+});
+
+test('funding waits for broadcast, preserves exact amounts and keys, and leaves mining to the test', async t => {
+  const ths = client('normal'); t.after(() => ths.stop()); await ths.start();
+  const options = { idempotencyKey: 'funding-replay/&?key' };
+  const funded = await ths.fundAddress('regtest-fixture-address', 1_000_000n, options);
+  assert.deepEqual(funded, { address: 'regtest-fixture-address', amountZatoshi: 1_000_000n,
+    idempotencyKey: options.idempotencyKey, txid: 'ab'.repeat(32), status: 'broadcast' });
+  assert.deepEqual(await ths.fundAddress('regtest-fixture-address', 1_000_000n, options), funded);
+  const details = await (await fetch(`${ths.config().dashboard}/fixture`)).json();
+  assert.equal(details.funded, 1_000_000);
+  assert.equal(details.height, 200);
+  assert.equal(details.calls.length, 2);
+  await assert.rejects(ths.fundAddress('regtest-fixture-address', 2_000_000n, options), /409/);
+  await fetch(`${ths.config().dashboard}/fixture`, { method: 'POST' });
+  await assert.rejects(ths.fundAddress('regtest-fixture-address', 1n), /identity/i);
+});
+
+test('funding validates arguments before sending a payment', async t => {
+  const ths = client('normal'); t.after(() => ths.stop()); await ths.start();
+  for (const amount of [0n, -1n, 500_000_001n, 1, 1.5, '1']) {
+    await assert.rejects(ths.fundAddress('regtest-fixture-address', amount));
+  }
+  for (const key of ['', 'short', 'x'.repeat(129), 'spaces are not allowed', 'é'.repeat(8)]) {
+    await assert.rejects(ths.fundAddress('regtest-fixture-address', 1n, { idempotencyKey: key }));
+  }
+  for (const address of ['', ' ', null]) await assert.rejects(ths.fundAddress(address, 1n));
+  assert.deepEqual((await (await fetch(`${ths.config().dashboard}/fixture`)).json()).calls, []);
+});
+
+test('explicit funding retry after a lost response reuses the original payment', async t => {
+  const ths = client('lost-funding-response'); t.after(() => ths.stop()); await ths.start();
+  const options = { idempotencyKey: 'lost-response-retry' };
+  await assert.rejects(ths.fundAddress('regtest-fixture-address', 1_000_000n, options), /lost-response-retry/);
+  const funded = await ths.fundAddress('regtest-fixture-address', 1_000_000n, options);
+  assert.equal(funded.txid, 'ab'.repeat(32));
+  assert.equal((await (await fetch(`${ths.config().dashboard}/fixture`)).json()).funded, 1_000_000);
+});
+
+for (const [mode, expected] of [['failed-funding', /fixture funding rejected/], ['wrong-funding', /funding response/i],
+  ['bad-funding-txid', /funding response/i], ['hang-funding', /timeout|aborted/i], ['lost-funding-response', /fetch/i]]) {
+  test(`funding failure remains observable with a retry key: ${mode}`, async t => {
+    const ths = createTestTHSClient({ executable, runtimeDir: mode, timeoutMs: 500 });
+    t.after(() => ths.stop()); await ths.start();
+    await assert.rejects(ths.fundAddress('regtest-fixture-address', 1_000_000n), error => {
+      assert.match(error.message, expected);
+      assert.match(error.message, /idempotency key [a-f0-9-]{36}/);
+      return true;
+    });
+    const details = await (await fetch(`${ths.config().dashboard}/fixture`)).json();
+    assert.equal(details.calls.length, 1, 'ambiguous payments must not be submitted again automatically');
+  });
+}

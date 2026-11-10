@@ -21,6 +21,13 @@ export interface TestTHSConfig {
   readonly tls: false;
   readonly genesisHash: string;
 }
+export interface TestTHSFunding {
+  readonly address: string;
+  readonly amountZatoshi: bigint;
+  readonly idempotencyKey: string;
+  readonly txid: string;
+  readonly status: 'broadcast' | 'confirmed';
+}
 export interface TestTHSClient {
   /** Starts a fresh isolated native instance; concurrent calls share the same result. */
   start(): Promise<TestTHSConfig>;
@@ -28,6 +35,12 @@ export interface TestTHSClient {
   produceBlock(count: number): Promise<void>;
   reorg(depth: number, options?: { readonly keepTransactions?: boolean }): Promise<void>;
   rollback(depth: number): Promise<void>;
+  /** Sends one treasury payment; confirmations remain under the test's control. */
+  fundAddress(address: string, amountZatoshi: bigint,
+    options?: { readonly idempotencyKey?: string }): Promise<TestTHSFunding>;
+  /** Direct node RPC. Mutations are not retried and do not automatically wait for wallet sync. */
+  rpc(method: string, params?: readonly unknown[]): Promise<unknown>;
+  waitUntilSettled(): Promise<void>;
   /** Cancels startup/requests and waits for the launcher's owned-resource cleanup. */
   stop(): Promise<void>;
 }
@@ -125,6 +138,18 @@ export function createTestTHSClient(options: TestTHSOptions = {}): TestTHSClient
   }
   async function settle(current: Run, dashboard: string, instance: string, signal: AbortSignal): Promise<void> {
     while (!await status(current, dashboard, instance, signal)) await delay(100, undefined, { signal });
+  }
+  async function nodeRpc(current: Run, url: string, signal: AbortSignal,
+    method: string, params: readonly unknown[]): Promise<unknown> {
+    const id = randomUUID();
+    const response = object(await request(current, url, signal, { jsonrpc: '2.0', id, method, params }));
+    if (response.id !== id) throw Error('THS RPC response ID mismatch.');
+    if (response.error != null) {
+      const error = object(response.error);
+      throw Error(`THS RPC failed (${String(error.code)}): ${String(error.message)}`);
+    }
+    if (!Object.hasOwn(response, 'result')) throw Error('THS RPC response omitted its result.');
+    return response.result;
   }
   function cleanup(current: Run): Promise<void> {
     if (current.cleanup) return current.cleanup;
@@ -234,16 +259,10 @@ export function createTestTHSClient(options: TestTHSOptions = {}): TestTHSClient
         });
         const values = endpoints(data);
         await settle(current, values.dashboard, instance, signal);
-        const rpc = async (method: string, params: unknown[]) => {
-          const response = object(await request(current, values.rpc, signal,
-            { jsonrpc: '2.0', id: instance, method, params }));
-          if (response.error || response.id !== instance) throw Error('THS RPC failed.');
-          return response.result;
-        };
         // Zakura names Regtest 'test' in JSON-RPC; the exact genesis below distinguishes it from Testnet.
-        const chain = object(await rpc('getblockchaininfo', [])).chain;
+        const chain = object(await nodeRpc(current, values.rpc, signal, 'getblockchaininfo', [])).chain;
         if (chain !== 'test' && chain !== 'regtest') throw Error('THS RPC is not Regtest.');
-        const genesisHash = await rpc('getblockhash', [0]);
+        const genesisHash = await nodeRpc(current, values.rpc, signal, 'getblockhash', [0]);
         if (genesisHash !== '029f11d80ef9765602235e1bc9727e3eb6ba20839319f761fee920d63401e327') {
           throw Error('Invalid THS Regtest genesis hash.');
         }
@@ -289,6 +308,60 @@ export function createTestTHSClient(options: TestTHSOptions = {}): TestTHSClient
       integer(depth, 1000);
       await mutate('rollback', { depth });
     },
+    async fundAddress(address, amountZatoshi, options = {}) {
+      if (typeof address !== 'string' || !address.trim()) throw Error('A Regtest address is required.');
+      if (typeof amountZatoshi !== 'bigint' || amountZatoshi < 1n || amountZatoshi > 500_000_000n) {
+        throw Error('Funding requires a bigint amount from 1 to 500000000 zatoshi (5 ZEC).');
+      }
+      const { idempotencyKey = randomUUID() } = options;
+      if (typeof idempotencyKey !== 'string' || !/^[!-~]{8,128}$/.test(idempotencyKey)) {
+        throw Error('Funding idempotency keys must contain 8-128 visible ASCII characters.');
+      }
+      const values = config();
+      const current = run!;
+      const signal = AbortSignal.any([current.abort.signal, AbortSignal.timeout(timeoutMs)]);
+      try {
+        await settle(current, values.dashboard, values.instance, signal);
+        const url = `${values.dashboard}/api/v1/faucet/address`;
+        let payment = await request(current, url, signal,
+          { address, amount_zatoshi: Number(amountZatoshi), idempotency_key: idempotencyKey });
+        while (true) {
+          const data = object(payment);
+          if (data.address !== address || data.amount_zatoshi !== Number(amountZatoshi)
+            || typeof data.status !== 'string') throw Error('Invalid THS funding response.');
+          if (data.status === 'failed') throw Error(`THS funding failed: ${String(data.last_error)}`);
+          if (data.status === 'broadcast' || data.status === 'confirmed') {
+            if (typeof data.txid !== 'string' || !/^[a-f0-9]{64}$/.test(data.txid)) {
+              throw Error('Invalid THS funding response transaction ID.');
+            }
+            await status(current, values.dashboard, values.instance, signal);
+            return { address, amountZatoshi, idempotencyKey, txid: data.txid, status: data.status };
+          }
+          await delay(100, undefined, { signal });
+          await status(current, values.dashboard, values.instance, signal);
+          payment = await request(current, `${url}?idempotency_key=${encodeURIComponent(idempotencyKey)}`, signal);
+        }
+      } catch (error) {
+        throw Error(`THS funding failed (idempotency key ${idempotencyKey}): ${String(error)}`, { cause: error });
+      }
+    },
+    async rpc(method, params = []) {
+      if (typeof method !== 'string' || !method.trim() || !Array.isArray(params)) {
+        throw Error('THS RPC requires a method name and an array of parameters.');
+      }
+      const parameters = structuredClone(params);
+      const values = config();
+      const current = run!;
+      const signal = AbortSignal.any([current.abort.signal, AbortSignal.timeout(timeoutMs)]);
+      await status(current, values.dashboard, values.instance, signal);
+      return nodeRpc(current, values.rpc, signal, method, parameters);
+    },
+    async waitUntilSettled() {
+      const values = config();
+      const current = run!;
+      const signal = AbortSignal.any([current.abort.signal, AbortSignal.timeout(timeoutMs)]);
+      await settle(current, values.dashboard, values.instance, signal);
+    },
     async stop() {
       const current = run;
       if (!current) return;
@@ -299,4 +372,41 @@ export function createTestTHSClient(options: TestTHSOptions = {}): TestTHSClient
       }
     },
   };
+}
+
+/** Runs a test callback in a fresh native sandbox and awaits cleanup, including when the callback throws. */
+export async function withTestTHS<T>(callback: (ths: TestTHSClient) => T | Promise<T>,
+  options: TestTHSOptions & { readonly signal?: AbortSignal } = {}): Promise<T> {
+  const { signal, ...clientOptions } = options;
+  signal?.throwIfAborted();
+  const ths = createTestTHSClient(clientOptions);
+  let onAbort: (() => void) | undefined;
+  const cancelled = signal && new Promise<never>((_, reject) => {
+    onAbort = () => reject(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+  let result: { value: T } | { error: unknown };
+  try {
+    const work = (async () => {
+      await ths.start();
+      signal?.throwIfAborted();
+      return callback(ths);
+    })();
+    // Cancellation must reach cleanup even when application code ignores the signal.
+    result = { value: await (cancelled ? Promise.race([work, cancelled]) : work) };
+  } catch (error) {
+    result = { error };
+  } finally {
+    if (onAbort) signal?.removeEventListener('abort', onAbort);
+  }
+  try {
+    await ths.stop();
+  } catch (error) {
+    if ('error' in result) {
+      throw new AggregateError([result.error, error], 'Test and THS cleanup both failed.', { cause: error });
+    }
+    throw error;
+  }
+  if ('error' in result) throw result.error;
+  return result.value;
 }

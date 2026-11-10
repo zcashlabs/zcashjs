@@ -96,7 +96,7 @@ test('packed release imports and typechecks in an isolated Node consumer', async
     const native = await import('@zcashlabs/zcash.js/grpc-node');
     assert.deepEqual(Object.keys(native), ['createGrpcNodeTransport']);
     const testing = await import('@zcashlabs/zcash.js/testing');
-    assert.deepEqual(Object.keys(testing), ['createTestTHSClient']);
+    assert.deepEqual(Object.keys(testing), ['createTestTHSClient', 'withTestTHS']);
     assert.throws(() => testing.createTestTHSClient().config(), /ready/i);
     assert.equal(native.createGrpcNodeTransport('http://127.0.0.1:1', { sourceId: 'fixture', timeoutMs: 10 }).kind, 'custom-lightwallet');
     assert.equal(sdk.parseZec('9007199254740993.00000001'), 900719925474099300000001n);
@@ -236,11 +236,20 @@ test('packed release imports and typechecks in an isolated Node consumer', async
   await writeFile(join(consumer, 'native.ts'), `
     import { createGrpcNodeTransport } from '@zcashlabs/zcash.js/grpc-node';
     import type { GrpcNodeOptions } from '@zcashlabs/zcash.js/grpc-node';
-    import { createTestTHSClient } from '@zcashlabs/zcash.js/testing';
-    import type { TestTHSClient, TestTHSConfig } from '@zcashlabs/zcash.js/testing';
+    import { createTestTHSClient, withTestTHS } from '@zcashlabs/zcash.js/testing';
+    import type { TestTHSClient, TestTHSConfig, TestTHSFunding } from '@zcashlabs/zcash.js/testing';
     const ths: TestTHSClient = createTestTHSClient({ timeoutMs: 1000 });
     const ready: Promise<TestTHSConfig> = ths.start();
     ths.produceBlock(1); ths.reorg(1, { keepTransactions: true }); ths.rollback(1); ths.stop();
+    const funding: Promise<TestTHSFunding> = ths.fundAddress('regtest-address', 1000n, { idempotencyKey: 'fund-once' });
+    const rpc: Promise<unknown> = ths.rpc('getblockcount');
+    const settled: Promise<void> = ths.waitUntilSettled();
+    const scoped: Promise<number> = withTestTHS(async sandbox => { await sandbox.produceBlock(1); return 42; },
+      { signal: new AbortController().signal });
+    // @ts-expect-error Amounts use bigint zatoshi.
+    ths.fundAddress('regtest-address', 1000);
+    // @ts-expect-error RPC parameters must be an array.
+    ths.rpc('generate', { blocks: 1 });
     // @ts-expect-error Counts must be numbers.
     ths.produceBlock('1');
     const options: GrpcNodeOptions = { sourceId: 'fixture', timeoutMs: 10 };
