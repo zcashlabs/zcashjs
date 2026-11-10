@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { createServer } from 'node:http';
+import { writeFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 const value = flag => args[args.indexOf(flag) + 1];
-const mode = value('--runtime-dir');
+const runtimeDir = value('--runtime-dir');
+const { mode, startupMarker } = runtimeDir.startsWith('{') ? JSON.parse(runtimeDir) : { mode: runtimeDir };
 const instance = value('--name');
 if (mode === 'exit') { console.error('fixture service failed'); process.exit(7); }
 const calls = [];
@@ -85,9 +87,10 @@ server.listen(0, '127.0.0.1', () => {
   if (mode === 'credentials') endpoints.dashboard = `http://user:pass@127.0.0.1:${port}`;
   if (mode === 'bad-p2p') endpoints.p2p = '0.0.0.0:1234';
   if (mode === 'no-output') return;
+  // Signal that cancellation is safe without declaring startup complete.
+  if (startupMarker) { writeFileSync(startupMarker, 'ready'); return; }
   const data = JSON.stringify(endpoints) + '\n';
   if (mode === 'split') { process.stdout.write(data.slice(0, 30)); setTimeout(() => process.stdout.write(data.slice(30)), 30); }
-  else if (['slow', 'cancel-error'].includes(mode)) setTimeout(() => process.stdout.write(data), 1000);
   else if (mode === 'output-exit') { process.stdout.write(data, () => process.exit(6)); }
   else process.stdout.write(data);
   if (mode === 'late-term-exit') setTimeout(() => process.exit(143), 250);

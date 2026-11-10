@@ -3,11 +3,31 @@ import test from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { spawnSync } from 'node:child_process';
 import { build } from 'vite';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createTestTHSClient } from '@zcashlabs/zcash.js/testing';
 import * as testing from '@zcashlabs/zcash.js/testing';
 const executable = new URL('./ths-fixture.mjs', import.meta.url).pathname;
 const client = runtimeDir => createTestTHSClient({ executable, runtimeDir, timeoutMs: 2000 });
+
+async function startupFixture(t, mode) {
+  const directory = await mkdtemp(join(tmpdir(), 'ths-startup-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const startupMarker = join(directory, 'started');
+  return {
+    options: { executable, runtimeDir: JSON.stringify({ mode, startupMarker }), timeoutMs: 5000 },
+    async wait() {
+      const deadline = Date.now() + 5000;
+      while (true) {
+        try { await readFile(startupMarker); return; }
+        catch (error) { if (error.code !== 'ENOENT') throw error; }
+        assert.ok(Date.now() < deadline, 'fixture did not install its shutdown handler');
+        await delay(10);
+      }
+    },
+  };
+}
 
 test('coalesces start, parses split JSON, exposes frozen config, stops repeatedly and restarts fresh', async t => {
   const ths = client('split'); t.after(() => ths.stop());
@@ -46,11 +66,12 @@ test('validates parameters before mutation, sends exact payloads and waits for s
   await assert.rejects(ths.produceBlock(1), /identity/i);
   assert.equal((await (await fetch(`${ths.config().dashboard}/fixture`)).json()).calls.length, 4);
 });
-test('stop cancels startup and awaits process cleanup', async () => {
-  const ths = client('slow');
+test('stop cancels startup and awaits process cleanup', async t => {
+  const fixture = await startupFixture(t, 'slow');
+  const ths = createTestTHSClient(fixture.options); t.after(() => ths.stop());
   const starting = ths.start();
   const rejected = assert.rejects(starting);
-  await delay(200); await Promise.all([ths.stop(), ths.stop()]); await rejected; await ths.stop();
+  await fixture.wait(); await Promise.all([ths.stop(), ths.stop()]); await rejected; await ths.stop();
 });
 for (const runtimeDir of ['no-output', 'hang-http', 'unsettled']) {
   test(`bounds startup timeout: ${runtimeDir}`, async () => {
@@ -124,10 +145,11 @@ test('unrequested exit 143 remains a service failure', async () => {
   await assert.rejects(ths.stop(), /143/); await ths.stop();
 });
 
-test('startup cancellation with native code 1 waits for cleanup and preserves the failure diagnostic', async () => {
-  const ths = client('cancel-error'); const starting = ths.start();
+test('startup cancellation with native code 1 waits for cleanup and preserves the failure diagnostic', async t => {
+  const fixture = await startupFixture(t, 'cancel-error');
+  const ths = createTestTHSClient(fixture.options); const starting = ths.start();
   const rejected = assert.rejects(starting, /failure logs retained.*|interrupted/);
-  await delay(200); const began = Date.now();
+  await fixture.wait(); const began = Date.now();
   await assert.rejects(ths.stop(), /failure logs retained.*|interrupted/);
   assert.ok(Date.now() - began >= 140); await rejected; await ths.stop();
 });
@@ -219,14 +241,15 @@ test('an already cancelled scope never starts a launcher or calls the applicatio
   assert.equal(called, false);
 });
 
-test('cancellation during startup waits for launcher cleanup without calling the application', async () => {
+test('cancellation during startup waits for launcher cleanup without calling the application', async t => {
+  const fixture = await startupFixture(t, 'slow');
   const controller = new AbortController();
   const failure = new Error('startup cancelled by the test');
   let called = false;
   const running = testing.withTestTHS(() => { called = true; },
-    { executable, runtimeDir: 'slow', timeoutMs: 2000, signal: controller.signal });
+    { ...fixture.options, signal: controller.signal });
   const rejected = assert.rejects(running, error => error === failure);
-  await delay(200); controller.abort(failure); await rejected;
+  await fixture.wait(); controller.abort(failure); await rejected;
   assert.equal(called, false);
 });
 
