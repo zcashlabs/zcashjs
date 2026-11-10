@@ -26,7 +26,8 @@ try {
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     strict: true, noEmit: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
     skipLibCheck: true,
-    paths: { '@zcashlabs/zcash.js': [resolve(root, 'src/index.ts')] },
+    paths: { '@zcashlabs/zcash.js': [resolve(root, 'src/index.ts')],
+      '@zcashlabs/zcash.js/testing': [resolve(root, 'src/testing.ts')] },
   });
   const diagnostics = ts.getPreEmitDiagnostics(program);
   if (diagnostics.length) {
