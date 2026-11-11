@@ -17,16 +17,16 @@ export async function observationChecks({ readLightdInfo, createGrpcWebByteTrans
   equal([...codec.encodeRequest('GetLightdInfo', '{}')], []);
   equal(codec.decodeResponse('GetLightdInfo', bytes(golden.hex)), golden.dto);
   claims.push('actual-codec-empty-request-and-unchanged-golden');
-  for (const mode of ['main', 'zero', 'maximum', 'unknown', 'fragmented']) {
+  for (const mode of ['main', 'zero', 'maximum', 'unknown', 'fragmented', 'protocol-v060']) {
     const dto = (vectors[mode] ?? vectors.main).dto;
     const before = Date.now();
     const result = await readLightdInfo(source(mode));
     const { observedAt, ...rest } = result;
-    equal(rest, { version: dto.version, vendor: dto.vendor, protocolRevision: 'v0.5.0', sourceId: 'local label', chainName: dto.chain_name,
+    equal(rest, { version: dto.version, vendor: dto.vendor, protocolRevision: dto.lightwallet_protocol_version, sourceId: 'local label', chainName: dto.chain_name,
       saplingActivationHeight: Number(dto.sapling_activation_height), branchId: dto.consensus_branch_id, blockHeight: Number(dto.block_height), taddrSupport: dto.taddr_support });
     if (new Date(observedAt).toISOString() !== observedAt || Date.parse(observedAt) < before || Date.parse(observedAt) > Date.now()) throw Error('timestamp');
   }
-  claims.push('exact-unbound-projection-zero-max-unknown-fragmented');
+  claims.push('exact-unbound-projection-zero-max-unknown-fragmented-v060');
   for (const mode of ['default', 'golden', 'height-overflow', 'sapling-overflow', 'uint64-max', 'protocol-missing', 'protocol-other',
     'branch-upper', 'branch-short', 'branch-newline', 'chain-empty', 'truncated-field', 'wrong-wire', 'utf8', 'field-bound', 'missing', 'no-message', 'two', 'base64', 'frame']) {
     await rejects(() => readLightdInfo(source(mode)), 'PROTOCOL_MISMATCH');
