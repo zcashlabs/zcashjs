@@ -14,10 +14,18 @@ type Source = {
   readonly transport: Pick<ReturnType<typeof createGrpcWebByteTransport>, 'unary'>;
   readonly sourceId: string;
 };
+// Revisions this client speaks. v0.6.0 (lightwallet-protocol 2026-10-19) only
+// adds GetStandardFee; every message this client exchanges is unchanged.
+export const supportedProtocolRevisions = ['v0.5.0', 'v0.6.0'] as const;
+export type SupportedProtocolRevision = (typeof supportedProtocolRevisions)[number];
+function supportedRevision(value: string): value is SupportedProtocolRevision {
+  return (supportedProtocolRevisions as readonly string[]).includes(value);
+}
+
 export type LightdObservation = {
   readonly version: string;
   readonly vendor: string;
-  readonly protocolRevision: 'v0.5.0';
+  readonly protocolRevision: SupportedProtocolRevision;
   readonly sourceId: string;
   readonly observedAt: string;
   readonly chainName: string;
@@ -86,10 +94,12 @@ export async function readLightdInfo(source: Source, args: Op = {}): Promise<Lig
       || typeof dto.chain_name !== 'string' || !dto.chain_name
       || typeof dto.consensus_branch_id !== 'string' || !/^[0-9a-f]{8}$/.test(dto.consensus_branch_id)
       || typeof dto.taddr_support !== 'boolean') throw protocol();
-    if (dto.lightwallet_protocol_version !== 'v0.5.0') {
+    const revision = dto.lightwallet_protocol_version;
+    if (!supportedRevision(revision)) {
       throw failure(
         'PROTOCOL_MISMATCH', 'transport', 'configure',
-        'Light server protocol revision is unsupported; expected v0.5.0.',
+        'Light server protocol revision is unsupported; this client supports '
+        + `${supportedProtocolRevisions.join(' and ')}.`,
       );
     }
     const saplingActivationHeight = height(dto.sapling_activation_height),
@@ -98,7 +108,7 @@ export async function readLightdInfo(source: Source, args: Op = {}): Promise<Lig
     return {
       version: dto.version,
       vendor: dto.vendor,
-      protocolRevision: 'v0.5.0',
+      protocolRevision: revision,
       sourceId,
       chainName: dto.chain_name,
       saplingActivationHeight,

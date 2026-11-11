@@ -99,4 +99,4 @@ Use an `AbortController` to stop a long stream, or break a `for await` loop. Do 
 
 Reported transport and protocol failures reject. Some backends can hide failures behind empty replies, which the SDK cannot distinguish from valid empty results. Check your provider's behavior before treating an empty result as complete.
 
-For an application-owned byte transport, `CustomLightTransport` accepts bounded protobuf messages at the supported protocol revision. The Node-only `@zcashlabs/zcash.js/grpc-node` entry exports `createGrpcNodeTransport`; ordinary applications can use `grpc` without importing that lower-level adapter.
+For an application-owned byte transport, `CustomLightTransport` accepts bounded protobuf messages at the supported protocol revisions (`v0.5.0` and `v0.6.0`). The Node-only `@zcashlabs/zcash.js/grpc-node` entry exports `createGrpcNodeTransport`; ordinary applications can use `grpc` without importing that lower-level adapter.
