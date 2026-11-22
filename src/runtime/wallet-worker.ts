@@ -2,6 +2,8 @@ import type { InitializedViews, InitializedSigners } from '../wallet/session.js'
 import { errorTag } from '../errors.js';
 import { installWalletWorker } from '../wallet/worker.js';
 import { sameRecord, walletProfile } from './wallet-profile.js';
+import { checkUnencryptedStorage, encryptStorage, ENCRYPTION_KEY_BYTES, KEY_MISMATCH } from './encrypted-storage.js';
+import type { StorageBackend } from './encrypted-storage.js';
 import type { WalletRuntimeIdentity } from './wallet-profile.js';
 
 const node = typeof (globalThis as { process?: { versions?: { node?: string } } }).process?.versions?.node === 'string';
@@ -43,7 +45,7 @@ type OpenRequest = {
   type: 'open';
   id: unknown;
   port: MessagePort;
-  storage: { kind: 'memory' } | { kind: 'persistent'; location: string; hostUrl: string };
+  storage: { kind: 'memory' } | { kind: 'persistent'; location: string; hostUrl: string; encryptionKey?: Uint8Array };
   parametersFormat: string;
   parameters: Uint8Array;
   genesis: Uint8Array;
@@ -82,7 +84,10 @@ function openRequest(data: Record<string, unknown>): OpenRequest {
     if (record.kind !== (node ? 'node-filesystem' : 'browser-opfs')) failed('INVALID_ARGUMENT');
     const path = node ? record.path : record.name;
     if (typeof path !== 'string' || !executableUrl(data.hostUrl)) failed('INVALID_ARGUMENT');
-    location = { kind: 'persistent', location: path, hostUrl: data.hostUrl };
+    const key = record.encryptionKey;
+    const validKey = key instanceof Uint8Array && key.length === ENCRYPTION_KEY_BYTES;
+    if (key !== undefined && (!node || !validKey)) failed('INVALID_ARGUMENT');
+    location = { kind: 'persistent', location: path, hostUrl: data.hostUrl, ...(key ? { encryptionKey: key } : {}) };
   }
   if (!isPort(data.port) || !(data.genesis instanceof Uint8Array) || data.genesis.length !== 32
     || !(data.parameters instanceof Uint8Array) || data.parameters.length < 1 || data.parameters.length > 256
@@ -194,8 +199,8 @@ async function initializeCompute(request: Extract<ControlRequest, { type: 'compu
   failed('RUNTIME_UNAVAILABLE');
 }
 
-type Backend = { owned: boolean; release(): void };
-async function acquireStorage(storage: Extract<OpenRequest['storage'], { kind: 'persistent' }>): Promise<Backend> {
+type PersistentRequest = Extract<OpenRequest['storage'], { kind: 'persistent' }>;
+async function acquireStorage(storage: PersistentRequest): Promise<StorageBackend> {
   if (node) {
     const filesystem = 'node:fs';
     const fs = await import(filesystem);
@@ -206,10 +211,24 @@ async function acquireStorage(storage: Extract<OpenRequest['storage'], { kind: '
     }
   }
   const host = await import(storage.hostUrl);
-  return host.acquire(storage.location, { create: true });
+  const backend = await host.acquire(storage.location, { create: true }) as StorageBackend;
+  try {
+    if (!node) return backend;
+    if (!storage.encryptionKey) return checkUnencryptedStorage(backend);
+    const cryptoModule = 'node:crypto';
+    const crypto = await import(cryptoModule) as typeof import('node:crypto');
+    try {
+      return encryptStorage(backend, crypto, storage.encryptionKey);
+    } finally {
+      storage.encryptionKey.fill(0);
+    }
+  } catch (error) {
+    if (backend.owned) backend.release();
+    throw error;
+  }
 }
 
-const knownFailures = new Set(['INVALID_ARGUMENT', 'PROTOCOL_MISMATCH', 'RESOURCE_LIMIT',
+const knownFailures = new Set([KEY_MISMATCH, 'INVALID_ARGUMENT', 'PROTOCOL_MISMATCH', 'RESOURCE_LIMIT',
   'NETWORK_MISMATCH', 'SCHEMA_MISMATCH', 'VIEWING_SCHEMA_REQUIRED', 'MIGRATION_REQUIRED']);
 function failureInfo(error: unknown, fallback: string) {
   const tag = errorTag(error);
@@ -228,7 +247,7 @@ function failureInfo(error: unknown, fallback: string) {
 
 /** Acquisition owns cleanup until both the wallet port and its control receipt are installed. */
 async function openStorage(request: OpenRequest): Promise<{ code: string; fatal: boolean } | undefined> {
-  let backend: Backend | undefined,
+  let backend: StorageBackend | undefined,
     owner: InitializedViews | undefined;
   let nativeOpening = false,
     fallback = 'RUNTIME_UNAVAILABLE';

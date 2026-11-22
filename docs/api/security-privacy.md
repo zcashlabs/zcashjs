@@ -8,7 +8,7 @@ Keep spending secrets out of wallet SQLite and ordinary backups. Treat viewing k
 
 Applications own mnemonic generation, backup and input collection. Supplied secret bytes are copied into the authority domain; memory signers expose only opaque authority. Best-effort clearing cannot erase every JS copy, string, garbage-collected allocation or crash artifact. WASM and workers are not secure enclaves and cannot defend against malicious application code in the same trust domain.
 
-Wallet storage includes viewing authority, recovery metadata and financial history. No encrypted-at-rest guarantee or persistent spending-secret vault is established. Exporting a UFVK/UIVK requires explicit disclosure acknowledgment; outgoing recovery is limited by key policy and available transaction data.
+Wallet storage includes viewing authority, recovery metadata and financial history. Node filesystem storage supports [authenticated at-rest encryption](wallet-runtime.md#encrypt-storage-at-rest) with a key the application supplies; without that key, or with OPFS, the files are plaintext. No persistent spending-secret vault is established. Exporting a UFVK/UIVK requires explicit disclosure acknowledgment; outgoing recovery is limited by key policy and available transaction data.
 
 ## Network disclosure
 

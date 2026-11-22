@@ -90,6 +90,7 @@ const messages: Partial<Record<ErrorInfo['code'], string>> = {
   STORAGE_ERROR: 'Wallet storage failed; check its availability and integrity before reopening.',
   STORAGE_BUSY: 'Wallet storage is already in use; release the other owner before reopening.',
   STORAGE_QUOTA: 'Storage capacity or quota was exhausted; free space before reopening.',
+  STORAGE_KEY_MISMATCH: 'Wallet storage cannot be opened with the supplied encryption key or setting.',
   MIGRATION_REQUIRED: 'Wallet schema initialization or migration failed; check runtime compatibility before reopening.',
   RUNTIME_UNAVAILABLE: 'The wallet or codec runtime failed; check its configuration and recovery action.',
   RESOURCE_LIMIT: 'The operation exceeds a resource limit; reduce the workload or adjust its configured budget.',
