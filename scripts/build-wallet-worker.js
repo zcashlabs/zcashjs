@@ -9,7 +9,7 @@ const root = resolve(import.meta.dirname, '..');
 const output = process.argv[2];
 assert.ok(output, 'exclusive worker output path required');
 const bundle = await rolldown({ input: resolve(root, 'dist/src/runtime/wallet-worker.js'), platform: 'neutral',
-  external: ['node:worker_threads', 'node:fs'],
+  external: ['node:worker_threads', 'node:fs', 'node:crypto'],
   onLog(level, log) { throw Error(`${level}: ${log.code}`); },
 });
 try {
@@ -18,7 +18,7 @@ try {
   const chunk = result.output[0];
   assert.equal(chunk.type, 'chunk');
   assert.equal(chunk.imports.length, 0);
-  assert.ok(chunk.dynamicImports.every(name => ['node:worker_threads', 'node:fs'].includes(name)));
+  assert.ok(chunk.dynamicImports.every(name => ['node:worker_threads', 'node:fs', 'node:crypto'].includes(name)));
   const inputs = Object.fromEntries(Object.keys(chunk.modules).map(name => {
     const path = relative(root, name);
     assert.ok(path.startsWith('dist/src/'), `unexpected worker input ${path}`);

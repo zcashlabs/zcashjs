@@ -20,7 +20,7 @@ for (const failing of ['release','close','control','busy']) test(`shared owner i
     export const initializeWalletRuntime=()=>({invalid:false,open(){${failing==='release'?"throw 'NETWORK_MISMATCH'":"return {}"};}});
     export const viewsForStorage=()=>{let reads=0;return {get generation(){if(!reads++)throw Error('INVALID_ARGUMENT');return 1},instance:'fixture',close(){throw Error('cleanup')}};};
   `);
-  await writeFile(join(root,'host.mjs'),failing==='busy' ? `export const acquire=async()=>{throw new DOMException('private fixture path','NoModificationAllowedError')};` : `export const acquire=async()=>({owned:true,release(){${failing==='release'?"throw Error('cleanup')":''};}});`);
+  await writeFile(join(root,'host.mjs'),failing==='busy' ? `export const acquire=async()=>{throw new DOMException('private fixture path','NoModificationAllowedError')};` : `export const acquire=async()=>({owned:true,access(){return false;},release(){${failing==='release'?"throw Error('cleanup')":''};}});`);
   const worker=new Worker(new URL('../../dist/src/runtime/wallet-worker.js',import.meta.url));
   const channel=new MessageChannel();
   t.after(async()=>{channel.port1.close();channel.port2.close();await worker.terminate();});
@@ -105,7 +105,7 @@ for (const fault of ['acquire', 'native-known', 'native-unknown', 'consensus']) 
     export const acquire = async () => {
       appendFileSync(${JSON.stringify(log)}, 'acquire\\n');
       if (++acquisitions === 1 && ${fault === 'acquire'}) throw Error('private filesystem text');
-      return {owned: true, release() {this.owned = false; appendFileSync(${JSON.stringify(log)}, 'release\\n');}};
+      return {owned: true, access() {return false;}, release() {this.owned = false; appendFileSync(${JSON.stringify(log)}, 'release\\n');}};
     };
   `);
   const reply = async data => {
@@ -151,7 +151,7 @@ for (const tag of ['MIGRATION_REQUIRED', 'QuotaExceededError', 'ENOSPC', 'EDQUOT
     export const consensusContext=()=>{};
     export const initializeWalletRuntime=()=>({invalid:false,open(){throw 'MIGRATION_REQUIRED';}});
   `);
-  const acquire = tag === 'MIGRATION_REQUIRED' ? 'return {owned:true,release(){}}'
+  const acquire = tag === 'MIGRATION_REQUIRED' ? 'return {owned:true,access(){return false;},release(){}}'
     : tag === 'QuotaExceededError' ? "throw new DOMException('PRIVATE_SENTINEL','QuotaExceededError')"
     : `throw Object.assign(Error('PRIVATE_SENTINEL'),{code:${JSON.stringify(tag)}})`;
   await writeFile(join(root,'host.mjs'), `export const acquire=async()=>{${acquire}};`);

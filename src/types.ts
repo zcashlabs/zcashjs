@@ -229,10 +229,13 @@ export interface LightClient {
 
 /** Bundled SQLite in wallet WASM; never an injected native SQLite connection.
  * Node filesystem and OPFS are intended durable modes, pending F3 qualification.
- * Memory is explicitly ephemeral; no silent fallback, encrypted-at-rest claim or secret vault.
+ * Memory is explicitly ephemeral; no silent fallback or secret vault.
+ * `encryptionKey` (32 bytes, Node filesystem only) enables authenticated at-rest
+ * encryption of the database and journal. The application owns key derivation and
+ * custody; the SDK copies the key and clears its copy after admission.
  */
 export type WalletStorage
-  = | { readonly kind: 'node-filesystem'; readonly path: string }
+  = | { readonly kind: 'node-filesystem'; readonly path: string; readonly encryptionKey?: Uint8Array }
     | { readonly kind: 'browser-opfs'; readonly name: string }
     | { readonly kind: 'memory' };
 /** Application-pinned canonical manifest; H1.1 defines URL and verification rules. */
@@ -957,7 +960,7 @@ export type ErrorCode = 'INVALID_ARGUMENT' | 'INVALID_MNEMONIC' | 'ENTROPY_UNAVA
   | 'PROVING_MATERIAL_REQUIRED' | 'ASSET_UNAVAILABLE' | 'ASSET_INTEGRITY' | 'PROOF_FAILED'
   | 'NOT_FINALIZED' | 'OPERATION_NOT_FOUND' | 'PAYMENT_BLOCKED' | 'TRANSACTION_EXPIRED'
   | 'SUBMISSION_REJECTED' | 'SUBMISSION_UNKNOWN' | 'CURSOR_STALE' | 'STORAGE_ERROR'
-  | 'STORAGE_BUSY' | 'STORAGE_QUOTA' | 'MIGRATION_REQUIRED' | 'RUNTIME_UNAVAILABLE'
+  | 'STORAGE_BUSY' | 'STORAGE_QUOTA' | 'STORAGE_KEY_MISMATCH' | 'MIGRATION_REQUIRED' | 'RUNTIME_UNAVAILABLE'
   | 'WORKER_CRASHED' | 'RESOURCE_LIMIT' | 'STALE_HANDLE' | 'WRONG_INSTANCE' | 'CLOSED'
   | 'TIMEOUT' | 'ABORTED';
 export interface ErrorInfo {

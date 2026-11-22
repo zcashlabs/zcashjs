@@ -28,7 +28,7 @@ includes the asset configuration and an offline OPFS wallet check.
 
 ## Current limits
 
-The package is an experimental prerelease. Endpoint factories default to mainnet, but require an explicit provider endpoint (see [wallet defaults](wallet-runtime.md#defaults)). It has no managed artifact hosting, persistent secret vault, database backup API, remote proving integration, or concrete hardware signer integration. Storage is not advertised as encrypted at rest.
+The package is an experimental prerelease. Endpoint factories default to mainnet, but require an explicit provider endpoint (see [wallet defaults](wallet-runtime.md#defaults)). It has no managed artifact hosting, persistent secret vault, database backup API, remote proving integration, or concrete hardware signer integration. Node filesystem storage can be [encrypted at rest](wallet-runtime.md#encrypt-storage-at-rest) with an application-supplied key; OPFS and memory storage are not encrypted.
 
 The current persistent Node adapter is Linux-specific and uses the operating
 system's `flock` utility for crash-safe ownership. macOS and Windows persistent

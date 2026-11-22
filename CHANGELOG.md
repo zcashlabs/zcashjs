@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add optional authenticated at-rest encryption for Node filesystem wallet
+  storage (`storage.encryptionKey`), covering the database and rollback journal,
+  with a new `STORAGE_KEY_MISMATCH` error for wrong or missing keys.
+
 ## 0.1.2
 
 - Add explicit `Nu7` custom network schedules using `zcash-js-network/2`,

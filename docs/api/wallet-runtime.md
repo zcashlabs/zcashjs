@@ -64,6 +64,41 @@ Back up recovery material separately. Only one owner should open a database at a
 time; conflicting ownership can fail with `STORAGE_BUSY`.
 Browser endpoints must support gRPC-Web and CORS. See [platforms](platforms.md).
 
+## Encrypt storage at rest
+
+On Node, pass a 32-byte `encryptionKey` with filesystem storage:
+
+```ts
+import { createWalletClient } from '@zcashlabs/zcash.js';
+
+export async function openEncrypted(path: string, key: Uint8Array) {
+  return createWalletClient('https://testnet.zec.rocks:443', {
+    network: 'testnet',
+    storage: { kind: 'node-filesystem', path, encryptionKey: key },
+  });
+}
+```
+
+The database and its rollback journal are encrypted with AES-256-GCM using a
+per-file key derived from yours with HKDF-SHA256. Database pages are stored as
+authenticated 4 KiB blocks. The journal is an append-only log of authenticated
+frames, so an interrupted write cannot damage journal content that SQLite
+already synced. Every block and frame is authenticated, and a modified block
+fails to read rather than returning altered data.
+
+Your application derives and protects the key, for example from a password with
+a memory-hard KDF. The SDK copies the key and clears its copy once storage is
+open; clear your own copy when you no longer need it. Opening an encrypted
+database with the wrong key, or without one, fails with `STORAGE_KEY_MISMATCH`.
+The same error is returned when a key is supplied for an existing plaintext
+database: there is no in-place migration. A new encrypted database requires
+account recovery.
+
+Encryption covers file contents. It does not hide file sizes, write timing, or
+the `owner.lock` file. It also does not stop an attacker with write access
+from rolling an individual block back to an earlier version of the same block.
+OPFS storage does not support encryption yet.
+
 ## Override configuration
 
 Pass a preset name, a registered `Network`, or a full `NetworkDefinition` as

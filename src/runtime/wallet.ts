@@ -118,16 +118,23 @@ export function runtimeOptions(value: unknown): RuntimeOptions {
   };
 }
 export function walletStorage(value: unknown): WalletStorage {
-  const storage = record(value, ['kind', 'path', 'name']);
+  const storage = record(value, ['kind', 'path', 'name', 'encryptionKey']);
   if (storage.kind !== 'memory' && storage.kind !== (node ? 'node-filesystem' : 'browser-opfs')) throw unavailable();
   if (storage.kind === 'memory') {
     if (Object.keys(storage).length !== 1) throw invalidArgument();
     return { kind: 'memory' };
   }
   const name = storage[node ? 'path' : 'name'];
-  if (Object.keys(storage).length !== 2 || typeof name !== 'string' || !name.length
+  const key = storage.encryptionKey;
+  if (key !== undefined && !node) throw unavailable();
+  if (key !== undefined && (!(key instanceof Uint8Array) || key.length !== 32)) throw invalidArgument();
+  if (Object.keys(storage).length !== (key === undefined ? 2 : 3) || typeof name !== 'string' || !name.length
     || name.includes('\0') || (!node && !/^[a-zA-Z0-9_-]{1,128}$/.test(name))) throw invalidArgument();
-  return node ? { kind: 'node-filesystem', path: name } : { kind: 'browser-opfs', name };
+  if (!node) return { kind: 'browser-opfs', name };
+  // Defensive copy: the caller may clear its key after the factory returns.
+  return key === undefined
+    ? { kind: 'node-filesystem', path: name }
+    : { kind: 'node-filesystem', path: name, encryptionKey: Uint8Array.from(key) };
 }
 
 /** Browser capabilities only; this does not qualify a threaded artifact. */
@@ -454,6 +461,7 @@ async function createOwner(
         'STORAGE_ERROR',
         'STORAGE_BUSY',
         'STORAGE_QUOTA',
+        'STORAGE_KEY_MISMATCH',
         'NETWORK_MISMATCH',
         'INVALID_ARGUMENT',
         'RESOURCE_LIMIT',
