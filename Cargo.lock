@@ -2291,8 +2291,6 @@ dependencies = [
 [[package]]
 name = "zakura-zip321"
 version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "077cc7259ccd55e71852eca10d2709ab3fb33ab5b53bffa9989d05a059619eb2"
 dependencies = [
  "base64 0.22.1",
  "nom",

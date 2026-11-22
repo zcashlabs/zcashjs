@@ -8,6 +8,8 @@ mod sync;
 mod account_lifecycle;
 #[path = "proposal.rs"]
 mod proposal;
+#[path = "zip321.rs"]
+mod zip321;
 #[path = "pczt_build.rs"]
 mod pczt_build;
 mod nu7;
