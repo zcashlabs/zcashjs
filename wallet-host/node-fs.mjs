@@ -38,6 +38,22 @@ function lockExclusive(fd) {
   { stdio: ['ignore', 'ignore', 'ignore', fd], timeout: 5000 });
   if (result.error || result.status !== 0) throw Object.assign(Error('exclusive owner unavailable'), { code: result.status === 1 ? 'EBUSY' : 'EIO' });
 }
+// macOS fsync(2) only reaches the drive cache; F_FULLFSYNC asks the drive to flush,
+// matching SQLite's own macOS durability mode. Available through bun:ffi; under
+// Node on macOS this falls back to fsync(2).
+const F_FULLFSYNC = 51;
+let fullSync = null;
+function durableSync(fd) {
+  if (process.platform === 'darwin' && typeof process.versions.bun === 'string' && typeof import.meta.require === 'function') {
+    if (!fullSync) {
+      const { dlopen, FFIType } = import.meta.require('bun:ffi');
+      fullSync = dlopen('libSystem.B.dylib', { fcntl: { args: [FFIType.i32, FFIType.i32], returns: FFIType.i32 } });
+    }
+    // Some filesystems reject F_FULLFSYNC; fall back to fsync like SQLite does.
+    if (fullSync.symbols.fcntl(fd, F_FULLFSYNC) === 0) return;
+  }
+  fs.fsyncSync(fd);
+}
 export function acquire(root, { create = false } = {}) {
   if (isMainThread || !['linux', 'darwin'].includes(process.platform)) throw Error('dedicated Linux or macOS worker required');
   let base, lock, dir;
@@ -66,11 +82,11 @@ export function acquire(root, { create = false } = {}) {
       try { fs.fsyncSync(dir); } catch (e) { closeSync(fd); throw e; }
       descriptors.add(fd); return fd;
     },
-    close(fd) { fs.fsyncSync(fd); fs.closeSync(fd); descriptors.delete(fd); },
+    close(fd) { durableSync(fd); fs.closeSync(fd); descriptors.delete(fd); },
     read: (fd, b, at) => fs.readSync(fd, b, 0, b.length, at),
     write: (fd, b, at) => fs.writeSync(fd, b, 0, b.length, at),
     truncate: (fd, size) => fs.ftruncateSync(fd, size),
-    sync: fd => fs.fsyncSync(fd),
+    sync: fd => durableSync(fd),
     size: fd => fs.fstatSync(fd).size,
     delete(path, sync) {
       try { fs.unlinkSync(`${base}/${path}`); } catch (e) { if (e.code !== 'ENOENT') throw e; }
