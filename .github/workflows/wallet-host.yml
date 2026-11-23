@@ -1,0 +1,27 @@
+name: wallet-host
+on:
+  push:
+    paths: ["wallet-host/**", "tests/node-fs-lock.mjs", ".github/workflows/wallet-host.yml"]
+  pull_request:
+    paths: ["wallet-host/**", "tests/node-fs-lock.mjs", ".github/workflows/wallet-host.yml"]
+permissions:
+  contents: read
+jobs:
+  owner-lease:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
+      - name: Owner lease (Node)
+        run: node tests/node-fs-lock.mjs
+      - name: Owner lease (Bun)
+        run: bun tests/node-fs-lock.mjs
