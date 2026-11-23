@@ -54,6 +54,11 @@ or starts one, then obtains fresh payment evidence before native submission
 admission. This preserves the finalized transaction bytes; it does not rebuild,
 re-sign, or retry a network submission. After three unsuccessful refreshes,
 continued tip movement returns `SYNC_REQUIRED`; recover the same operation.
+Any `SYNC_REQUIRED` from this refresh, including a scan that does not reach its
+target, carries `operationId` and `paymentState` for the retained operation: its
+steps already have a `txid` and no submission `attempts`. The transaction is signed
+but was not submitted, and its inputs stay locked. Do not treat it as unsent or
+create a replacement; sync, then call `wallet.broadcast({ operationId })`.
 Automatic startup recovery does not initiate this scan refresh.
 
 Keep `watchSync()` running and consume its statuses while waiting for confirmation.
