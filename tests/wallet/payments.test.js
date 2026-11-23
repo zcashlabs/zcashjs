@@ -6,6 +6,7 @@ import {attachWalletWorker} from '../../dist/src/wallet/host.js';
 import {installWalletWorker} from '../../dist/src/wallet/worker.js';
 import {WalletPayments} from '../../dist/src/wallet/payments.js';
 import {defineNetwork} from '../../dist/src/network.js';
+import {failure,isZcashError} from '../../dist/src/errors.js';
 import {networkDefinition} from '../sdk/light-client-fixture.js';
 import {scalar,bytesField,concat} from '../clients/light-chain-reads-fixtures.js';
 const network=await defineNetwork(networkDefinition()),txid='12'.repeat(32),hash='34'.repeat(32);
@@ -133,6 +134,28 @@ test('submission scan failure preserves finalized operation with no attempt',asy
   await assert.rejects(payments.broadcast({operationId:operationId(1)}),/scan failed/);
   assert.equal(control.dispatches,0);assert.equal(control.refreshes,1);
   assert.equal(journal[0].state.steps[0].attempts.length,0);
+});
+
+test('submission refresh SYNC_REQUIRED identifies the retained finalized operation',async t=>{
+  const {payments,control,journal}=setup(t,{submissionSync:true});
+  control.refreshError=failure('SYNC_REQUIRED','submission','sync','Wallet scan did not reach its submission target.',true);
+  await payments.recover();
+  await assert.rejects(payments.broadcast({operationId:operationId(1)}),error=>{
+    assert.equal(isZcashError(error),true);
+    assert.equal(error.code,'SYNC_REQUIRED');assert.equal(error.stage,'submission');assert.equal(error.retryable,true);
+    assert.equal(error.message,'Wallet scan did not reach its submission target.');
+    assert.equal(error.operationId,operationId(1));
+    assert.equal(error.paymentState.operationId,operationId(1));
+    assert.equal(error.paymentState.steps[0].txid,journal[0].state.steps[0].txid);
+    assert.deepEqual(error.paymentState.steps[0].attempts,[]);
+    return true;
+  });
+  assert.equal(control.dispatches,0);assert.equal(control.refreshes,1);
+  // Recovering the same operation after a successful catch-up dispatches the same bytes once.
+  control.refreshError=undefined;
+  const state=await payments.broadcast({operationId:operationId(1)});
+  assert.equal(control.dispatches,1);
+  assert.equal(state.steps[0].exactBytesSha256,journal[0].state.steps[0].exactBytesSha256);
 });
 
 test('offline recovery traverses more than one page without IDs or network, then paginates locally',async t=>{

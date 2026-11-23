@@ -509,7 +509,15 @@ export class WalletPayments {
           'Source kept changing before submission; resume the retained operation after syncing.', true,
           undefined, this.project(value), value.state.operationId);
       }
-      await this.refreshForSubmission!(signal);
+      try {
+        await this.refreshForSubmission!(signal);
+      } catch (error) {
+        // The operation is finalized and retained with no attempt: say so, so callers
+        // recover this same operation instead of treating the payment as never created.
+        if (!isZcashError(error)) throw error;
+        throw failure(error.code, error.stage, error.recovery, error.message, error.retryable,
+          error.syncStatus, error.paymentState ?? this.project(value), value.state.operationId);
+      }
       value = await this.observeStep(value, index, this.light ?? this.broadcaster!, signal);
     }
   }

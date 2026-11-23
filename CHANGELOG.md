@@ -5,6 +5,9 @@
 - Add optional authenticated at-rest encryption for Node filesystem wallet
   storage (`storage.encryptionKey`), covering the database and rollback journal,
   with a new `STORAGE_KEY_MISMATCH` error for wrong or missing keys.
+- `SYNC_REQUIRED` raised while refreshing the scan before submitting a finalized
+  payment now always carries `operationId` and `paymentState`, so callers can see
+  the signed transaction is retained and recover it with `broadcast` (#36).
 
 ## 0.1.2
 
