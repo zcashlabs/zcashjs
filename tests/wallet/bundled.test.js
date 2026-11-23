@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readFile, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { createWalletClient, defineNetwork } from '@zcashlabs/zcash.js';
 import { packageProving } from '../../dist/src/runtime/package-proving.js';
@@ -43,7 +44,7 @@ test('root import opens the shipped engine offline and persists an account witho
   t.mock.method(globalThis, 'fetch', () => { throw Error('bundled Node wallet must not fetch executable assets'); });
   const parent = new URL('../../.local/tests/', import.meta.url);
   await mkdir(parent, { recursive: true });
-  const path = await mkdtemp(new URL('bundled-', parent).pathname);
+  const path = await mkdtemp(fileURLToPath(new URL('bundled-', parent)));
   t.after(() => rm(path, { recursive: true, force: true }));
   const fixture = JSON.parse(await readFile(new URL('../fixtures/wallet/bundle/tests/views-fixture.json', import.meta.url)));
   const network = await defineNetwork({ identity: 'bundled-test', genesisHash: '03'.repeat(32),
