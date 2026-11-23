@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `watchSync()` answers each standing unspent-address request (open-ended
+  `txStatus: 'all'`, `outputStatus: 'unspent'`) once per target block instead of
+  on every poll. Native reissues these after every answer, so a wallet with
+  transparent receivers repeated one UTXO inventory and decode per address every
+  `pollIntervalMs`. Measured on a testnet wallet with 17 such requests: idle CPU
+  went from 21.6% to 9.5% at the default 5 s poll. One-off `sync()` calls still
+  answer them every time. A deferred inventory (the source moved) stays due.
 - Target native `zakura-wasm-bindings` with Node filesystem storage on macOS
   (`flock(2)` owner lease, `F_FULLFSYNC`) and Windows (exclusive-open owner lease
   under Node and Bun). CI runs the filesystem storage tests on macOS and Windows.

@@ -42,6 +42,9 @@ the source advances beyond the captured target, or changes while the inventory
 is read, that request stays pending for a later scan. A finite sync can therefore
 reach its captured target with actionable enhancement still outstanding.
 `watchSync()` scans newer tips and revisits those requests on later polls.
+Standing unspent-address requests that native reissues after every answer are
+answered at most once per target block by the watcher, so unconfirmed transparent
+receipts surface with the next block rather than the next poll.
 Explicit historical targets are never advanced just to satisfy enhancement.
 
 You can consume `watchSync()` while awaiting a payment's `wait()`. Payment

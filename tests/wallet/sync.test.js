@@ -495,3 +495,41 @@ test('unsupported target pinning is classified before any scan mutation', async 
   });
   assert.equal(f.control.ingests,0); assert.equal(f.control.plans,0);
 });
+
+test('standing unspent-address polls are answered once per target block, not on every pass', async () => {
+  const hash = Array.from({ length: 32 }, (_, i) => i.toString(16).padStart(2, '0')).join('');
+  const nativeHash = hash.match(/../g).reverse().join('');
+  const request = { kind: 'address', address: 'fixture', start: 1, endExclusive: null, requestAt: null,
+    txStatus: 'all', outputStatus: 'unspent' };
+  let revision = 0, inventories = 0, applied = 0;
+  const target = { height: 50, hash };
+  const session = { scan: {
+    async state() { return { revision: String(revision), tipHeight: 50, fullyScannedHeight: 50, maxScannedHeight: 50, scanComplete: true }; },
+    async block({ height }) { return { revision: String(revision), point: { height, hash: nativeHash } }; },
+    async plan() { return { revision: String(revision), ranges: [] }; },
+    async complete() {},
+  }, enhancement: {
+    // Native reissues the standing poll after every answer.
+    async requests() { return { revision: String(revision), requests: [request] }; },
+    async apply() { applied++; return { revision: String(++revision) }; },
+  } };
+  const light = {
+    async getTip() { return { height: 50, hash, sourceId: 'source', observedAt: 'fixture' }; },
+    async getTreeState({ height }) { return { point: { height, hash }, encoded: new Uint8Array() }; },
+    async getAddressUtxos() { inventories++; return { items: [], tip: null, sourceId: 'source', observedAt: 'fixture' }; },
+  };
+  const polled = new Map();
+  await syncWallet(session, light, target, undefined, 16, polled);
+  assert.equal(inventories, 1);
+  assert.equal(applied, 1);
+  await syncWallet(session, light, target, undefined, 16, polled);
+  await syncWallet(session, light, target, undefined, 16, polled);
+  assert.equal(inventories, 1, 'same target block: no repeated inventory');
+  // A new target block makes the poll due again.
+  polled.set(JSON.stringify(request), 'ff'.repeat(32));
+  await syncWallet(session, light, target, undefined, 16, polled);
+  assert.equal(inventories, 2);
+  // Without a cache (one-off callers) every pass still answers it.
+  await syncWallet(session, light, target);
+  assert.equal(inventories, 3);
+});

@@ -21,9 +21,13 @@ const protocol = () => failure(
 );
 const limit = () => failure('RESOURCE_LIMIT', 'sync', 'configure', 'Enhancement transaction exceeds batch limit.');
 
-/** One backend request. Only successful stream exhaustion completes address coverage. */
+/**
+ * One backend request. Only successful stream exhaustion completes address coverage.
+ * Resolves true when an unspent-address inventory was committed for the current tip,
+ * false when it was deferred; other request kinds resolve undefined.
+ */
 export async function applyEnhancement(session: Session, light: LightClient, revision: string,
-  request: EnhancementRequest, signal?: AbortSignal): Promise<void> {
+  request: EnhancementRequest, signal?: AbortSignal): Promise<boolean | undefined> {
   const op = signal === undefined ? {} : { signal };
   const apply = async (result: EnhancementResult) => {
     revision = (await session.enhancement.apply({ revision, request, result, ...op })).revision;
@@ -47,8 +51,7 @@ export async function applyEnhancement(session: Session, light: LightClient, rev
     return;
   }
   if (request.txStatus === 'all' && request.outputStatus === 'unspent' && request.endExclusive === null) {
-    await unspent(session, light, revision, request, signal);
-    return;
+    return unspent(session, light, revision, request, signal);
   }
   if (request.txStatus !== 'mined' || request.outputStatus !== 'all'
     || request.endExclusive === null) throw unsupported();
@@ -184,7 +187,7 @@ function unspentTransaction(value: unknown, id: TxId, sourceId: string, height: 
 
 /** A positive UTXO inventory does not prove absence or complete address history. */
 async function unspent(session: Session, light: LightClient, revision: string,
-  request: Extract<EnhancementRequest, { kind: 'address' }>, signal?: AbortSignal) {
+  request: Extract<EnhancementRequest, { kind: 'address' }>, signal?: AbortSignal): Promise<boolean> {
   const pending = operation(signal),
     op = { signal: pending.signal };
   try {
@@ -198,7 +201,7 @@ async function unspent(session: Session, light: LightClient, revision: string,
     }
     // A finite scan owns its captured target, not the latest tip. Leave this native
     // request pending for a later scan; never advance an explicit historical target.
-    if (local.tipHeight !== null && before.height > local.tipHeight) return;
+    if (local.tipHeight !== null && before.height > local.tipHeight) return false;
     if (block.point?.height !== before.height
       || block.point.hash !== nativeHash) {
       throw failure(
@@ -208,7 +211,7 @@ async function unspent(session: Session, light: LightClient, revision: string,
         'Source tip is not the retained native chain point.',
       );
     }
-    if (local.tipHeight !== before.height) return;
+    if (local.tipHeight !== before.height) return false;
     const response = await pending.wait(light.getAddressUtxos({ addresses: [request.address], ...op }));
     const groups = unspentInventory(response, before, request.address, request.start);
     const batch: { txid: TxId; bytes: Uint8Array; minedHeight: number | null; unspentOutputs: UnspentOutput[] }[] = [];
@@ -232,7 +235,7 @@ async function unspent(session: Session, light: LightClient, revision: string,
     if (after.sourceId !== before.sourceId) throw protocol();
     // The inventory was gathered across a moving view. Discard it, keeping the
     // native request outstanding; sync's final target pin still checks chain identity.
-    if (after.height !== before.height || after.hash !== before.hash) return;
+    if (after.height !== before.height || after.hash !== before.hash) return false;
     pending.check();
     await session.enhancement.apply({
       revision,
@@ -242,6 +245,7 @@ async function unspent(session: Session, light: LightClient, revision: string,
       },
       ...op,
     });
+    return true;
   } finally {
     pending.close();
   }
