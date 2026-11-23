@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Target native `zakura-wasm-bindings` with Node filesystem storage on macOS
+  (`flock(2)` owner lease, `F_FULLFSYNC`) and Windows (exclusive-open owner lease
+  under Node and Bun). CI runs the filesystem storage tests on macOS and Windows.
+
 - Add optional authenticated at-rest encryption for Node filesystem wallet
   storage (`storage.encryptionKey`), covering the database and rollback journal,
   with a new `STORAGE_KEY_MISMATCH` error for wrong or missing keys.

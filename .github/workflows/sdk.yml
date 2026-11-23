@@ -28,3 +28,40 @@ jobs:
           key: sdk-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/native-source.json', 'scripts/build-native-wallet.js', 'src/wallet/proving-assets.ts') }}
       - run: npm ci
       - run: npm run check
+      # The native build is Linux-only; the built SDK (portable WASM + JS glue) is
+      # what other platforms consume, so share it with the storage job below.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist
+          retention-days: 3
+
+  storage-platforms:
+    name: Node filesystem storage (${{ matrix.os }})
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist
+      - name: Owner lease, encrypted storage, reopen and legacy databases
+        run: >-
+          node --test
+          tests/wallet/encrypted-storage.test.js
+          tests/wallet/runtime-owner.test.js
+          tests/wallet/bundled.test.js
+          tests/network-parameters/legacy-wallet.test.js
+          tests/network-parameters/legacy-payments.test.js
+          tests/network-parameters/nu7-wallet.test.js
