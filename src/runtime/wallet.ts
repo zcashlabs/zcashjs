@@ -1,4 +1,8 @@
 import { nodeRuntime as node, stageWalletWorkers } from './worker-platform.js';
+
+const bun = typeof (globalThis as { process?: { versions?: { bun?: string } } }).process?.versions?.bun === 'string';
+// The node-fs host's descriptor ledger: LEDGER_SLOTS (64) entries of four Int32 words.
+const LEDGER_INTS = 64 * 4;
 import type { RuntimeWorker } from './worker-platform.js';
 import type { NetworkDefinition, Op, RuntimeOptions, WalletStorage, WasmArtifact, ZcashError } from '../types.js';
 import { errorMessage, failure, invalidArgument, isZcashError } from '../errors.js';
@@ -360,6 +364,10 @@ async function createOwner(
     phase: 'assets', loaded: new Set(),
   };
   const sessions = new Set<ReturnType<typeof attachWalletWorker>>();
+  // Bun leaves a terminated worker's descriptors open (zcashlabs/zcashjs#34): each
+  // filesystem wallet gets a shared ledger of what its host holds, reclaimed on destroy.
+  const ledgers = new Set<Int32Array>();
+  let hostUrl: string | undefined;
   const budget: WalletQueueBudget = {
     jobs: 0,
     bytes: 0,
@@ -380,6 +388,13 @@ async function createOwner(
         await value?.terminate();
       }));
       if (results.some(result => result.status === 'rejected')) throw unavailable();
+      if (ledgers.size > 0 && hostUrl !== undefined) {
+        const host = await import(/* webpackIgnore: true */ /* @vite-ignore */ hostUrl) as {
+          reclaim(ledger: Int32Array): number;
+        };
+        for (const ledger of ledgers) host.reclaim(ledger);
+        ledgers.clear();
+      }
     } finally {
       for (const value of [worker, ...children]) value?.removeEvents();
       removeAssets();
@@ -545,6 +560,7 @@ async function createOwner(
       }
       removeAssets = platform.dispose;
       const { urls, channels } = platform;
+      if (bun) hostUrl = urls['node-fs.mjs'];
       const crash = () => stop(failure('WORKER_CRASHED', 'runtime', 'reopen', 'Wallet worker failed.'));
       const messageError = node ? crash : () => stop(mismatch());
       startup.phase = 'executing';
@@ -635,11 +651,16 @@ async function createOwner(
         ): Promise<OpenedWallet> {
           check();
           const channel = channels();
+          const ledger = bun && storage.kind !== 'memory'
+            ? new Int32Array(new SharedArrayBuffer(LEDGER_INTS * 4))
+            : undefined;
+          if (ledger) ledgers.add(ledger);
           try {
             const opened = await request({
               type: 'open',
               storage,
               ...(storage.kind === 'memory' ? {} : { hostUrl: urls[node ? 'node-fs.mjs' : 'opfs.mjs'] }),
+              ...(ledger ? { ledger } : {}),
               parametersFormat,
               parameters,
               genesis,
@@ -654,6 +675,8 @@ async function createOwner(
               channel.port1,
               async () => {
                 sessions.delete(session);
+                // An orderly close released every descriptor the ledger listed.
+                if (ledger && ledger.every((value, index) => index % 4 !== 0 || value === 0)) ledgers.delete(ledger);
                 await release();
               },
               {
