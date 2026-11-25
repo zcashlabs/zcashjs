@@ -9,21 +9,23 @@ import { scalar, bytesField, concat, blockBytes, tipBytes } from '../clients/lig
 const text = (field, value) => bytesField(field, new TextEncoder().encode(value));
 const endpoint = 'http://127.0.0.1:1';
 
-test('built-in schedules match locked zcash_protocol 0.10.6 at every upgrade boundary', async () => {
+test('built-in schedules match zcash_protocol 0.10.6 plus deployed NU7 at every upgrade boundary', async () => {
   const schedules = {
-    mainnet: [347500,419200,653600,903000,1046400,1687104,2726400,3146400,3364600,3428143],
-    testnet: [207500,280000,584000,903800,1028500,1842420,2976000,3536500,4052000,4134000],
+    mainnet: [347500,419200,653600,903000,1046400,1687104,2726400,3146400,3364600,3428143,3543405],
+    testnet: [207500,280000,584000,903800,1028500,1842420,2976000,3536500,4052000,4134000,4465026],
   };
   for (const [name, heights] of Object.entries(schedules)) {
     const network = await defineNetwork(name);
     const { definition, codec } = networkBinding(network);
     assert.equal(network.identity, `zcash-${name}`);
+    assert.equal(definition.parametersFormat, 'zcash-js-network/2');
     assert.deepEqual(definition.parameters.heights, heights);
     for (const height of heights) {
       const context = at => codec.consensusContext(definition.parametersFormat, definition.parameters.bytes, at);
       assert.notEqual(context(height - 1).branchId, context(height).branchId);
     }
-    assert.equal(codec.consensusContext(definition.parametersFormat, definition.parameters.bytes, heights.at(-1)).branchId, 0x37a5165b);
+    assert.equal(codec.consensusContext(definition.parametersFormat, definition.parameters.bytes, heights.at(-2)).branchId, 0x37a5165b);
+    assert.equal(codec.consensusContext(definition.parametersFormat, definition.parameters.bytes, heights.at(-1)).branchId, 0x77190ad9);
   }
   assert.equal((await defineNetwork()).genesisHash, '00040fe8ec8471911baa1db1266ea15dd06b4a8a5c453883c000b031973dce08');
   assert.equal((await defineNetwork('testnet')).genesisHash, '05a60a92d99d85997cce3b87616c089f6124d7342af37106edc76126334a2c38');

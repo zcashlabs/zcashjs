@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- The `mainnet` and `testnet` presets now include NU7 (mainnet 3543405, testnet 4465026),
+  as version-2 network documents. Before this, preset wallets and light clients failed with
+  `NETWORK_MISMATCH` against any server past NU7 activation (#30).
+  **Breaking for stored wallets:** a database created with an earlier preset is bound to the
+  old parameter bytes and now fails to open with `NETWORK_MISMATCH`. Such wallets cannot sync
+  past NU7 anyway; restore them from the mnemonic with the new preset. To read one offline,
+  open it with the old schedule passed explicitly through `encodeNetworkParameters` (no `Nu7`).
+
 ## 0.1.3
 
 - Idle wallets are much cheaper to keep synced (measured on a testnet wallet with 17
