@@ -285,7 +285,7 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
             }
             if operation=="proposal_lookup_intent" {if identity.is_none(){return Err("INVALID_ARGUMENT".into());}return Ok(Value::Null);}
             if super::revision::read(ext)?!=string(input,"revision")? {return Err("STALE_REVISION".into());}
-            if !db.get_wallet_summary_in_transaction(confirmations)?.is_some_and(|s|s.is_synced()){return Err("SYNC_REQUIRED".into());}
+            if !db.get_wallet_summary(confirmations)?.is_some_and(|s|s.is_synced()){return Err("SYNC_REQUIRED".into());}
             let target=u32::from(db.chain_height()?.ok_or(Failure::from("SYNC_REQUIRED"))?).checked_add(1).ok_or(Failure::from("RESOURCE_LIMIT"))?;
             let lock_blocks=height(policy,"lockExpiryBlocks")?;
             if lock_blocks==0{return Err("INVALID_ARGUMENT".into());}
@@ -300,11 +300,13 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
                     if sources.values().any(|a|!owned.contains_key(a)){return Err("INVALID_ARGUMENT".into());}
                     sources.values().copied().collect::<Vec<_>>()};
                 if addresses.is_empty(){return Err("NOTHING_TO_SHIELD".into());}
+                super::view_only::refuse_spend(db,account,true)?;
                 let plan=propose_shielding::<_,_,_,_,rusqlite::Error>(db,&p,&selector,&strategy,threshold,&addresses,account,confirmations,
                     zcash_client_backend::data_api::CoinbaseFilter::AllTransparentOutputs,Some(LockRequest::new(LockOwner::new(id),lock_blocks)))
                     .map_err(|e|Failure::from(match e {zcash_client_backend::data_api::error::Error::InsufficientFunds{..}|zcash_client_backend::data_api::error::Error::Change(zcash_client_backend::fees::ChangeError::InsufficientFunds{..})=>"NOTHING_TO_SHIELD",zcash_client_backend::data_api::error::Error::ScanRequired=>"SYNC_REQUIRED",_=>"BACKEND_ERROR"}))?;
                 wire::Proposal::from_standard_proposal(&plan.with_proposed_version(Some(version)))
             }else{
+                super::view_only::refuse_spend(db,account,false)?;
                 let plan=propose_transfer::<_,_,_,_,rusqlite::Error>(db,&p,account,&selector,&strategy,request.unwrap(),confirmations,&spend,Some(LockRequest::new(LockOwner::new(id),lock_blocks)),Some(version))
                     .map_err(|e|Failure::from(match e {zcash_client_backend::data_api::error::Error::InsufficientFunds{..}=>"INSUFFICIENT_FUNDS",zcash_client_backend::data_api::error::Error::ScanRequired=>"SYNC_REQUIRED",_=>"BACKEND_ERROR"}))?;
                 wire::Proposal::from_standard_proposal(&plan)

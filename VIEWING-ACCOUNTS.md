@@ -1,8 +1,8 @@
 # Private viewing account/address candidate
 
-This is real backend code on the existing worker-local WalletDb, not a public WalletClient or root SDK factory. Acceptance is pending independent HIGH review and final storage/host integration. The original base is `dbd67c0`; the authorized correction incorporates the necessary accepted storage prerequisites and owned native policy patches.
+This is real backend code on the existing worker-local WalletDb, not a public WalletClient or root SDK factory. Acceptance is pending independent HIGH review and final storage/host integration. The original base is `dbd67c0`; the authorized correction incorporates the necessary accepted storage prerequisites. No upstream crate is patched (#46).
 
-## Owned native policy and storage integration
+## View-only policy and storage integration
 
 The express owner authorization supersedes the historical VIEW hold. This worktree
 incorporates the necessary merged storage PR3 source from `c44bded`, including exact
@@ -11,40 +11,37 @@ explicitly admitted by exact object definitions and initialized on the same owne
 connection after native migrations. Independent review and integration remain the
 coordinator's responsibility.
 
-`native-policy/prepare.py` verifies the cached RC4 archives against the pinned
-checksums in `native-policy/upstream.json`, verifies every source file against those
-archives, and applies the two tracked patches to an ignored owned vendor directory.
-Cargo patches select those paths for native and WASM builds. No shared registry
-source is changed and no package is installed. Run preparation once with the
-already-populated isolated `CARGO_HOME`; an existing vendor directory is preserved
-rather than overwritten. `build-views.py OUTPUT` performs this preparation in its
-committed source snapshot and records patched source inventories in the receipt.
+The view-only policy lives in `src/wallet/view_only.rs` and uses only public upstream
+APIs; upstream `zakura-client-{backend,sqlite}` are used unmodified.
 
-The SQLite `WalletWrite::put_blocks` transaction applies account purpose to every
-scanned block before tree persistence, including scans constructed directly from
-UFVKs. True view-only notes keep viewing/history data (including nullifiers and
-positions), but their commitments have no per-note witness mark. Block checkpoints
-remain shared chain state. Omitted/false imports keep normal marked retention.
-Native shielded selection, single-note lookup, witness metadata selection and
-stabilization honor purpose. Transparent selection and spend-oriented outpoint
-lookup exclude true view-only accounts; history rows remain stored. UFVK possession
-is not signer possession. No signer attachment or implicit upgrade is introduced.
+After every scan (`put_blocks` or the threaded `scan_cached_blocks`), in the same
+transaction, the bindings remove the witness mark of every note owned by a true
+view-only account, immediately rather than as of a checkpoint. View-only notes keep
+viewing/history data (including nullifiers and positions); block checkpoints remain
+shared chain state. Omitted/false imports keep normal marked retention.
+`commitment_tree_position` is unique per pool, so a mark belongs to exactly one account.
 
-Native `get_wallet_summary` gates shielded spendability (including stabilized
-notes) and transparent balance classification on account purpose. True view-only
-value remains in the native non-spendable balance buckets, including the existing
-pending-spendability bucket; that name does not imply automatic future upgrade.
-Omitted/false classification is unchanged. No public summary API is added.
+Proposals (`proposal_create`, transfer or shielding) for a true view-only account are
+refused with `INSUFFICIENT_FUNDS` or `NOTHING_TO_SHIELD`, the outcome of an account with
+nothing spendable, so no view-only input is ever selected. UFVK possession is not signer
+possession; no signer attachment or implicit upgrade is introduced. Upstream storage
+itself does not know the policy: code that calls upstream selection APIs directly,
+rather than through the bindings, must apply it too.
 
-Extension version 2 migrates populated pre-policy wallets on the same owned
-connection, before the wallet is exposed. One immediate transaction clears native
-view-only per-note marks, their deferred checkpoint-removal records and stabilized
-flags, then updates the version. Native shardtree removal preserves shared chain
-checkpoints, spending-account marks, values, nullifiers, positions, metadata and
-viewing authority. Failure rolls back the policy writes and version together;
-reopening retries version 1 and version 2 opens are idempotent. This is logical
-removal of per-note spend support, not physical media erasure or removal of shared
-commitment data. Later spending still requires explicit recovery/upgrade.
+`account_balance` reports a true view-only account's spendable and locked value as
+pending spendability; totals and uneconomic value are unchanged. Upstream counts a note
+as locked only when it is otherwise spendable, and a spendable note is never pending
+change, so this matches classifying the note as unspendable. That bucket name does not
+imply automatic future upgrade. Omitted/false classification is unchanged.
+
+Extension version 2 migrates populated pre-policy wallets after native migrations and
+before the wallet is exposed: one transaction removes view-only marks and updates the
+version. Failure rolls back both; reopening retries version 1, and version 2 opens are
+idempotent. Deferred checkpoint-removal records and upstream stabilization flags are
+left as they are: the mark they refer to is already removed, and spendability is
+governed by the rules above. This is logical removal of per-note spend support, not
+physical media erasure or removal of shared commitment data. Later spending still
+requires explicit recovery/upgrade.
 
 ## Private interface
 

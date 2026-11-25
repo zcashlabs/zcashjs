@@ -41,7 +41,7 @@ fn prepared_mode(post_zip212:bool,with_signer:bool,internal:bool,ironwood:bool,m
         let input=json!({"accountIndex":0,"birthday":fixture["import"]["birthday"]});
         let result:Value=serde_json::from_str(&crate::wallet::signer::signer_create_account(g,"account_import_hd",&input.to_string(),WORDS.as_bytes().to_vec(),vec![]).unwrap()).unwrap();
         (result["account"].clone(),Some(result["signerToken"].as_u64().unwrap() as u32))
-    }else{(call(g,"account_import",fixture["import"].clone()).unwrap(),None)};
+    }else{let mut import=fixture["import"].clone();if mode.starts_with("view-only"){import["viewOnly"]=json!(true);}(call(g,"account_import",import).unwrap(),None)};
     let scan=|operation:&str,input:Value|crate::wallet::scan::scan_call(g,operation,&input.to_string()).map(|s|serde_json::from_str::<Value>(&s).unwrap()).unwrap();
     let mut revision=scan("scan_plan",json!({"target":fixture["target"]}))["revision"].clone();
     for data in fixture["batches"].as_array().unwrap(){let mut input=data.clone();input["target"]=fixture["target"].clone();input["revision"]=revision;revision=scan("scan_ingest_batch",input)["revision"].clone();}
@@ -51,7 +51,7 @@ fn prepared_mode(post_zip212:bool,with_signer:bool,internal:bool,ironwood:bool,m
     let mut input=json!({"revision":state["revision"],"accountId":account["id"],"payments":[{"to":t["address"],"amount":"10000"},{"to":s["address"],"amount":"10000","memo":hex::encode(zcash_protocol::memo::MemoBytes::empty().as_array())}],
         "policy":{"spendPools":["sapling"],"transparent":"disallow","changePool":if ironwood{"ironwood"}else{"sapling"},"feeRule":"zip317-standard","confirmations":{"trusted":1,"untrusted":1,"allowZeroConfirmationShielding":false},"expiry":{"kind":"offset","blocks":40},"lockExpiryBlocks":20}});
     if mode=="tex" {input["payments"]=json!([{"to":zcash_keys::address::Address::Tex([4;20]).encode(&crate::Document::parse(PARAMS).unwrap()),"amount":"10000"}]);}
-    if mode=="shield"||mode=="fixture" {
+    if mode=="shield"||mode=="fixture"||mode=="view-only-shield" {
         crate::wallet::DOMAIN.with(|domain| {
             let mut domain=domain.borrow_mut();let db=&mut domain.active.iter_mut().find(|a|a.generation==g).unwrap().wallet;
             let zcash_keys::address::Address::Transparent(address)=zcash_keys::address::Address::decode(db.params(),t["address"].as_str().unwrap()).unwrap() else {panic!()};
@@ -67,7 +67,7 @@ fn prepared_mode(post_zip212:bool,with_signer:bool,internal:bool,ironwood:bool,m
         });
         input.as_object_mut().unwrap().remove("payments");input["kind"]=json!("shield");input["threshold"]=json!("10000");input["policy"]["spendPools"]=json!(["transparent"]);input["policy"]["transparent"]=json!("allow-owned");
     }
-    if mode=="fixture"{return(path,g,input,token);}
+    if mode=="fixture"||mode.starts_with("view-only"){return(path,g,input,token);}
     let plan:Value=serde_json::from_str(&crate::wallet::proposal::proposal_call(g,"proposal_create",&input.to_string()).unwrap()).unwrap();
     (path,g,plan,token)
 }
@@ -550,4 +550,22 @@ fn payment_abandon_keeps_idempotency_terminal() {
     input["revision"]=state["revision"].clone();input["idempotencyKey"]=json!("new-shield");
     assert_ne!(create(g,"proposal_create",&input).unwrap()["operationId"],plan["operationId"],"released funds remain selectable for new work");
     crate::wallet::storage_close(g).unwrap();crate::wallet::signer::signer_release(token.unwrap()).unwrap();let _=path;
+}
+
+#[test]
+fn view_only_account_scans_without_marks_and_cannot_propose(){
+    for (mode,refusal) in [("view-only","INSUFFICIENT_FUNDS"),("view-only-shield","NOTHING_TO_SHIELD")] {
+        let (_path,g,input,_)=prepared_mode(true,false,false,false,mode);
+        assert_eq!(crate::wallet::proposal::proposal_call(g,"proposal_create",&input.to_string()).unwrap_err(),refusal,"{mode}");
+        crate::wallet::DOMAIN.with(|domain| {
+            use zcash_client_backend::data_api::WalletCommitmentTrees;
+            let mut domain=domain.borrow_mut();let db=&mut domain.active.iter_mut().find(|a|a.generation==g).unwrap().wallet;
+            assert!(db.with_sapling_tree_mut(|tree|tree.marked_positions()).unwrap().is_empty(),"the real scan path keeps no view-only witness: {mode}");
+        });
+        let balance=call(g,"account_balance",json!({"accountId":input["accountId"],"confirmations":{"trusted":1,"untrusted":1,"allowZeroConfirmationShielding":false}})).unwrap();
+        for pool in [&balance["amounts"]["sapling"],&balance["amounts"]["transparent"]["regular"]] {
+            assert_eq!(pool["spendable"],"0");assert_eq!(pool["locked"],"0");
+        }
+        assert_ne!(balance["amounts"]["sapling"]["pendingSpendability"],"0","view-only value is reported as pending, not hidden");
+    }
 }

@@ -84,7 +84,7 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
         let active=domain.active.iter_mut().find(|a|a.generation==generation).ok_or(Failure::from("STALE_HANDLE"))?;
         active.wallet.transactionally_with_extension(|db,ext|->Result<Value>{
             let revision=super::revision::read(ext)?;
-            let summary=db.get_wallet_summary_in_transaction(ConfirmationsPolicy::MIN)?;
+            let summary=db.get_wallet_summary(ConfirmationsPolicy::MIN)?;
             let scan=json!({"revision":revision,"tipHeight":db.chain_height()?.map(u32::from),
                 "fullyScannedHeight":db.block_fully_scanned()?.map(|b|u32::from(b.block_height())),
                 "maxScannedHeight":db.block_max_scanned()?.map(|b|u32::from(b.block_height())),

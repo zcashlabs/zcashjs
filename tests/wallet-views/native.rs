@@ -487,6 +487,8 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             let confirmed=scan_block(&p,confirmation,&keys,&Nullifiers::empty(),Some(&scan.to_block_metadata())).unwrap();
             db.update_chain_tip(101u32.into()).unwrap();
             db.put_blocks(birthday.prior_chain_state(),vec![scan,confirmed]).unwrap();
+            // The bindings' scan path applies the view-only policy after every put_blocks.
+            db.transactionally_with_extension(|db,ext|crate::wallet::view_only::drop_marks(db,ext)).unwrap();
             let address = *db.get_last_generated_address_matching(account_id,UnifiedAddressRequest::AllAvailableKeys).unwrap().unwrap().transparent().unwrap();
             let output = zcash_client_backend::wallet::WalletTransparentOutput::from_parts(
                 zcash_transparent::bundle::OutPoint::new([10;32],0),
@@ -512,7 +514,7 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             }
         });
         crate::wallet::storage_close(g).unwrap();
-        let mut conn=rusqlite::Connection::open(&path).unwrap();
+        let conn=rusqlite::Connection::open(&path).unwrap();
         if legacy { conn.execute("UPDATE ext_viewing_version SET version=1",[]).unwrap(); }
         for pool in ["sapling","orchard","ironwood"] {
             let count:u32=conn.query_row(&format!("SELECT count(*) FROM {pool}_received_notes WHERE nf IS NOT NULL AND value>0 AND commitment_tree_position=0"),[],|r|r.get(0)).unwrap();
@@ -528,15 +530,10 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             let reader=rusqlite::Connection::open(&path).unwrap();
             reader.execute_batch("BEGIN; SELECT * FROM accounts;").unwrap();
             conn.busy_timeout(std::time::Duration::ZERO).unwrap();
-            let changes=conn.total_changes();
-            assert_eq!(super::initialize(&mut conn).unwrap_err(),"VIEWING_SCHEMA_REQUIRED");
-            assert!(conn.total_changes()>changes,"native migration wrote before blocked COMMIT");
-            assert_eq!(policy_rows(&conn,&tree_tables),before,"all pool writes and version roll back");
-            assert_eq!(policy_rows(&conn,&preserved_tables),preserved);
-            eprintln!("native migration COMMIT blocked: all tree/version writes rolled back");
             assert!(crate::wallet::initialize_path(&path,"zcash-js-network/1",PARAMS,&[3;32]).is_err(),"locked legacy opening must not publish an owner");
             assert!(call(g,"account_list",json!({})).is_err());
             assert_eq!(policy_rows(&conn,&tree_tables),before,"failed open cannot expose a partial migration");
+            assert_eq!(policy_rows(&conn,&preserved_tables),preserved);
             reader.execute_batch("ROLLBACK").unwrap();
         }
         conn.close().unwrap();
@@ -554,7 +551,9 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             eprintln!("legacy={legacy} policy={policy:?} native summary spendable: {:?}", [balance.sapling_balance().spendable_value(),balance.orchard_balance().spendable_value(),balance.ironwood_balance().spendable_value(),balance.unshielded_regular_balance().spendable_value()]);
             for (pool, balance, value) in [("sapling",balance.sapling_balance(),50_000u64),("orchard",balance.orchard_balance(),60_000),("ironwood",balance.ironwood_balance(),60_000),("transparent",balance.unshielded_regular_balance(),70_000)] {
                 assert_eq!(u64::from(balance.total()),value,"viewing total: {pool}");
-                assert_eq!(u64::from(balance.spendable_value()),value*expected as u64,"summary purpose: {pool}");
+                let reported=crate::wallet::view_only::bucket(balance,policy==Some(true));
+                assert_eq!(reported.spendable,value*expected as u64,"summary purpose: {pool}");
+                assert_eq!(reported.pending,value*(1-expected as u64),"view-only value is pending: {pool}");
             }
 
             let sapling=db.with_sapling_tree_mut(|tree| tree.marked_positions()).unwrap();
@@ -565,6 +564,9 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             for (bal,value) in [(summary.account_balances()[&other_id].sapling_balance(),50_000u64),(summary.account_balances()[&other_id].orchard_balance(),60_000),(summary.account_balances()[&other_id].ironwood_balance(),60_000)] {
                 assert_eq!(u64::from(bal.spendable_value()),value,"mixed spending account unchanged");
             }
+            // Upstream storage does not know the view-only policy; the bindings refuse
+            // proposals for view-only accounts instead (view_only_account_scans_without_marks_and_cannot_propose).
+            if expected==1 {
             let selected = db.select_spendable_notes(account_id,
                 zcash_client_backend::data_api::TargetValue::AtLeast(zcash_protocol::value::Zatoshis::const_from_u64(10_000)),
                 &[ShieldedPool::Sapling,ShieldedPool::Orchard,ShieldedPool::Ironwood],102u32.into(),
@@ -579,21 +581,25 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
             for pool in [ShieldedPool::Sapling,ShieldedPool::Orchard,ShieldedPool::Ironwood] {
                 assert_eq!(db.get_spendable_note(&TxId::from_bytes([9;32]),pool,0,102u32.into(),LockFilter::Unfiltered).unwrap().is_some(),expected==1,"{pool:?}");
             }
+            }
         });
         let mut queries=Vec::new();
         for (trusted,untrusted,zero) in [(1,1,true),(2,10,false)] {
             let confirmations=json!({"trusted":trusted,"untrusted":untrusted,"allowZeroConfirmationShielding":zero});
             let args=json!({"accountId":account["id"],"confirmations":confirmations});
+            let view_only=policy==Some(true);
             let native=crate::wallet::DOMAIN.with(|domain| {
                 let d=domain.borrow();let db=&d.active.first().unwrap().wallet;
                 let policy=zcash_client_backend::data_api::wallet::ConfirmationsPolicy::new(
                     std::num::NonZeroU32::new(trusted).unwrap(),std::num::NonZeroU32::new(untrusted).unwrap(),zero).unwrap();
                 let summary=db.get_wallet_summary(policy).unwrap().unwrap();
                 let b=&summary.account_balances()[&account_id];
-                let bucket=|b:&zcash_client_backend::data_api::Balance| json!({
-                    "total":u64::from(b.total()).to_string(),"spendable":u64::from(b.spendable_value()).to_string(),
-                    "locked":u64::from(b.locked_value()).to_string(),"changePendingConfirmation":u64::from(b.change_pending_confirmation()).to_string(),
-                    "pendingSpendability":u64::from(b.value_pending_spendability()).to_string(),"uneconomic":u64::from(b.uneconomic_value()).to_string()});
+                let bucket=|b:&zcash_client_backend::data_api::Balance| {
+                    let (spendable,locked,pending)=(u64::from(b.spendable_value()),u64::from(b.locked_value()),u64::from(b.value_pending_spendability()));
+                    let (spendable,locked,pending)=if view_only{(0,0,pending+spendable+locked)}else{(spendable,locked,pending)};
+                    json!({"total":u64::from(b.total()).to_string(),"spendable":spendable.to_string(),
+                    "locked":locked.to_string(),"changePendingConfirmation":u64::from(b.change_pending_confirmation()).to_string(),
+                    "pendingSpendability":pending.to_string(),"uneconomic":u64::from(b.uneconomic_value()).to_string()})};
                 json!({"accountId":account["id"],"amounts":{"total":"240000","uneconomic":"0","observedTotal":"240000",
                     "transparent":{"regular":bucket(b.unshielded_regular_balance()),"coinbase":bucket(b.unshielded_coinbase_balance())},
                     "sapling":bucket(b.sapling_balance()),"ironwood":bucket(b.ironwood_balance()),
@@ -617,7 +623,9 @@ fn policy_scan_matrix(legacy: bool) -> Vec<Value> {
         if legacy {
             for pool in ["sapling","orchard","ironwood"] {
                 let positions:Vec<u64>=conn.prepare(&format!("SELECT mark_removed_position FROM {pool}_tree_checkpoint_marks_removed ORDER BY mark_removed_position")).unwrap().query_map([],|r|r.get(0)).unwrap().collect::<std::result::Result<_,_>>().unwrap();
-                assert_eq!(positions,if policy==Some(true) {vec![1]} else {vec![0,1]},"only view-only deferred marks removed");
+                // Deferred removal records stay; the view-only mark itself is already gone, so
+                // applying the record at checkpoint pruning is a no-op.
+                assert_eq!(positions,vec![0,1],"upstream removal records are not rewritten");
             }
         }
         if let Some(before)=&migrated {assert_eq!(&after,before,"repeat-open idempotence");}
@@ -953,19 +961,19 @@ fn account_balance_policy_admission_and_native_bucket_extremes() {
             b.add_uneconomic_value(Zatoshis::const_from_u64(n+5))
         }).unwrap();
     }
-    let amounts=balance_amounts(&native).unwrap();
+    let amounts=balance_amounts(&native,false).unwrap();
     for (i,b) in [&amounts["sapling"],&amounts["unsupportedLegacy"]["balance"],&amounts["ironwood"],&amounts["transparent"]["regular"],&amounts["transparent"]["coinbase"]].into_iter().enumerate() {
         let n=(i as u64+1)*10_000;
         assert_eq!(*b,json!({"total":(4*n+10).to_string(),"spendable":(n+1).to_string(),"locked":(n+2).to_string(),"changePendingConfirmation":(n+3).to_string(),"pendingSpendability":(n+4).to_string(),"uneconomic":(n+5).to_string()}));
     }
     assert_eq!(amounts["total"],"600050");assert_eq!(amounts["uneconomic"],"150025");assert_eq!(amounts["observedTotal"],"750075");
-    let empty=balance_amounts(&AccountBalance::ZERO).unwrap();assert_eq!(empty["unsupportedLegacy"],Value::Null);
-    assert_eq!(empty["observedTotal"],"0");assert_eq!(empty["sapling"],balance_bucket(&Balance::ZERO));
+    let empty=balance_amounts(&AccountBalance::ZERO,false).unwrap();assert_eq!(empty["unsupportedLegacy"],Value::Null);
+    assert_eq!(empty["observedTotal"],"0");assert_eq!(empty["sapling"],balance_bucket(&Balance::ZERO,false));
     let mut large=AccountBalance::ZERO;
     large.with_sapling_balance_mut::<_,BalanceError>(|b|b.add_spendable_value(Zatoshis::const_from_u64(MAX_MONEY))).unwrap();
-    assert_eq!(balance_amounts(&large).unwrap()["observedTotal"],MAX_MONEY.to_string());
+    assert_eq!(balance_amounts(&large,false).unwrap()["observedTotal"],MAX_MONEY.to_string());
     large.with_orchard_balance_mut::<_,BalanceError>(|b|b.add_uneconomic_value(Zatoshis::const_from_u64(1))).unwrap();
-    assert_eq!(balance_amounts(&large).unwrap_err().0,"BALANCE_OVERFLOW");
+    assert_eq!(balance_amounts(&large,false).unwrap_err().0,"BALANCE_OVERFLOW");
 }
 
 fn locked_balance_case(source:&Value)->Value {
