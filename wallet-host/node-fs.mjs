@@ -44,7 +44,9 @@ function syncDirectory(dir) {
 //   is the lease and a second owner fails with a sharing violation (EBUSY). Node
 //   passes libuv's UV_FS_O_EXLOCK (not exported in fs.constants); Bun cannot, so it
 //   opens the handle with kernel32 CreateFileW through bun:ffi.
-// Worker trackUnmanagedFds must remain enabled for crash/destruction cleanup.
+// Worker trackUnmanagedFds must remain enabled for crash/destruction cleanup. Bun's
+// Worker.terminate() leaves the worker's descriptors open (zcashlabs/zcashjs#34), so
+// under Bun the owner also records what it holds in a shared ledger; see reclaim().
 const LOCK_EX = 2, LOCK_NB = 4;
 function lockExclusive(fd) {
   if (process.platform === 'linux') {
@@ -84,7 +86,7 @@ function durableSync(fd) {
 const UV_FS_O_EXLOCK = 0x10000000; // libuv include/uv/win.h
 const busy = () => Object.assign(Error('exclusive owner unavailable'), { code: 'EBUSY' });
 /** Windows owner lease on `path`; returns its release function. */
-function windowsLease(path) {
+function windowsLease(path, ledger) {
   windowsPathCheck(path, true, false);
   if (typeof process.versions.bun === 'string' && typeof import.meta.require === 'function') {
     const { dlopen, FFIType, ptr } = import.meta.require('bun:ffi');
@@ -103,23 +105,97 @@ function windowsLease(path) {
       if (error === 32 || error === 33) throw busy();
       throw Object.assign(Error('owner lease unavailable'), { code: 'EIO' });
     }
-    return () => { k32.symbols.CloseHandle(handle); k32.close(); };
+    const slot = publish(ledger, HANDLE, Number(BigInt.asIntN(32, handle)), Number(BigInt.asIntN(32, handle >> 32n)), 0);
+    return () => { unpublish(ledger, slot); k32.symbols.CloseHandle(handle); k32.close(); };
   }
   let fd;
   try { fd = openSync(path, fs.constants.O_CREAT | fs.constants.O_RDWR | UV_FS_O_EXLOCK, 0o600); }
   catch (e) { if (e.code === 'EBUSY') throw busy(); throw e; }
-  return () => closeSync(fd);
+  const slot = publishDescriptor(ledger, fd);
+  return () => { unpublish(ledger, slot); closeSync(fd); };
 }
-export function acquire(root, { create = false } = {}) {
+// Descriptor ledger: an Int32Array over a SharedArrayBuffer of LEDGER_SLOTS entries
+// of [kind, a, b, c]. kind 0 is free, 1 a descriptor (a = fd, b/c = low/high inode
+// bits), 2 a Win32 handle (a/b = low/high bits). The owner publishes an entry only
+// after it opens the resource and clears it before closing, so reclaim() can leak a
+// descriptor but never closes one the owner already gave back.
+export const LEDGER_SLOTS = 64;
+const DESCRIPTOR = 1, HANDLE = 2;
+function checkedLedger(ledger) {
+  if (ledger === undefined) return undefined;
+  if (!(ledger instanceof Int32Array) || !(ledger.buffer instanceof SharedArrayBuffer)
+    || ledger.length !== LEDGER_SLOTS * 4) throw Error('invalid descriptor ledger');
+  return ledger;
+}
+function publish(ledger, kind, a, b, c) {
+  if (ledger === undefined) return -1;
+  for (let slot = 0; slot < LEDGER_SLOTS; slot++) {
+    const at = slot * 4;
+    if (Atomics.load(ledger, at) !== 0) continue;
+    ledger[at + 1] = a; ledger[at + 2] = b; ledger[at + 3] = c;
+    Atomics.store(ledger, at, kind);
+    return slot;
+  }
+  return -1; // Full: the descriptor is still closed normally, only not reclaimable.
+}
+function unpublish(ledger, slot) {
+  if (ledger !== undefined && slot >= 0) Atomics.store(ledger, slot * 4, 0);
+}
+function inodeWords(fd) {
+  const ino = fstatSync(fd, { bigint: true }).ino;
+  return [Number(BigInt.asIntN(32, ino)), Number(BigInt.asIntN(32, ino >> 32n))];
+}
+function publishDescriptor(ledger, fd) {
+  if (ledger === undefined || fd === undefined) return -1;
+  return publish(ledger, DESCRIPTOR, fd, ...inodeWords(fd));
+}
+
+/**
+ * Main-thread cleanup after a worker that owned `root` was terminated without
+ * release(): closes the descriptors and handles its ledger still lists, which frees
+ * the owner lease. Only Bun needs it (Node closes them through trackUnmanagedFds), so
+ * it does nothing elsewhere. A descriptor is closed only if it still refers to the
+ * inode that was recorded; call it only after the worker has fully exited.
+ * Returns the number of entries closed.
+ */
+export function reclaim(ledger) {
+  checkedLedger(ledger);
+  if (typeof process.versions.bun !== 'string') return 0;
+  let closed = 0, k32;
+  try {
+    for (let slot = 0; slot < LEDGER_SLOTS; slot++) {
+      const at = slot * 4, kind = Atomics.exchange(ledger, at, 0);
+      if (kind === DESCRIPTOR) {
+        const fd = ledger[at + 1];
+        let same = false;
+        try { const [lo, hi] = inodeWords(fd); same = lo === ledger[at + 2] && hi === ledger[at + 3]; } catch { }
+        if (same) { try { closeSync(fd); closed++; } catch { } }
+      } else if (kind === HANDLE && windows && typeof import.meta.require === 'function') {
+        if (!k32) {
+          const { dlopen, FFIType } = import.meta.require('bun:ffi');
+          k32 = dlopen('kernel32.dll', { CloseHandle: { args: [FFIType.i64], returns: FFIType.i32 } });
+        }
+        const handle = (BigInt(ledger[at + 2]) << 32n) | BigInt(ledger[at + 1] >>> 0);
+        if (k32.symbols.CloseHandle(handle)) closed++;
+      }
+    }
+  } finally { k32?.close(); }
+  return closed;
+}
+
+export function acquire(root, { create = false, ledger } = {}) {
   if (isMainThread || !['linux', 'darwin', 'win32'].includes(process.platform)) throw Error('dedicated Linux, macOS or Windows worker required');
-  let base, lock, dir;
+  ledger = checkedLedger(ledger);
+  let base, lock, dir, dirSlot = -1;
   try {
     base = fs.realpathSync(root);
     dir = checkedOpen(base, fs.constants.O_RDONLY | fs.constants.O_DIRECTORY, true);
-    if (windows) lock = windowsLease(`${base}/owner.lock`);
+    dirSlot = publishDescriptor(ledger, dir);
+    if (windows) lock = windowsLease(`${base}/owner.lock`, ledger);
     else {
       const fd = checkedOpen(`${base}/owner.lock`, fs.constants.O_CREAT | fs.constants.O_RDWR);
-      lock = () => closeSync(fd);
+      const slot = publishDescriptor(ledger, fd);
+      lock = () => { unpublish(ledger, slot); closeSync(fd); };
       lockExclusive(fd);
     }
     // Validate BOTH preexisting files before SQLite can mutate either one.
@@ -128,13 +204,14 @@ export function acquire(root, { create = false } = {}) {
       catch (e) { if (e.code !== 'ENOENT' || (name === 'wallet.db' && !create)) throw e; }
     }
   } catch (e) {
+    unpublish(ledger, dirSlot);
     if (dir !== undefined) closeSync(dir);
     if (lock !== undefined) lock();
     const held = e.code === 'EBUSY';
     throw Object.assign(Error(held ? 'exclusive owner unavailable' : 'STORAGE_OPEN_FAILED'),
       { code: held ? 'EBUSY' : 'EIO' });
   }
-  const descriptors = new Set();
+  const descriptors = new Map(); // fd → ledger slot
   // Windows FlushFileBuffers needs write access: a read-only handle has nothing to
   // flush and fails with EPERM, so read-only descriptors are not synced on close.
   const readOnlyDescriptors = new Set();
@@ -144,10 +221,11 @@ export function acquire(root, { create = false } = {}) {
       const fd = checkedOpen(`${base}/${path}`, (readOnly ? fs.constants.O_RDONLY : fs.constants.O_RDWR) | (make ? fs.constants.O_CREAT : 0));
       // Persist namespace entries before journal/database writes can depend on them.
       try { syncDirectory(dir); } catch (e) { closeSync(fd); throw e; }
-      descriptors.add(fd); if (readOnly) readOnlyDescriptors.add(fd); return fd;
+      descriptors.set(fd, publishDescriptor(ledger, fd)); if (readOnly) readOnlyDescriptors.add(fd); return fd;
     },
     close(fd) {
       if (!(windows && readOnlyDescriptors.has(fd))) durableSync(fd);
+      unpublish(ledger, descriptors.get(fd) ?? -1);
       fs.closeSync(fd); descriptors.delete(fd); readOnlyDescriptors.delete(fd);
     },
     read: (fd, b, at) => fs.readSync(fd, b, 0, b.length, at),
@@ -166,8 +244,10 @@ export function acquire(root, { create = false } = {}) {
     release() {
       if (!host.owned) return;
       // Hold the lease until every data descriptor is closed.
-      for (const fd of descriptors) { fs.closeSync(fd); descriptors.delete(fd); }
-      descriptors.clear(); readOnlyDescriptors.clear(); if (dir !== undefined) fs.closeSync(dir); lock(); host.owned = false;
+      for (const [fd, slot] of descriptors) { unpublish(ledger, slot); fs.closeSync(fd); descriptors.delete(fd); }
+      descriptors.clear(); readOnlyDescriptors.clear();
+      unpublish(ledger, dirSlot); if (dir !== undefined) fs.closeSync(dir);
+      lock(); host.owned = false;
     },
   };
   return host;
