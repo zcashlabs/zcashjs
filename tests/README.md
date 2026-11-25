@@ -116,3 +116,5 @@ self-contained Node suite and default OPFS bridge test; TLS runs also require
 
 Advanced signer runs read `bundle/tests/signer-fixture.json` from the supplied
 native packet, or `WALLET_SIGNER_FIXTURE`; its original receipt hash is still required.
+
+For native Regtest lifecycle and real external wallet coverage, see [Native Regtest tests](../docs/api/testing.md). `tests/testing/` uses a disposable loopback CLI fixture; the optional `tests/integration/ths-testing.mjs` needs an installed native THS runtime.

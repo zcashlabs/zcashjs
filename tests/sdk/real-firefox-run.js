@@ -81,7 +81,7 @@ try {
   command('tar', ['-xzf', join(runRoot, pack.filename), '--strip-components=1', '-C', join(consumer, 'node_modules/@zcashlabs/zcash.js')]);
   const packageRoot = join(consumer, 'node_modules/@zcashlabs/zcash.js');
   const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json')));
-  assert.deepEqual(Object.keys(manifest.exports), ['.', './grpc-node']);
+  assert.deepEqual(Object.keys(manifest.exports), ['.', './grpc-node', './testing']);
   assert.equal(manifest.exports['.'].import, './dist/src/index.js');
   assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.4' });
   const entry = join(consumer, 'entry.mjs');
