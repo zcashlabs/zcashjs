@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { MessageChannel } from 'node:worker_threads';
+import { MessageChannel, Worker } from 'node:worker_threads';
+import { once } from 'node:events';
 import { attachWalletWorker } from '../../dist/src/wallet/host.js';
 import { installWalletWorker } from '../../dist/src/wallet/worker.js';
 import { defineNetwork } from '../../dist/src/network.js';
@@ -358,4 +359,55 @@ for (const importing of [true, false]) test(`missing authority ${importing ? 're
   });
   if (importing) assert.deepEqual(await host.accounts.list(), []);
   else await assert.rejects(host.accounts.list(), {code:'CLOSED'});
+});
+
+test('scan batches transfer only host-owned copies and keep caller views usable', async t => {
+  const target = { height: 100, hash: '03'.repeat(32) };
+  const seen = [];
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  const { host } = local(t, async (_g, _i, operation, args) => {
+    if (operation === 'account_list') { await gate; return []; }
+    seen.push({ blocks: args.blocks.map(b => [...b]), prior: [...args.priorTreeState],
+      buffers: new Set(args.blocks.map(b => b.buffer)).size });
+    return { revision: 'next', start: 100, endExclusive: 101, blocks: args.blocks.length };
+  }, undefined, { maxQueuedJobs: 4, maxQueuedBytes: 65536 });
+  const backing = new Uint8Array(64).map((_, i) => i);
+  const view = backing.subarray(8, 12), repeated = new Uint8Array([5, 6]), prior = backing.subarray(0, 3);
+  const args = { target, revision: 'old', blocks: [view, repeated, repeated, backing.subarray(10, 11)], priorTreeState: prior };
+  const blocker = host.accounts.list();
+  const controller = new AbortController();
+  const aborted = host.scan.ingest({ ...args, signal: controller.signal });
+  const pending = host.scan.ingest(args);
+  controller.abort();
+  await assert.rejects(aborted, error => error.code === 'ABORTED' && host.completion(error).completion === 'none');
+  backing.fill(0xff); repeated.fill(0xee);
+  release(); await blocker;
+  assert.equal((await pending).revision, 'next');
+  assert.deepEqual(seen, [{ blocks: [[8, 9, 10, 11], [5, 6], [5, 6], [10]], prior: [0, 1, 2], buffers: 4 }]);
+  for (const caller of [backing, view, repeated, prior]) {
+    assert.ok(caller.buffer.byteLength > 0); caller[0] = 1; assert.equal(caller[0], 1);
+  }
+  assert.equal(backing.byteLength, 64);
+  await assert.rejects(host.scan.ingest({ ...args, blocks: [new Uint8Array(40000)] }), error =>
+    error.code === 'RESOURCE_LIMIT' && host.completion(error).completion === 'none');
+  assert.equal((await host.scan.ingest(args)).revision, 'next');
+});
+
+test('real worker thread receives transferred scan copies while caller buffers stay attached', async t => {
+  const { port1, port2 } = new MessageChannel();
+  const worker = new Worker(new URL('./scan-transfer-worker.js', import.meta.url), { workerData: { port: port2 }, transferList: [port2] });
+  const host = attachWalletWorker(port1, () => worker.terminate(), { maxQueuedJobs: 4, maxQueuedBytes: 65536 });
+  worker.on('error', host.crashed); worker.on('exit', host.crashed);
+  t.after(async () => { await host.close().catch(() => {}); });
+  await once(worker, 'message');
+  const backing = new Uint8Array([1, 2, 3, 4, 5, 6]), repeated = new Uint8Array([7]);
+  const args = { target: { height: 100, hash: '03'.repeat(32) }, revision: 'old',
+    blocks: [backing.subarray(2, 4), repeated, repeated], priorTreeState: backing.subarray(0, 1) };
+  const first = host.scan.ingest(args), second = host.scan.ingest(args);
+  backing.fill(0); repeated.fill(0);
+  assert.equal((await first).revision, '1,3,4,7,7');
+  assert.equal((await second).revision, '1,3,4,7,7');
+  assert.equal(backing.buffer.byteLength, 6); assert.equal(repeated.byteLength, 1);
+  assert.equal((await host.scan.ingest(args)).revision, '0,0,0,0,0');
 });
