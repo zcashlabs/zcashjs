@@ -56,7 +56,7 @@ pub fn build(
         ],
     )?;
     let metadata = json(&output.join("metadata.log"))?;
-    let packages = inputs::verify(run, source, cargo, &metadata)?;
+    let packages = inputs::verify(source, cargo, &metadata)?;
     let mut graph = Vec::new();
     for package in metadata["packages"].as_array().unwrap() {
         if package["source"].is_null() {
@@ -111,7 +111,7 @@ pub fn build(
     }
     receipt["raw_wasm_sha256"] = sha(&wasm)?.into();
     receipt["artifacts"] = serde_json::to_value(artifacts)?;
-    inputs::verify(run, source, cargo, &metadata)?;
+    inputs::verify(source, cargo, &metadata)?;
     if inventory(source)? != snapshot {
         return Err("source mutated before completion".into());
     }

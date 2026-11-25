@@ -1,8 +1,8 @@
-//! Exercise the shared codec re-export used by wallet proposals and URI admission.
+//! Exercise the URI admission path used by wallet proposals (normalization + backend codec).
 #![allow(deprecated)]
 
 use zcash_address::{ToAddress, ZcashAddress};
-use zcash_client_backend::zip321::TransactionRequest;
+use crate::wallet::proposal::parse_uri;
 use zcash_protocol::consensus::NetworkType;
 
 fn address() -> String {
@@ -14,26 +14,26 @@ fn optional_flags_match_empty_values_and_roundtrip() {
     let address = address();
     for index in ["", ".3", ".9999"] {
         let prefix = format!("zcash:?address{index}={address}&amount{index}=0.0001");
-        let bare = TransactionRequest::from_uri(&format!("{prefix}&merchantflag{index}")).unwrap();
+        let bare = parse_uri(&format!("{prefix}&merchantflag{index}")).unwrap();
         let empty =
-            TransactionRequest::from_uri(&format!("{prefix}&merchantflag{index}=")).unwrap();
+            parse_uri(&format!("{prefix}&merchantflag{index}=")).unwrap();
         assert_eq!(
             bare, empty,
             "same canonical proposal intent for index {index}"
         );
         assert_eq!(bare.to_uri(), empty.to_uri());
-        assert_eq!(TransactionRequest::from_uri(&bare.to_uri()).unwrap(), bare);
+        assert_eq!(parse_uri(&bare.to_uri()).unwrap(), bare);
     }
 }
 
 #[test]
 fn optional_flags_preserve_case_and_neighboring_values() {
     let address = address();
-    let bare = TransactionRequest::from_uri(&format!(
+    let bare = parse_uri(&format!(
         "zcash:{address}?merchantflag&amount=0.0001&MerchantFlag&label=Keep%20CASE&message=A%26B"
     ))
     .unwrap();
-    let empty = TransactionRequest::from_uri(&format!(
+    let empty = parse_uri(&format!(
         "zcash:{address}?merchantflag=&amount=0.0001&MerchantFlag=&label=Keep%20CASE&message=A%26B"
     ))
     .unwrap();
@@ -78,7 +78,7 @@ fn optional_flags_do_not_relax_required_or_payment_validation() {
         "amount=1&merchantflag#fragment",
     ] {
         assert!(
-            TransactionRequest::from_uri(&format!("zcash:{address}?{query}")).is_err(),
+            parse_uri(&format!("zcash:{address}?{query}")).is_err(),
             "{query}"
         );
     }

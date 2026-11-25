@@ -1,4 +1,4 @@
-use crate::support::{digest, inventory, json, sha, text, write_json, Inventory, Result, Runner};
+use crate::support::{digest, inventory, sha, text, Inventory, Result};
 use flate2::read::GzDecoder;
 use serde_json::{json, Value};
 use std::{
@@ -53,19 +53,6 @@ fn verify_archive(source: &Path, archive: &Path, checksum: &str) -> Result<Inven
     Ok(actual)
 }
 
-fn cached_source(cargo: &Path, stem: &str) -> Result<PathBuf> {
-    let mut matches = Vec::new();
-    for registry in fs::read_dir(cargo.join("registry/src"))? {
-        let candidate = registry?.path().join(stem);
-        if candidate.is_dir() {
-            matches.push(candidate);
-        }
-    }
-    if matches.len() != 1 {
-        return Err(format!("expected one cached source: {stem}").into());
-    }
-    Ok(matches.remove(0))
-}
 fn archive_for(cargo: &Path, source: &Path) -> Result<PathBuf> {
     let registry = source.parent().ok_or("missing registry directory")?;
     if registry.parent() != Some(cargo.join("registry/src").as_path()) {
@@ -80,81 +67,8 @@ fn archive_for(cargo: &Path, source: &Path) -> Result<PathBuf> {
         )))
 }
 
-pub fn prepare(run: &Runner, root: &Path, cargo: &Path) -> Result<()> {
-    let policy = json(&root.join("native-policy/upstream.json"))?;
-    // Fetch outside the root manifest: its patched path dependencies do not exist yet.
-    let scratch = tempfile::tempdir()?;
-    for (name, package) in policy.as_object().ok_or("invalid native policy")? {
-        run.run(
-            scratch.path(),
-            "cargo",
-            &[
-                "info",
-                &format!(
-                    "{name}@{}",
-                    package["version"].as_str().ok_or("missing version")?
-                ),
-            ],
-        )?;
-    }
-    let vendor = root.join("native-policy/vendor");
-    let receipt_path = vendor.join("receipt.json");
-    let prepared = if receipt_path.exists() {
-        json(&receipt_path)?
-    } else {
-        json!({})
-    };
-    let mut current = prepared.as_object().map(|v| v.len()) == policy.as_object().map(|v| v.len());
-    for (name, package) in policy.as_object().ok_or("invalid policy")? {
-        current &= prepared[name]["upstream"] == package["checksum"]
-            && prepared[name]["patch"] == sha(&root.join(format!("native-policy/{name}.patch")))?;
-    }
-    if current {
-        return Ok(());
-    } // Verification below reconstructs even a cached vendor tree.
-    if vendor.exists() {
-        fs::remove_dir_all(&vendor)?;
-    }
-    fs::create_dir_all(&vendor)?;
-    let mut receipt = json!({});
-    for (name, package) in policy.as_object().unwrap() {
-        let stem = format!(
-            "{name}-{}",
-            package["version"]
-                .as_str()
-                .ok_or("missing policy version")?
-        );
-        let source = cached_source(cargo, &stem)?;
-        let archive = archive_for(cargo, &source)?;
-        verify_archive(
-            &source,
-            &archive,
-            package["checksum"]
-                .as_str()
-                .ok_or("missing policy checksum")?,
-        )?;
-        let destination = vendor.join(name);
-        crate::support::copy_tree(&source, &destination)?;
-        let patch = root.join(format!("native-policy/{name}.patch"));
-        run.run(&destination, "git", &["apply", "--check", text(&patch)])?;
-        run.run(&destination, "git", &["apply", text(&patch)])?;
-        receipt[name] = json!({
-            "upstream": package["checksum"],
-            "patch": sha(&patch)?,
-            "files": inventory(&destination)?
-        });
-    }
-    write_json(&receipt_path, &receipt)
-}
-
-pub fn verify(run: &Runner, root: &Path, cargo: &Path, metadata: &Value) -> Result<Value> {
+pub fn verify(root: &Path, cargo: &Path, metadata: &Value) -> Result<Value> {
     let lock: toml::Value = fs::read_to_string(root.join("Cargo.lock"))?.parse()?;
-    let policy_path = root.join("native-policy/upstream.json");
-    let policy = if policy_path.exists() {
-        json(&policy_path)?
-    } else {
-        json!({})
-    };
     let mut packages = json!({});
     for package in metadata["packages"].as_array().ok_or("missing packages")? {
         let name = package["name"].as_str().ok_or("missing package name")?;
@@ -171,38 +85,7 @@ pub fn verify(run: &Runner, root: &Path, cargo: &Path, metadata: &Value) -> Resu
         if source == root {
             continue;
         }
-        let (checksum, actual) = if !policy[name].is_null()
-            && source == root.join("native-policy/vendor").join(name)
-        {
-            if policy[name]["version"] != version {
-                return Err(format!("unexpected policy version: {name}").into());
-            }
-            let cached = cached_source(cargo, &format!("{name}-{version}"))?;
-            let archive = archive_for(cargo, &cached)?;
-            let checksum = policy[name]["checksum"]
-                .as_str()
-                .ok_or("missing policy checksum")?;
-            if sha(&archive)? != checksum {
-                return Err(format!("policy archive checksum mismatch: {name}").into());
-            }
-            let scratch = tempfile::tempdir()?;
-            tar::Archive::new(GzDecoder::new(fs::File::open(&archive)?)).unpack(scratch.path())?;
-            let expected = scratch.path().join(format!("{name}-{version}"));
-            verify_archive(&expected, &archive, checksum)?;
-            run.run(
-                &expected,
-                "git",
-                &[
-                    "apply",
-                    text(&root.join(format!("native-policy/{name}.patch"))),
-                ],
-            )?;
-            let actual = source_inventory(source)?;
-            if source_inventory(&expected)? != actual {
-                return Err(format!("patched source differs from locked inputs: {name}").into());
-            }
-            (checksum, actual)
-        } else {
+        let (checksum, actual) = {
             if package["source"] != "registry+https://github.com/rust-lang/crates.io-index" {
                 return Err(format!("unexpected dependency source: {name}").into());
             }

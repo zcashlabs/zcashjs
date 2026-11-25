@@ -71,7 +71,6 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
         }
     }
     let (sdk, bindgen) = tools::install(&run, root, &cache)?;
-    inputs::prepare(&run, root, &cargo)?;
     run.run(root, "cargo", &["fetch", "--locked"])?;
     fs::create_dir_all(output.parent().ok_or("output has no parent")?)?;
     fs::create_dir(&output)?;
@@ -88,7 +87,7 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "1",
         ],
     )?)?;
-    let packages = inputs::verify(&run, root, &cargo, &metadata)?;
+    let packages = inputs::verify(root, &cargo, &metadata)?;
     configure_wallet(&mut run, root, &cargo, &sdk, &metadata)?;
     run.run(root, "cargo", &["test", "--locked", "--offline", "--lib"])?;
     for name in ["primitive", "bundle"] {
@@ -185,7 +184,7 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "host": {"system": system, "machine": machine},
             "tree": git(&["rev-parse", "HEAD^{tree}"])?,
             "lockSha256": sha(&root.join("Cargo.lock"))?,
-            "nativePolicy": json(&root.join("native-policy/vendor/receipt.json"))?,
+            "nativePolicy": {}, // No upstream crate is patched (#46); kept for receipt readers.
             "packages": packages,
             "rustc": run.capture(root, "rustc", &["-Vv"])?,
             "producerSha256": digest(&serde_json::to_vec(&inventory(&root.join("xtask/src"))?)?),

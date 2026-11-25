@@ -107,6 +107,7 @@ fn execute(generation: u32, operation: &str, v: &Value) -> Result<Value> {
             }
             db.put_blocks(state,scanned)?;
             }
+            super::view_only::drop_marks(db,ext)?;
             super::revision::advance(ext)?;
             Ok(json!({"revision":super::revision::read(ext)?,"start":first,"endExclusive":last.height+1,"blocks":blocks.len()}))
         })?;

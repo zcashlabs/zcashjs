@@ -31,8 +31,6 @@ def main():
     require((source/'build-wallet.py').read_bytes()==helper_bytes,'helper snapshot mismatch')
     git_inputs=inventory(source)
     proposed=False
-    subprocess.run([sys.executable, str(source/'native-policy/prepare.py')],
-        env={**os.environ, 'CARGO_HOME':str(SCRATCH/'cargo')}, check=True)
     inputs=inventory(source)
     env={k:v for k,v in os.environ.items() if k not in ['CC','CXX','AR','LD','RANLIB'] and not k.startswith(('CARGO_','RUST','CC_','AR_','CFLAGS','LIBSQLITE','WALLET_'))}
     sdk=wallet['SDK']
@@ -42,7 +40,6 @@ def main():
     require(sha(inherited)==receipt['inheritedStorageMetadataSha256'],'inherited storage metadata mismatch')
     receipt['inheritedStorageMetadataPath']=str(inherited)
     receipt['storagePrerequisite']='c44bded merged PR3; scoped source incorporation, combined qualification pending'
-    receipt['nativePolicy']=json.loads((source/'native-policy/vendor/receipt.json').read_text())
     receipt['helperSha256']=hashlib.sha256(helper_bytes).hexdigest()
     receipt['gitSources']=git_inputs
     receipt['proposedParentHook']=dict(appliedInScratch=proposed,sha256=sha(source/'tests/wallet-views-storage-hook.patch'),approval='hook incorporated under express owner authorization; independent review pending')
@@ -61,11 +58,6 @@ def main():
             root=Path(p['manifest_path']).parent
             if root==source:
                 require(p['name']=='zakura-network-bindings','local root'); continue
-            if root.is_relative_to(source/'native-policy/vendor'):
-                require(p['name'] in receipt['nativePolicy'] and p['version']=='0.1.0-rc4','owned patch identity')
-                require(inventory(root)==receipt['nativePolicy'][p['name']]['files'],'owned patch mutation')
-                packages[p['name']+'@'+p['version']]=receipt['nativePolicy'][p['name']]
-                continue
             require(p['source']=='registry+https://github.com/rust-lang/crates.io-index','registry source required')
             n,v=p['name'],p['version']
             if n.startswith('zakura-'):

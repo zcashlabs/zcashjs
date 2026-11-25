@@ -63,7 +63,7 @@ fn execute(generation: u32, operation: &str, input: &Value) -> Result<Value> {
                 fields(input,&[])?;
                 active.wallet.transactionally_with_extension(|db,ext| -> Result<Value> {
                     // Scan completeness is upstream-owned and independent of per-account amount projection.
-                    let summary=db.get_wallet_summary_in_transaction(ConfirmationsPolicy::MIN)?;
+                    let summary=db.get_wallet_summary(ConfirmationsPolicy::MIN)?;
                     Ok(json!({"revision":super::revision::read(ext)?,
                         "tipHeight":db.chain_height()?.map(u32::from),
                         "fullyScannedHeight":db.block_fully_scanned()?.map(|b|u32::from(b.block_height())),

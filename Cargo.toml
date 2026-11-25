@@ -67,9 +67,3 @@ hex = "=0.4.3"
 time = { version = "=0.3.55", features = ["wasm-bindgen"], optional = true }
 getrandom = { version = "=0.4.3", features = ["wasm_js"], optional = true }
 uuid = { version = "=1.26.1", features = ["js"], optional = true }
-
-# Materialized from checksum-verified locked archives by cargo xtask build.
-[patch.crates-io]
-zakura-client-backend = { path = "native-policy/vendor/zakura-client-backend" }
-zakura-client-sqlite = { path = "native-policy/vendor/zakura-client-sqlite" }
-zakura-zip321 = { path = "native-policy/vendor/zakura-zip321" }

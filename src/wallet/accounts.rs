@@ -41,11 +41,6 @@ pub(super) fn initialize(conn: &mut rusqlite::Connection) -> std::result::Result
         let bad_accounts:u32=tx.query_row("SELECT count(*) FROM ext_viewing_accounts WHERE length(CAST(metadata AS BLOB))>160000 OR NOT json_valid(metadata) OR length(account_uuid)!=16",[],|r|r.get(0))?;
         let bad_addresses:u32=tx.query_row("SELECT count(*) FROM ext_viewing_addresses WHERE length(diversifier)>27 OR length(address)>1024 OR length(account_uuid)!=16",[],|r|r.get(0))?;
         if objects!=3 || versions!=1 || bad_accounts!=0 || bad_addresses!=0 {return Err(rusqlite::Error::InvalidQuery);}
-        let version:u32=tx.query_row("SELECT version FROM ext_viewing_version WHERE id=1",[],|r|r.get(0))?;
-        if version==1 {
-            zcash_client_sqlite::migrate_view_only_spend_support(&tx).map_err(|_|rusqlite::Error::InvalidQuery)?;
-            tx.execute("UPDATE ext_viewing_version SET version=2 WHERE id=1",[])?;
-        }
         tx.commit()
     })().map_err(|_|"VIEWING_SCHEMA_REQUIRED".into())
 }
@@ -76,15 +71,14 @@ fn record(account: &impl Account<AccountId=AccountUuid>) -> Value {
         "birthdayHeight":u32::from(account.birthday_height()),"accountIndex":account.source().key_derivation().map(|d|u32::from(d.account_index())),
         "viewOnly":account.purpose()==AccountPurpose::ViewOnly,"signerAttached":false})
 }
-fn balance_bucket(balance: &zcash_client_backend::data_api::Balance) -> Value {
-    json!({"total":u64::from(balance.total()).to_string(),
-        "spendable":u64::from(balance.spendable_value()).to_string(),
-        "locked":u64::from(balance.locked_value()).to_string(),
-        "changePendingConfirmation":u64::from(balance.change_pending_confirmation()).to_string(),
-        "pendingSpendability":u64::from(balance.value_pending_spendability()).to_string(),
-        "uneconomic":u64::from(balance.uneconomic_value()).to_string()})
+fn balance_bucket(balance: &zcash_client_backend::data_api::Balance, view_only: bool) -> Value {
+    let b=super::view_only::bucket(balance,view_only);
+    json!({"total":b.total.to_string(),"spendable":b.spendable.to_string(),"locked":b.locked.to_string(),
+        "changePendingConfirmation":b.change.to_string(),"pendingSpendability":b.pending.to_string(),
+        "uneconomic":b.uneconomic.to_string()})
 }
-fn balance_amounts(balance: &zcash_client_backend::data_api::AccountBalance) -> Result<Value> {
+fn balance_amounts(balance: &zcash_client_backend::data_api::AccountBalance, view_only: bool) -> Result<Value> {
+    let balance_bucket=|b:&zcash_client_backend::data_api::Balance|balance_bucket(b,view_only);
     let total=balance.total();
     let uneconomic=balance.uneconomic_value();
     let observed=(total+uneconomic).ok_or(Failure::from("BALANCE_OVERFLOW"))?;
@@ -192,10 +186,10 @@ fn execute(generation: u32, operation: &str, v: &Value) -> Result<Value> {
                     confirmations.get("allowZeroConfirmationShielding").and_then(Value::as_bool).ok_or(Failure::from("INVALID_ARGUMENT"))?,
                 ).map_err(|_|Failure::from("INVALID_ARGUMENT"))?;
                 active.wallet.transactionally_with_extension(|db,ext| -> Result<Value> {
-                    db.get_account(account)?.ok_or(Failure::from("ACCOUNT_NOT_FOUND"))?;
-                    let summary=db.get_wallet_summary_in_transaction(policy)?;
+                    let view_only=db.get_account(account)?.ok_or(Failure::from("ACCOUNT_NOT_FOUND"))?.purpose()==AccountPurpose::ViewOnly;
+                    let summary=db.get_wallet_summary(policy)?;
                     let amounts=summary.as_ref().map(|summary| {
-                        balance_amounts(summary.account_balances().get(&account).ok_or(Failure::from("BACKEND_ERROR"))?)
+                        balance_amounts(summary.account_balances().get(&account).ok_or(Failure::from("BACKEND_ERROR"))?,view_only)
                     }).transpose()?;
                     let scan=json!({"revision":super::revision::read(ext)?,
                         "tipHeight":db.chain_height()?.map(u32::from),

@@ -11,10 +11,9 @@ pre-upgrade epoch is **NU6.3**, in the NU6 family, not base NU6.
 
 Use the host prerequisites and pinned Rust toolchain in [BUILDING.md](../../BUILDING.md):
 Node 22+, Git, curl, a C compiler/binutils, and rustup on supported macOS or
-Linux x86_64 (including WSL2). The locked Cargo dependencies and materialized
-`native-policy/vendor` patches must already be available; the existing
-`cargo xtask build` prepares them (its default Cargo cache is `.cache/sdk/cargo`).
-Use that `CARGO_HOME` if that is where dependencies were fetched.
+Linux x86_64 (including WSL2). The locked Cargo dependencies must already be
+available; the existing `cargo xtask build` fetches them (its default Cargo cache is
+`.cache/sdk/cargo`). Use that `CARGO_HOME` if that is where dependencies were fetched.
 
 From the repository root, run with a fresh scratch directory:
 

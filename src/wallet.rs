@@ -133,6 +133,22 @@ fn initialize(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<
                 transparent_ledger: zcash_client_backend::data_api::transparent_ledger::TransparentLedgerMode::Public,
                 enhancement: zcash_client_backend::data_api::enhance_pir::EnhancementMode::Standard,
             });
+        // Version 1 databases predate the view-only policy and may hold witness marks for
+        // view-only notes. Remove them atomically with the version bump before exposure.
+        let mut wallet = wallet;
+        let migrated = wallet.transactionally_with_extension(|db, ext| -> accounts::Result<()> {
+            let version: u32 = ext.query_row("SELECT version FROM ext_viewing_version WHERE id=1", [], |r| r.get(0))?;
+            if version == 1 {
+                view_only::drop_marks(db, ext)?;
+                ext.execute("UPDATE ext_viewing_version SET version=2 WHERE id=1", [])?;
+            }
+            Ok(())
+        });
+        if migrated.is_err() {
+            drop(wallet);
+            if receipt.borrow().error.is_some() { domain.failed = Some(receipt); return Err("STORAGE_CLOSE_FAILED".into()); }
+            return Err("VIEWING_SCHEMA_REQUIRED".into());
+        }
         domain.generation = generation;
         domain.active.push(Active { transparent_checks:Default::default(), scan_plan:None, wallet, bytes: bytes.to_vec(), generation, receipt });
         Ok(generation)
@@ -197,6 +213,7 @@ mod account_lifecycle;
 pub mod signer;
 
 mod scan;
+mod view_only;
 mod sync;
 mod creation;
 mod proposal;

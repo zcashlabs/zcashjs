@@ -110,20 +110,29 @@ fn project(plan:&wire::Proposal,account:&str,expiry:u32)->Result<Vec<Value>> {
 }
 // ZIP-321 is ABNF, whose literals are case-insensitive (`ZCASH:`, `AMOUNT=`, `REQ-x=`);
 // the pinned parser matches only lower case. Other parameter names, addresses and values keep their case.
-fn lowercase_literals(uri:&str)->String {
+// ZIP-321's `otherparam` also allows an optional flag without `=`, which the pinned parser
+// rejects; such a flag is the same request as `flag=`. Payment fields and `req-` parameters
+// stay bare so the parser still rejects them.
+fn normalize_uri(uri:&str)->String {
     let Some((scheme,rest))=uri.get(..6).zip(uri.get(6..)) else {return uri.into()};
     let (address,query)=rest.split_once('?').map_or((rest,None),|(a,q)|(a,Some(q)));
-    let name=|n:&str|{let lower=n.to_ascii_lowercase();
-        if lower.starts_with("req-")||["address","amount","memo","label","message"].contains(&lower.split('.').next().unwrap_or_default()){lower}else{n.into()}};
+    let literal=|lower:&str|lower.starts_with("req-")||["address","amount","memo","label","message"].contains(&lower.split('.').next().unwrap_or_default());
+    let name=|n:&str|{let lower=n.to_ascii_lowercase();if literal(&lower){lower}else{n.into()}};
+    let flag=|p:&str|if literal(&p.to_ascii_lowercase()){name(p)}else{format!("{p}=")};
     let query=query.map_or(String::new(),|q|format!("?{}",q.split('&').map(|p|p.split_once('=')
-        .map_or(name(p),|(n,v)|format!("{}={v}",name(n)))).collect::<Vec<_>>().join("&")));
+        .map_or_else(||flag(p),|(n,v)|format!("{}={v}",name(n)))).collect::<Vec<_>>().join("&")));
     format!("{}{address}{query}",scheme.to_ascii_lowercase())
+}
+/// Parses a ZIP-321 URI with the pinned backend codec after [`normalize_uri`].
+#[allow(deprecated)]
+pub(crate) fn parse_uri(uri:&str)->std::result::Result<zcash_client_backend::zip321::TransactionRequest,zcash_client_backend::zip321::Zip321Error> {
+    zcash_client_backend::zip321::TransactionRequest::from_uri(&normalize_uri(uri))
 }
 /// A ZIP-321 request whose payments are all for this network; amounts may be absent.
 #[allow(deprecated)]
 fn payment_request(uri:&str,p:&crate::Document)->Result<zcash_client_backend::zip321::TransactionRequest> {
     if uri.len()>8192{return Err("RESOURCE_LIMIT".into());}
-    let request=zcash_client_backend::zip321::TransactionRequest::from_uri(&lowercase_literals(uri)).map_err(|_|Failure::from("INVALID_ARGUMENT"))?;
+    let request=parse_uri(uri).map_err(|_|Failure::from("INVALID_ARGUMENT"))?;
     if request.payments().is_empty()||request.payments().len()>16{return Err("RESOURCE_LIMIT".into());}
     for payment in request.payments().values() {
         zcash_keys::address::Address::try_from_zcash_address(p,payment.recipient_address().clone()).map_err(|_|Failure::from("NETWORK_MISMATCH"))?;
@@ -276,7 +285,7 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
             }
             if operation=="proposal_lookup_intent" {if identity.is_none(){return Err("INVALID_ARGUMENT".into());}return Ok(Value::Null);}
             if super::revision::read(ext)?!=string(input,"revision")? {return Err("STALE_REVISION".into());}
-            if !db.get_wallet_summary_in_transaction(confirmations)?.is_some_and(|s|s.is_synced()){return Err("SYNC_REQUIRED".into());}
+            if !db.get_wallet_summary(confirmations)?.is_some_and(|s|s.is_synced()){return Err("SYNC_REQUIRED".into());}
             let target=u32::from(db.chain_height()?.ok_or(Failure::from("SYNC_REQUIRED"))?).checked_add(1).ok_or(Failure::from("RESOURCE_LIMIT"))?;
             let lock_blocks=height(policy,"lockExpiryBlocks")?;
             if lock_blocks==0{return Err("INVALID_ARGUMENT".into());}
@@ -291,11 +300,13 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
                     if sources.values().any(|a|!owned.contains_key(a)){return Err("INVALID_ARGUMENT".into());}
                     sources.values().copied().collect::<Vec<_>>()};
                 if addresses.is_empty(){return Err("NOTHING_TO_SHIELD".into());}
+                super::view_only::refuse_spend(db,account,true)?;
                 let plan=propose_shielding::<_,_,_,_,rusqlite::Error>(db,&p,&selector,&strategy,threshold,&addresses,account,confirmations,
                     zcash_client_backend::data_api::CoinbaseFilter::AllTransparentOutputs,Some(LockRequest::new(LockOwner::new(id),lock_blocks)))
                     .map_err(|e|Failure::from(match e {zcash_client_backend::data_api::error::Error::InsufficientFunds{..}|zcash_client_backend::data_api::error::Error::Change(zcash_client_backend::fees::ChangeError::InsufficientFunds{..})=>"NOTHING_TO_SHIELD",zcash_client_backend::data_api::error::Error::ScanRequired=>"SYNC_REQUIRED",_=>"BACKEND_ERROR"}))?;
                 wire::Proposal::from_standard_proposal(&plan.with_proposed_version(Some(version)))
             }else{
+                super::view_only::refuse_spend(db,account,false)?;
                 let plan=propose_transfer::<_,_,_,_,rusqlite::Error>(db,&p,account,&selector,&strategy,request.unwrap(),confirmations,&spend,Some(LockRequest::new(LockOwner::new(id),lock_blocks)),Some(version))
                     .map_err(|e|Failure::from(match e {zcash_client_backend::data_api::error::Error::InsufficientFunds{..}=>"INSUFFICIENT_FUNDS",zcash_client_backend::data_api::error::Error::ScanRequired=>"SYNC_REQUIRED",_=>"BACKEND_ERROR"}))?;
                 wire::Proposal::from_standard_proposal(&plan)
