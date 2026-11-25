@@ -9,6 +9,12 @@
   old parameter bytes and now fails to open with `NETWORK_MISMATCH`. Such wallets cannot sync
   past NU7 anyway; restore them from the mnemonic with the new preset. To read one offline,
   open it with the old schedule passed explicitly through `encodeNetworkParameters` (no `Nu7`).
+- `freshness: { mode: 'catch-up' }` now repeats `sync()` passes (up to 8, within
+  `timeoutMs`) while each pass changes the wallet revision or the actionable enhancement
+  count, instead of running exactly one. A finite `sync()` can reach its target with
+  enhancement still outstanding, so `propose()`/`send()` right after a sync could fail with
+  `SYNC_REQUIRED` and succeed on retry, which was common with NU7's 25 s blocks. A pass that
+  changes nothing still ends with `SYNC_REQUIRED` (#35).
 
 ## 0.1.3
 
