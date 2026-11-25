@@ -73,7 +73,7 @@ fn project(plan:&wire::Proposal,account:&str,expiry:u32)->Result<Vec<Value>> {
         let mut outputs=Vec::new();let mut indices=Vec::new();
         for (&payment_index,payment) in request.payments() {
             let pool=step.payment_output_pools.iter().find(|v|v.payment_index as usize==payment_index).ok_or(Failure::from("BACKEND_ERROR"))?;
-            outputs.push(json!({"kind":"payment","accountId":null,"pool":pool_name(pool.value_pool)?,"address":payment.recipient_address().encode(),"amount":u64::from(payment.amount().ok_or(Failure::from("BACKEND_ERROR"))?).to_string(),"memo":payment.memo().map(|m|hex::encode(m.as_array()))}));
+            outputs.push(json!({"kind":"payment","accountId":null,"pool":pool_name(pool.value_pool)?,"address":payment.recipient_address().encode(),"amount":u64::from(payment.amount().ok_or(Failure::from("BACKEND_ERROR"))?).to_string(),"memo":payment.memo().map(|m|hex::encode(m.as_array())),"label":payment.label(),"message":payment.message()}));
             indices.push(payment_index);
         }
         let balance=step.balance.as_ref().ok_or(Failure::from("BACKEND_ERROR"))?;
@@ -108,9 +108,48 @@ fn project(plan:&wire::Proposal,account:&str,expiry:u32)->Result<Vec<Value>> {
     }
     Ok(result)
 }
+// ZIP-321 is ABNF, whose literals are case-insensitive (`ZCASH:`, `AMOUNT=`, `REQ-x=`);
+// the pinned parser matches only lower case. Other parameter names, addresses and values keep their case.
+fn lowercase_literals(uri:&str)->String {
+    let Some((scheme,rest))=uri.get(..6).zip(uri.get(6..)) else {return uri.into()};
+    let (address,query)=rest.split_once('?').map_or((rest,None),|(a,q)|(a,Some(q)));
+    let name=|n:&str|{let lower=n.to_ascii_lowercase();
+        if lower.starts_with("req-")||["address","amount","memo","label","message"].contains(&lower.split('.').next().unwrap_or_default()){lower}else{n.into()}};
+    let query=query.map_or(String::new(),|q|format!("?{}",q.split('&').map(|p|p.split_once('=')
+        .map_or(name(p),|(n,v)|format!("{}={v}",name(n)))).collect::<Vec<_>>().join("&")));
+    format!("{}{address}{query}",scheme.to_ascii_lowercase())
+}
+/// A ZIP-321 request whose payments are all for this network; amounts may be absent.
+#[allow(deprecated)]
+fn payment_request(uri:&str,p:&crate::Document)->Result<zcash_client_backend::zip321::TransactionRequest> {
+    if uri.len()>8192{return Err("RESOURCE_LIMIT".into());}
+    let request=zcash_client_backend::zip321::TransactionRequest::from_uri(&lowercase_literals(uri)).map_err(|_|Failure::from("INVALID_ARGUMENT"))?;
+    if request.payments().is_empty()||request.payments().len()>16{return Err("RESOURCE_LIMIT".into());}
+    for payment in request.payments().values() {
+        zcash_keys::address::Address::try_from_zcash_address(p,payment.recipient_address().clone()).map_err(|_|Failure::from("NETWORK_MISMATCH"))?;
+        if payment.amount()==Some(Zatoshis::ZERO){return Err("INVALID_ARGUMENT".into());}
+    }
+    Ok(request)
+}
 #[allow(deprecated)] // Reuse the pinned backend's ZIP321 types; no second request codec.
 fn payments(input:&Value,p:&crate::Document)->Result<zcash_client_backend::zip321::TransactionRequest> {
     use zcash_client_backend::zip321::{Payment,TransactionRequest};
+    // ZIP-321 payment request URI; `amounts` fills in, by payment index, exactly the payments without one.
+    if let Some(Value::String(uri))=input.get("payments") {
+        let request=payment_request(uri,p)?;
+        let empty=serde_json::Map::new();
+        let amounts=match input.get("amounts") {None=>&empty,Some(Value::Object(m))=>m,_=>return Err("INVALID_ARGUMENT".into())};
+        if amounts.len()!=request.payments().values().filter(|p|p.amount().is_none()).count(){return Err("INVALID_ARGUMENT".into());}
+        let mut filled=std::collections::BTreeMap::new();
+        for (&index,payment) in request.payments() {
+            let amount=match payment.amount() {Some(amount)=>amount,None=>money(&input["amounts"],&index.to_string())?};
+            if amount==Zatoshis::ZERO{return Err("INVALID_ARGUMENT".into());}
+            filled.insert(index,Payment::new(payment.recipient_address().clone(),Some(amount),payment.memo().cloned(),payment.label().cloned(),
+                payment.message().cloned(),payment.other_params().to_vec()).map_err(|_|Failure::from("INVALID_ARGUMENT"))?);
+        }
+        return TransactionRequest::from_indexed(filled).map_err(|_|"INVALID_ARGUMENT".into());
+    }
+    if input.get("amounts").is_some(){return Err("INVALID_ARGUMENT".into());}
     let list=input.get("payments").and_then(Value::as_array).ok_or(Failure::from("INVALID_ARGUMENT"))?;
     if list.is_empty()||list.len()>16{return Err("RESOURCE_LIMIT".into());}
     let mut payments=Vec::new();
@@ -134,12 +173,18 @@ fn payments(input:&Value,p:&crate::Document)->Result<zcash_client_backend::zip32
 }
 
 fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
-    fields(input,match operation {"proposal_create"|"proposal_lookup_intent"=>&["revision","accountId","payments","policy","maxFee","kind","threshold","fromAddresses","idempotencyKey"][..],"proposal_get"=>&["operationId"],"proposal_list"=>&["afterSequence","highWater","limit"],_=>return Err("INVALID_ARGUMENT".into())})?;
+    fields(input,match operation {"proposal_create"|"proposal_lookup_intent"=>&["revision","accountId","payments","amounts","policy","maxFee","kind","threshold","fromAddresses","idempotencyKey"][..],"proposal_get"=>&["operationId"],"proposal_list"=>&["afterSequence","highWater","limit"],"payment_request_parse"=>&["uri"],_=>return Err("INVALID_ARGUMENT".into())})?;
     super::DOMAIN.with(|domain|{
         let mut domain=domain.try_borrow_mut().map_err(|_|Failure::from("STORAGE_BUSY"))?;
         if domain.failed.is_some(){return Err("STORAGE_ERROR".into());}
         let active=domain.active.iter_mut().find(|a|a.generation==generation).ok_or(Failure::from("STALE_HANDLE"))?;
         let p=active.wallet.params().clone();
+        if operation=="payment_request_parse" {
+            let request=payment_request(string(input,"uri")?,&p)?;
+            return Ok(json!({"payments":request.payments().iter().map(|(index,payment)|json!({"index":index.to_string(),"address":payment.recipient_address().encode(),
+                "amount":payment.amount().map(|a|u64::from(a).to_string()),"memo":payment.memo().map(|m|hex::encode(m.as_array())),
+                "label":payment.label(),"message":payment.message()})).collect::<Vec<_>>()}));
+        }
         let parameters=active.bytes.clone();
         active.wallet.transactionally_with_extension(|db,ext|->Result<Value>{
             if operation=="proposal_list" {
@@ -189,7 +234,7 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
             let confirmations=ConfirmationsPolicy::new(height(c,"trusted")?.try_into().map_err(|_|Failure::from("INVALID_ARGUMENT"))?,height(c,"untrusted")?.try_into().map_err(|_|Failure::from("INVALID_ARGUMENT"))?,c.get("allowZeroConfirmationShielding").and_then(Value::as_bool).ok_or(Failure::from("INVALID_ARGUMENT"))?).map_err(|_|Failure::from("INVALID_ARGUMENT"))?;
             let shielding=match input.get("kind") {None=>false,Some(Value::String(s)) if s=="shield"=>true,_=>return Err("INVALID_ARGUMENT".into())};
             if shielding&&(!transparent||string(policy,"transparent")?!="allow-owned"){return Err("UNSUPPORTED_POOL".into());}
-            let request=if shielding {if input.get("payments").is_some(){return Err("INVALID_ARGUMENT".into());}None}else{
+            let request=if shielding {if input.get("payments").is_some()||input.get("amounts").is_some(){return Err("INVALID_ARGUMENT".into());}None}else{
                 if input.get("threshold").is_some()||input.get("fromAddresses").is_some(){return Err("INVALID_ARGUMENT".into());}Some(payments(input,&p)?)};
             let threshold=if shielding {money(input,"threshold")?}else{Zatoshis::ZERO};
             let mut sources=std::collections::BTreeMap::new();

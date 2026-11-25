@@ -8,7 +8,7 @@ const operations = new Set(['account_balance','account_import','account_import_h
 const queries = new Set(['wallet_history','wallet_transaction','wallet_notes','wallet_utxos']);
 const syncs = new Set(['scan_state','scan_block_hash','scan_rewind','scan_complete']);
 const enhancements = new Set(['enhancement_requests','enhancement_apply']);
-const proposals = new Set(['proposal_create','proposal_get','proposal_list','proposal_lookup_intent']);
+const proposals = new Set(['proposal_create','proposal_get','proposal_list','proposal_lookup_intent','payment_request_parse']);
 const pczt = new Set(['fused_send','pczt_finalize','finalized_get','pczt_prove','pczt_build','pczt_get_artifact','pczt_import']);
 const lifecycle = new Set(['account_remove','account_check_key','account_viewing_key']);
 const payments = new Set(['payment_abandon','payment_get','payment_list','payment_reconcile','payment_observe','payment_attempt_begin','payment_attempt_finish','payment_recovery_position']);
@@ -74,8 +74,9 @@ function scanHex(bytes) {
     return new TextDecoder().decode(ascii);
 }
 function lowerProposal(args, operation) {
-  const input=scanFields(args,[...((operation==='proposal_create'||operation==='proposal_lookup_intent')?['revision','accountId','payments','policy','maxFee','kind','threshold','fromAddresses','idempotencyKey']:operation==='proposal_get'?['operationId']:['afterSequence','highWater','limit']),'signal']);delete input.signal;
+  const input=scanFields(args,[...((operation==='proposal_create'||operation==='proposal_lookup_intent')?['revision','accountId','payments','amounts','policy','maxFee','kind','threshold','fromAddresses','idempotencyKey']:operation==='proposal_get'?['operationId']:operation==='payment_request_parse'?['uri']:['afterSequence','highWater','limit']),'signal']);delete input.signal;
   const text=(value,max)=>{if(typeof value!=='string'||value.length>max)throw TypeError('INVALID_ARGUMENT');return value;};
+  if(operation==='payment_request_parse') {text(input.uri,8192);return input;}
   const decimal=value=>{text(value,20);if(!/^(0|[1-9][0-9]*)$/.test(value))throw TypeError('INVALID_ARGUMENT');return value;};
   const money=value=>{if(typeof value!=='bigint'||value<0n||value>2100000000000000n)throw TypeError('INVALID_ARGUMENT');return value.toString();};
   const list=(value,max,project,min=1)=>{
@@ -91,16 +92,24 @@ function lowerProposal(args, operation) {
   text(input.accountId,36);
   if(Object.hasOwn(input,'idempotencyKey')&&text(input.idempotencyKey,1024).length===0)throw TypeError('INVALID_ARGUMENT');
   if(input.kind==='shield') {
-    if(Object.hasOwn(input,'payments'))throw TypeError('INVALID_ARGUMENT');
+    if(Object.hasOwn(input,'payments')||Object.hasOwn(input,'amounts'))throw TypeError('INVALID_ARGUMENT');
     input.threshold=money(input.threshold);
     if(Object.hasOwn(input,'fromAddresses'))input.fromAddresses=list(input.fromAddresses,256,value=>text(value,2048),0);
   }else {
     if(Object.hasOwn(input,'kind')||Object.hasOwn(input,'threshold')||Object.hasOwn(input,'fromAddresses'))throw TypeError('INVALID_ARGUMENT');
-    input.payments=list(input.payments,16,value=>{
+    input.payments=typeof input.payments==='string'?text(input.payments,8192):list(input.payments,16,value=>{
     const payment=scanFields(value,['to','amount','memo']);text(payment.to,2048);payment.amount=money(payment.amount);
     if(Object.hasOwn(payment,'memo')&&payment.memo!==null)payment.memo=scanHex(copyBytes(payment.memo,512,'INVALID_ARGUMENT',0));
     return payment;
   });
+    // Amounts for the URI's payments that omit one, keyed by ZIP-321 payment index.
+    if(Object.hasOwn(input,'amounts')) {
+      if(typeof input.payments!=='string')throw TypeError('INVALID_ARGUMENT');
+      const amounts=scanFields(input.amounts,Reflect.ownKeys(Object(input.amounts)).filter(key=>typeof key==='string'&&/^(0|[1-9][0-9]{0,3})$/.test(key)));
+      if(Object.keys(amounts).length>16)throw TypeError('RESOURCE_LIMIT');
+      for(const key of Object.keys(amounts))amounts[key]=money(amounts[key]);
+      input.amounts=amounts;
+    }
   }
   if(Object.hasOwn(input,'maxFee'))input.maxFee=money(input.maxFee);
   const policy=scanFields(input.policy,['spendPools','transparent','changePool','feeRule','confirmations','expiry','lockExpiryBlocks']);
@@ -349,7 +358,9 @@ export function viewsForStorage(storage) {
           if(output.memo!==null)output.memo=Uint8Array.from(output.memo.match(/../g)??[],hex=>parseInt(hex,16));
         }
       }
-      if(proposals.has(operation)&&operation!=='proposal_list'&&value!==null) {
+      if(operation==='payment_request_parse') {
+        for(const payment of value.payments) {if(payment.amount!==null)payment.amount=BigInt(payment.amount);if(payment.memo!==null)payment.memo=Uint8Array.from(payment.memo.match(/../g),hex=>parseInt(hex,16));}
+      } else if(proposals.has(operation)&&operation!=='proposal_list'&&value!==null) {
         value.totalFee=BigInt(value.totalFee);
         for(const step of value.steps) {step.fee=BigInt(step.fee);for(const input of step.inputs)input.value=BigInt(input.value);for(const output of step.outputs) {output.amount=BigInt(output.amount);if(output.memo!==null)output.memo=Uint8Array.from(output.memo.match(/../g)??[],hex=>parseInt(hex,16));}}
       }

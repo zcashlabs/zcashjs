@@ -36,10 +36,12 @@ if(isMainThread) {
     assert.throws(()=>call(first,'proposal_create',{...input,maxFee:1n}),e=>e.message==='FEE_LIMIT_EXCEEDED'&&e.commit==='none');
     assert.deepEqual(call(first,'proposal_list',{afterSequence:'0',limit:200}).items,[]);
     assert.equal(call(first,'scan_state').revision,revision);
-    const plan=call(first,'proposal_create',input);
+    const plan=call(first,'proposal_create',{...input,payments:`zcash:${address.address}?amount=0.0001&label=Coffee`});
     assert.equal(plan.targetHeight,101);assert.equal(plan.steps[0].outputs[0].address,address.address);
+    assert.equal(plan.steps[0].outputs[0].label,'Coffee');assert.equal(plan.steps[0].outputs[0].message,null);
     assert.equal(plan.steps[0].outputs[1].address,null);assert.equal(typeof plan.totalFee,'bigint');
     assert.throws(()=>call(first,'proposal_create',{...input,revision:plan.revision}),e=>e.message==='INSUFFICIENT_FUNDS'&&e.commit==='none');
+    for(const payments of [`zcash:${address.address}`,'zcash:invalid?amount=1'])assert.throws(()=>call(first,'proposal_create',{...input,revision:plan.revision,payments}),e=>e.message==='INVALID_ARGUMENT'&&e.commit==='none');
     close(first);reopened=open(0,false);
     const inventory=call(reopened,'proposal_list',{afterSequence:'0',limit:1});
     assert.equal(inventory.highWater,'1');assert.equal(inventory.items.length,1);

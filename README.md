@@ -210,6 +210,37 @@ prover or proof-verification claim. Proof material is not required for signing.
 Native role checks remain authoritative; unsupported/malformed material rejects.
 Actual WASM and SDK qualification is separate from these native source fixtures.
 
+### ZIP-321 payment requests
+
+`proposal_create` and `proposal_lookup_intent` accept `payments` either as the
+existing payment list or as a [ZIP-321](https://zips.z.cash/zip-0321) `zcash:`
+URI string of at most 8192 characters. The URI is parsed by the pinned backend's
+ZIP-321 codec. The scheme, the `req-` prefix and the parameter names `address`,
+`amount`, `memo`, `label` and `message` are matched case-insensitively, because
+ZIP-321's grammar is ABNF, whose literal strings are case-insensitive; other
+parameter names, addresses and values are used as written. The URI must request
+1 to 16 payments, and every address must be a non-Sprout address on the
+wallet's network. The codec recognises no `req-` parameters, so any `req-`
+parameter, including `req-asset` (Custom Assets), rejects the URI, as ZIP-321
+requires for `req-` parameters a parser does not recognise. Every payment needs
+a nonzero amount, although ZIP-321 itself permits a zero or omitted amount; a
+URI's omitted amounts can be given as `amounts` (below).
+
+Review payment outputs include the URI's `label` and `message`, or `null` where
+absent. ZIP-321 says a wallet SHOULD display the label together with its
+address, and if it displays the label, the label MUST be identifiable as
+distinct from the address.
+
+`payment_request_parse({uri})` checks a URI the same way, except that it allows
+omitted amounts. It reads only the open wallet's network and changes nothing.
+It returns `{payments:[{index,address,amount,memo,label,message}]}` in ascending
+index order. `index` is a string (`'0'` for the payment without an index),
+`amount` is zatoshis as a bigint, `memo` is the 512-byte memo as a `Uint8Array`,
+and `amount`, `memo`, `label` and `message` are `null` where the URI omits them.
+`amounts` is an object of bigint zatoshis keyed by payment index. It must have
+exactly one entry for each payment that has no amount, and is accepted only
+with a URI; any other entry rejects.
+
 ### Retained PCZT import candidate
 
 `pczt_import_call(generation, operationId, bytes, maximum)` accepts at most 4 MiB for an
