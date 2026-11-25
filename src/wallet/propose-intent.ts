@@ -97,6 +97,11 @@ function payment(value: Payment): { to: string; amount: bigint; memo?: Uint8Arra
   }
   return { to: text(input.to, 2048), amount: money(input.amount), ...(memo === undefined ? {} : { memo }) };
 }
+const CATCH_UP_ROUNDS = 8;
+function progressed(before: SyncStatus, after: SyncStatus) {
+  return after.scan.revision !== before.scan.revision
+    || after.enhancement.actionable !== before.enhancement.actionable;
+}
 function fresh(status: SyncStatus, maxLag: number) {
   const tip = status.scan.tipHeight,
     scanned = status.scan.fullyScannedHeight;
@@ -191,8 +196,13 @@ export function walletPropose(
         }, freshness.timeoutMs);
       }
       let status = await pending.wait(sync.getSyncStatus({ signal: pending.signal }));
-      if (!fresh(status, freshness.maxLagBlocks) && freshness.mode === 'catch-up') {
+      // A finite sync() can reach its target with enhancement still actionable, and a new
+      // block can land meanwhile, so catch-up repeats passes while they make progress.
+      for (let round = 0; freshness.mode === 'catch-up' && round < CATCH_UP_ROUNDS
+        && !fresh(status, freshness.maxLagBlocks); round++) {
+        const before = status;
         status = await pending.wait(sync.sync({ signal: pending.signal }));
+        if (round > 0 && !progressed(before, status)) break;
       }
       pending.check();
       if (!fresh(status, freshness.maxLagBlocks)) {

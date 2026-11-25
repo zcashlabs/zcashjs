@@ -38,3 +38,21 @@ test('idempotent native lookup precedes stale freshness without selecting again'
   assert.equal(await propose(input()),retained);
   assert.throws(()=>walletPropose({}, {},{...policy(),freshness:{mode:'catch-up',maxLagBlocks:0,timeoutMs:0x80000000}}),{code:'INVALID_ARGUMENT'});
 });
+
+test('catch-up repeats sync passes while they progress, then reports SYNC_REQUIRED (#35)',async()=>{
+  const catchup={...policy(),freshness:{mode:'catch-up',maxLagBlocks:0,timeoutMs:10_000}};
+  const pending=n=>({...status(),scan:{...status().scan,revision:`epoch:${n}`},enhancement:{actionable:1,delayed:0}});
+  let creates=0,syncs=0,received;const native={lookup:async()=>null,create:async value=>{creates++;received=value;}};
+  // First pass reaches the target with enhancement outstanding; the second finishes it.
+  const passes=[pending(2),{...status(),scan:{...status().scan,revision:'epoch:3'}}];
+  await walletPropose(native,{getSyncStatus:async()=>pending(1),sync:async()=>passes[syncs++]},catchup)(input());
+  assert.equal(syncs,2);assert.equal(creates,1);assert.equal(received.revision,'epoch:3');
+  // A pass that changes nothing ends catch-up instead of spinning until the deadline.
+  syncs=0;
+  await assert.rejects(walletPropose(native,{getSyncStatus:async()=>pending(1),sync:async()=>{syncs++;return pending(2);}},catchup)(input()),{code:'SYNC_REQUIRED'});
+  assert.equal(syncs,2);
+  // Progress is bounded by a fixed number of rounds.
+  syncs=0;
+  await assert.rejects(walletPropose(native,{getSyncStatus:async()=>pending(0),sync:async()=>pending(++syncs)},catchup)(input()),{code:'SYNC_REQUIRED'});
+  assert.equal(syncs,8);assert.equal(creates,1);
+});
