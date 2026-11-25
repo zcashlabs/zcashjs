@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.4
 
 - Native components are built from zakura-wasm-bindings v0.1.4, which no longer patches any
   upstream crate. Behaviour is unchanged.
