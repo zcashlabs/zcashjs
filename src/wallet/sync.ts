@@ -6,7 +6,8 @@ import { failure, invalidArgument, isZcashError } from '../errors.js';
 import { operation } from '../clients/light-chain-reads.js';
 import { blockHash } from '../primitives.js';
 import type { attachWalletWorker } from './host.js';
-import { applyEnhancement } from './enhancement.js';
+import { applyEnhancement, applyUnspentBatch } from './enhancement.js';
+import type { EnhancementRequest } from './session.js';
 
 type Session = ReturnType<typeof attachWalletWorker>;
 const reverse = (hash: string) => hash.match(/../g)!.reverse().join('');
@@ -46,6 +47,10 @@ export class WalletSync {
   private watching: Promise<void> | undefined;
   private watchController: AbortController | undefined;
   private readonly observation: ObservationOptions;
+  /** Open-ended unspent-address polls already answered at a tip, keyed by request. */
+  private readonly polled: PolledAddresses = new Map();
+  /** Wallet revision right after the last pass that reached `target`; cleared by any new run. */
+  private settledRevision: string | undefined;
   constructor(
     private readonly session: Session,
     private readonly light: LightClient | undefined,
@@ -141,7 +146,7 @@ export class WalletSync {
             } finally {
               waiting.close();
             }
-          } else await this.sync({ signal: controller.signal });
+          } else if (!await this.settled(controller.signal)) await this.sync({ signal: controller.signal });
         } catch (error) {
           if (controller.signal.aborted) break;
           if (!isZcashError(error) || !error.retryable || !['TRANSPORT_ERROR', 'TIMEOUT'].includes(error.code)) {
@@ -156,6 +161,25 @@ export class WalletSync {
       this.watchController = undefined;
       this.startWatching();
     });
+  }
+
+  /**
+   * True when a watcher pass would find nothing new: the last pass reached its target,
+   * the source tip is still that exact block, and no local write has happened since.
+   * Costs one tip read and one local read instead of a full scan/enhancement pass.
+   */
+  private async settled(signal: AbortSignal): Promise<boolean> {
+    const revision = this.settledRevision,
+      target = this.target;
+    if (revision === undefined || !this.reached || !target || !this.light) return false;
+    try {
+      const tip = await this.light.getTip({ signal });
+      if (tip.height !== target.height || tip.hash !== target.hash) return false;
+      const scan = await this.session.scan.state({ signal });
+      return scan.revision === revision && this.settledRevision === revision;
+    } catch {
+      return false; // Let a full pass surface and classify the failure.
+    }
   }
 
   async getSyncStatus(args: Op = {}): Promise<SyncStatus> {
@@ -233,6 +257,7 @@ export class WalletSync {
   }
 
   private async run(target: ChainPoint | undefined, signal: AbortSignal | undefined): Promise<SyncStatus> {
+    this.settledRevision = undefined;
     this.activity = 'running';
     this.reached = false;
     this.lastError = null;
@@ -249,7 +274,7 @@ export class WalletSync {
         const point = target ?? await this.light.getTip({ signal: dependent });
         this.target = Object.freeze({ height: point.height, hash: point.hash });
         try {
-          await syncWallet(this.session, this.light, this.target, dependent, this.scanBatchSize);
+          await syncWallet(this.session, this.light, this.target, dependent, this.scanBatchSize, this.polled);
           break;
         } catch (error) {
           // Only our chain-view checks permit re-pinning; arbitrary protocol errors do not.
@@ -259,6 +284,7 @@ export class WalletSync {
       this.reached = true; // Native completion validates coverage, including an empty wallet.
       this.activity = 'idle';
       const status = await this.getSyncStatus();
+      this.settledRevision = status.scan.revision;
       this.publish(status);
       return status;
     } catch (caught) {
@@ -296,6 +322,22 @@ export class WalletSync {
   }
 }
 
+/**
+ * Open-ended unspent-address requests (`txStatus: 'all'`, `outputStatus: 'unspent'`,
+ * no end height, no `requestAt`) are standing polls: native keeps reissuing them
+ * after a successful answer. Answering each one again against the same tip repeats
+ * a network inventory and decode per transparent address on every watch poll,
+ * so a request is revisited only once the target block changes. Keys are the
+ * serialized request; values are the `height:hash` it was answered at.
+ */
+export type PolledAddresses = Map<string, string>;
+const POLLED_LIMIT = 4096;
+
+function standingPoll(request: EnhancementRequest) {
+  return request.kind === 'address' && request.requestAt === null && request.endExclusive === null
+    && request.txStatus === 'all' && request.outputStatus === 'unspent';
+}
+
 /** Internal finite run used by the wallet owner; all scan decisions and writes remain native. */
 export async function syncWallet(
   session: Session,
@@ -303,11 +345,12 @@ export async function syncWallet(
   target: ChainPoint,
   signal?: AbortSignal,
   scanBatchSize = 16,
+  polled?: PolledAddresses,
 ) {
   if (!Number.isSafeInteger(scanBatchSize) || scanBatchSize < 1) throw invalidArgument();
   for (let attempt = 0; ; attempt++) {
     try {
-      return await syncPass(session, light, target, signal, scanBatchSize);
+      return await syncPass(session, light, target, signal, scanBatchSize, polled);
     } catch (error) {
       // A rejected revision must be replanned, never reused. Bound contention per finite run.
       if (!isZcashError(error) || error.code !== 'CURSOR_STALE' || attempt === 2 || signal?.aborted
@@ -317,7 +360,7 @@ export async function syncWallet(
 }
 
 async function syncPass(session: Session, light: LightClient, target: ChainPoint,
-  signal: AbortSignal | undefined, scanBatchSize: number) {
+  signal: AbortSignal | undefined, scanBatchSize: number, polled: PolledAddresses | undefined) {
   const batchSize = Math.min(scanBatchSize, 16); // Native/control-message ceiling remains authoritative.
   const op = signal === undefined ? {} : { signal };
   const pin = async () => {
@@ -411,7 +454,8 @@ async function syncPass(session: Session, light: LightClient, target: ChainPoint
   for (; ;) {
     const pending = await session.enhancement.requests(op);
     const request = pending.requests.find(value => !visited.has(JSON.stringify(value))
-      && !(value.kind === 'address' && value.requestAt !== null && value.requestAt > Date.now()));
+      && !(value.kind === 'address' && value.requestAt !== null && value.requestAt > Date.now())
+      && !(standingPoll(value) && polled?.get(JSON.stringify(value)) === `${target.height}:${target.hash}`));
     if (!request) break;
     if (visited.size >= 1024) {
       throw failure(
@@ -421,8 +465,35 @@ async function syncPass(session: Session, light: LightClient, target: ChainPoint
         'Sync enhancement pass exceeded its request limit.',
       );
     }
-    visited.add(JSON.stringify(request));
-    await applyEnhancement(session, light, pending.revision, request, signal);
+    const key = JSON.stringify(request);
+    if (standingPoll(request) && request.kind === 'address') {
+      // Answer every due standing poll from this snapshot against one source view.
+      const due = pending.requests.filter((value): value is typeof request => standingPoll(value)
+        && value.kind === 'address' && !visited.has(JSON.stringify(value))
+        && polled?.get(JSON.stringify(value)) !== `${target.height}:${target.hash}`).slice(0, 100);
+      if (due.length > 1) {
+        const committed = await applyUnspentBatch(session, light, pending.revision, due, signal);
+        if (committed !== null) {
+          if (visited.size + due.length > 1024) {
+            throw failure('RESOURCE_LIMIT', 'sync', 'sync', 'Sync enhancement pass exceeded its request limit.');
+          }
+          for (const value of due) visited.add(JSON.stringify(value));
+          if (polled) {
+            if (polled.size + committed.length > POLLED_LIMIT) polled.clear();
+            for (const value of committed) polled.set(JSON.stringify(value), `${target.height}:${target.hash}`);
+          }
+          continue;
+        }
+        // Inventory too large for one response: fall through to one request at a time.
+      }
+    }
+    visited.add(key);
+    const answered = await applyEnhancement(session, light, pending.revision, request, signal);
+    // A deferred inventory (the source moved) stays due on the next pass.
+    if (polled && answered === true && standingPoll(request)) {
+      if (polled.size >= POLLED_LIMIT) polled.clear();
+      polled.set(key, `${target.height}:${target.hash}`);
+    }
   }
   const tree = await pin();
   const current = await session.scan.state(op);

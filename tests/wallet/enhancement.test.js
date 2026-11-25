@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { applyEnhancement } from '../../dist/src/wallet/enhancement.js';
+import { applyEnhancement, applyUnspentBatch } from '../../dist/src/wallet/enhancement.js';
+import { failure } from '../../dist/src/errors.js';
 
 test('address enhancement commits bounded batches but only completes after successful exhaustion', async () => {
   const request = { kind: 'address', address: 'fixture', start: 1, endExclusive: 10, requestAt: null, txStatus: 'mined', outputStatus: 'all' };
@@ -143,4 +144,54 @@ test('unspent item validation rejects accessors and malformed fields before fetc
   await assert.rejects(applyEnhancement(fixture.session, fixture.light, '0', fixture.request), {code: 'PROTOCOL_MISMATCH'});
   assert.equal(reads, 0);
   assert.equal(fixture.control.raw, 0);
+});
+
+test('unspent batch answers several addresses from one source view with one commit each', async () => {
+  const hash = Array.from({ length: 32 }, (_, i) => i.toString(16).padStart(2, '0')).join(''),
+    nativeHash = hash.match(/../g).reverse().join('');
+  const request = address => ({ kind: 'address', address, start: 1, endExclusive: null, requestAt: null,
+    txStatus: 'all', outputStatus: 'unspent' });
+  const requests = ['a', 'b', 'c'].map(request);
+  const shared = '11'.repeat(32);
+  const items = [
+    { txid: shared, outputIndex: 0, address: 'a', value: 1n, script: new Uint8Array([1]), minedHeight: 2 },
+    { txid: shared, outputIndex: 1, address: 'b', value: 2n, script: new Uint8Array([2]), minedHeight: 2 },
+  ];
+  let revision = '0', tips = 0, inventories = 0, raws = 0;
+  const commits = [];
+  const session = { scan: {
+    async state() { return { revision, tipHeight: 50 }; },
+    async block() { return { revision, point: { height: 50, hash: nativeHash } }; },
+  }, enhancement: { async apply(args) {
+    assert.equal(args.revision, revision); commits.push(args);
+    return { revision: revision = String(+revision + 1) };
+  } } };
+  const light = {
+    async getTip() { tips++; return { height: 50, hash, sourceId: 'source', observedAt: 'fixture' }; },
+    async getAddressUtxos({ addresses }) { inventories++; assert.deepEqual(addresses, ['a', 'b', 'c']);
+      return { items, tip: null, sourceId: 'source', observedAt: 'fixture' }; },
+    async getTransaction({ txid }) { raws++; return { txid, raw: new Uint8Array([1, 2]), sourceId: 'source', observedAt: 'fixture',
+      observation: { txid, state: 'mined', inclusion: { height: 2, blockHash: null, confirmations: null }, tip: null,
+        priorInclusion: null, sourceId: 'source', observedAt: 'fixture' } }; },
+  };
+  const committed = await applyUnspentBatch(session, light, '0', requests);
+  assert.deepEqual(committed, requests);
+  assert.equal(tips, 2); assert.equal(inventories, 1); assert.equal(raws, 1, 'a shared transaction is read once');
+  assert.deepEqual(commits.map(c => [c.request.address, c.result.transactions.length, c.result.complete]),
+    [['a', 1, true], ['b', 1, true], ['c', 0, true]]);
+  assert.deepEqual(commits[1].result.transactions[0].unspentOutputs.map(o => o.outputIndex), [1]);
+
+  // A moved source defers every request without committing.
+  commits.length = 0; revision = '0'; tips = 0;
+  light.getTip = async () => ({ height: 50, hash: ++tips === 2 ? 'ff'.repeat(32) : hash, sourceId: 'source', observedAt: 'fixture' });
+  assert.deepEqual(await applyUnspentBatch(session, light, '0', requests), []);
+  assert.equal(commits.length, 0);
+
+  // Too many UTXOs for one response: the caller falls back to one request at a time.
+  light.getTip = async () => ({ height: 50, hash, sourceId: 'source', observedAt: 'fixture' });
+  light.getAddressUtxos = async () => { throw failure('RESOURCE_LIMIT', 'transport', 'configure', 'Too many.'); };
+  assert.equal(await applyUnspentBatch(session, light, '0', requests), null);
+  // Any other failure propagates.
+  light.getAddressUtxos = async () => { throw failure('TRANSPORT_ERROR', 'transport', 'configure', 'Down.', true); };
+  await assert.rejects(applyUnspentBatch(session, light, '0', requests), { code: 'TRANSPORT_ERROR' });
 });

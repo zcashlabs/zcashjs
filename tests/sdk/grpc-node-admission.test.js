@@ -74,7 +74,8 @@ for (const enumerable of [true, false]) {
         assert.equal((await stream.next()).value.length, 1);
         await assert.rejects(stream.next(), { code: 'RESOURCE_LIMIT' });
         assert.equal((await stream.next()).done, true);
-        assert.ok(cancels >= 1); assert.equal(closes, cancels);
+        // Cleanup may cancel more than once; the leased channel closes exactly once.
+        assert.ok(cancels >= 1); assert.equal(closes, 1);
       }
     });
   }
@@ -115,4 +116,57 @@ test('F2 record exclusions do not invoke accessors or proxy traps', async () => 
     await assert.rejects(createGrpcNodeTransport('http://localhost', { ...options, headers: async () => headers }).unary(args), invalid);
   assert.throws(() => createGrpcNodeTransport('http://localhost', { ...options, headers: {} }), invalid);
   assert.equal(effects, 0);
+});
+
+test('F3 channelIdleMs reuses one channel across operations and closes it once idle', async t => {
+  let channels = 0, closes = 0, fail = null;
+  const seen = new Set();
+  const close = Client.prototype.close;
+  t.mock.method(Client.prototype, 'close', function () { closes++; return close.call(this); });
+  t.mock.method(Client.prototype, 'makeUnaryRequest', function (_m, _s, _d, _r, _md, _o, callback) {
+    if (!seen.has(this)) { seen.add(this); channels++; }
+    queueMicrotask(() => fail ? callback(fail) : callback(null, new Uint8Array(6)));
+    return { cancel() {} };
+  });
+  for (const bad of [-1, 1.5, '1', 600_001]) {
+    assert.throws(() => createGrpcNodeTransport('http://localhost', { ...options, channelIdleMs: bad }), invalid);
+  }
+  const transport = createGrpcNodeTransport('http://localhost', { ...options, channelIdleMs: 40 });
+  await transport.unary(args);
+  await Promise.all([transport.unary(args), transport.unary(args)]);
+  await transport.unary(args);
+  assert.equal(channels, 1, 'successive and concurrent operations share a channel');
+  assert.equal(closes, 0, 'still open within the idle window');
+  await new Promise(resolve => setTimeout(resolve, 80));
+  assert.equal(closes, 1, 'closed after the idle window');
+  await transport.unary(args);
+  assert.equal(channels, 2, 'a closed channel is replaced on demand');
+  // A transport failure retires the channel immediately; the next operation opens a new one.
+  fail = { code: 14, details: 'unavailable' };
+  await assert.rejects(transport.unary(args), { code: 'TRANSPORT_ERROR' });
+  assert.equal(closes, 2);
+  fail = null;
+  await transport.unary(args);
+  assert.equal(channels, 3);
+  // A missing record says nothing about the connection.
+  fail = { code: 5, details: 'not found' };
+  await assert.rejects(transport.unary(args));
+  fail = null;
+  await transport.unary(args);
+  assert.equal(channels, 3);
+  await new Promise(resolve => setTimeout(resolve, 80));
+  assert.equal(closes, 3);
+});
+
+test('F3 default channelIdleMs closes the channel when its last operation ends', async t => {
+  let closes = 0;
+  const close = Client.prototype.close;
+  t.mock.method(Client.prototype, 'close', function () { closes++; return close.call(this); });
+  t.mock.method(Client.prototype, 'makeUnaryRequest', (_m, _s, _d, _r, _md, _o, callback) => {
+    queueMicrotask(() => callback(null, new Uint8Array(6)));
+    return { cancel() {} };
+  });
+  const transport = createGrpcNodeTransport('http://localhost', options);
+  await transport.unary(args);
+  assert.equal(closes, 1);
 });

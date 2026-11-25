@@ -3,7 +3,7 @@ import { types } from 'node:util';
 import { Client, Metadata, credentials, status } from '@grpc/grpc-js';
 import type { CustomLightTransport, LightUnaryMethod, LightStreamMethod, ZcashError } from '../types.js';
 import { failure, invalidArgument, isZcashError } from '../errors.js';
-import { recordNotFound } from './grpc-status.js';
+import { isGrpcNotFound, recordNotFound } from './grpc-status.js';
 
 const service = '/cash.z.wallet.sdk.rpc.CompactTxStreamer/';
 const revision = 'lightwire:80575dbe59a9bf2e6b79e2391eb78679c453f1a0477292eb97ea3b58bb6c8b10:d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d';
@@ -34,6 +34,11 @@ export interface GrpcNodeOptions {
   readonly timeoutMs: number;
   readonly headers?: () => Promise<Readonly<Record<string, string>>>;
   readonly limits?: { readonly messageBytes?: number; readonly totalBytes?: number; readonly messages?: number };
+  /**
+   * How long an unused channel stays open for reuse. 0 (default) closes the channel as
+   * soon as no operation holds it. Reuse avoids a TCP+TLS handshake per request.
+   */
+  readonly channelIdleMs?: number;
 }
 function record(value: unknown, keys?: readonly string[]): asserts value is Record<string, unknown> {
   if (!value || typeof value !== 'object' || types.isProxy(value)
@@ -60,14 +65,19 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
   let endpoint: URL;
   let sourceId: string,
     timeoutMs: number,
+    channelIdleMs = 0,
     headers: GrpcNodeOptions['headers'];
   const limits = { messageBytes: 4 * 1024 * 1024, totalBytes: 64 * 1024 * 1024, messages: 65536 };
   try {
     if (typeof url !== 'string' || /[\s\\?#]/.test(url) || !/^https?:\/\//.test(url)) throw invalidArgument();
     endpoint = new URL(url);
     if (endpoint.username || endpoint.password || endpoint.pathname !== '/') throw invalidArgument();
-    record(options, ['sourceId', 'timeoutMs', 'headers', 'limits']);
+    record(options, ['sourceId', 'timeoutMs', 'headers', 'limits', 'channelIdleMs']);
     ({ sourceId, timeoutMs, headers } = options);
+    if (options.channelIdleMs !== undefined) {
+      if (options.channelIdleMs !== 0) integer(options.channelIdleMs, 600_000);
+      channelIdleMs = options.channelIdleMs;
+    }
     if (typeof sourceId !== 'string' || !sourceId.length || sourceId.length > 256) throw invalidArgument();
     integer(timeoutMs, 2147483647);
     if (headers !== undefined && typeof headers !== 'function') throw invalidArgument();
@@ -104,12 +114,62 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
     }
   }
 
+  // One channel is shared by concurrent and successive operations. Each operation holds a
+  // lease; the channel closes once unleased for channelIdleMs (immediately when 0). A
+  // channel that saw a connection-level failure is retired: it closes when its last lease
+  // ends and the next operation opens a fresh one.
+  type Shared = { client: Client; leases: number; retired: boolean; idle: ReturnType<typeof setTimeout> | undefined };
+  let shared: Shared | undefined;
+  function lease(): Shared {
+    if (!shared || shared.retired) {
+      shared = {
+        client: new Client(
+          `${endpoint.hostname}:${endpoint.port || (endpoint.protocol === 'https:' ? '443' : '80')}`,
+          endpoint.protocol === 'https:' ? credentials.createSsl() : credentials.createInsecure(),
+          {
+            'grpc.enable_retries': 0,
+            'grpc.max_receive_message_length': limits.messageBytes,
+            'grpc.max_send_message_length': limits.messageBytes,
+            'grpc.enable_http_proxy': 0,
+          },
+        ),
+        leases: 0,
+        retired: false,
+        idle: undefined,
+      };
+    }
+    clearTimeout(shared.idle);
+    shared.idle = undefined;
+    shared.leases++;
+    return shared;
+  }
+  function release(entry: Shared) {
+    if (--entry.leases > 0) return;
+    const close = () => {
+      if (entry.leases > 0) return;
+      if (shared === entry) shared = undefined;
+      entry.client.close();
+    };
+    if (entry.retired || channelIdleMs === 0) close();
+    else {
+      entry.idle = setTimeout(close, channelIdleMs);
+      (entry.idle as { unref?(): void }).unref?.(); // Never keeps the process alive.
+    }
+  }
+  function retireOn(entry: Shared | undefined, error: unknown) {
+    // Transport failures and timeouts may leave a broken connection; a record that does
+    // not exist, a caller abort or a local limit says nothing about the channel.
+    if (!entry || isGrpcNotFound(error)) return;
+    const code = isZcashError(error) ? error.code : normalize(error).code;
+    if (code === 'TRANSPORT_ERROR' || code === 'TIMEOUT' || code === 'METHOD_NOT_SUPPORTED') entry.retired = true;
+  }
+
   function operation(signal?: AbortSignal) {
     // Private dependent signals observe native cancellation, not caller-dispatched events.
     const dependent = signal === undefined ? undefined : AbortSignal.any([signal]);
     const deadline = Date.now() + timeoutMs;
     let stopped: ZcashError | undefined,
-      client: Client | undefined,
+      held: Shared | undefined,
       call: { cancel(): void } | undefined;
     let rejectStop!: (error: ZcashError) => void;
     const interruption = new Promise<never>((_, reject) => {
@@ -128,7 +188,11 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
       clearTimeout(timer);
       dependent?.removeEventListener('abort', onAbort);
       call?.cancel();
-      client?.close();
+      if (held) {
+        const entry = held;
+        held = undefined; // cleanup can run more than once (stop, then finally)
+        release(entry);
+      }
     }
     if (signal) {
       dependent!.addEventListener('abort', onAbort, { once: true });
@@ -176,18 +240,13 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
           }
         }
         check();
-        // One owned channel per operation keeps disposal out of the custom transport contract.
-        client = new Client(
-          `${endpoint.hostname}:${endpoint.port || (endpoint.protocol === 'https:' ? '443' : '80')}`,
-          endpoint.protocol === 'https:' ? credentials.createSsl() : credentials.createInsecure(),
-          {
-            'grpc.enable_retries': 0,
-            'grpc.max_receive_message_length': limits.messageBytes,
-            'grpc.max_send_message_length': limits.messageBytes,
-            'grpc.enable_http_proxy': 0,
-          },
-        );
-        return { client, metadata };
+        // Disposal stays inside the adapter: leases close idle channels without a
+        // transport-level close in the custom transport contract.
+        held = lease();
+        return { client: held.client, metadata };
+      },
+      fail(error: unknown) {
+        retireOn(held, error);
       },
     };
   }
@@ -214,6 +273,7 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
         if (response.length > limits.totalBytes) throw limit();
         return response;
       } catch (error) {
+        op.fail(error);
         throw normalize(error);
       } finally {
         op.cleanup();
@@ -257,6 +317,7 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
           }
           await op.bounded(terminal);
         } catch (error) {
+          op.fail(error);
           throw normalize(error);
         } finally {
           op.cleanup();

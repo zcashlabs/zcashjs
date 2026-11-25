@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Idle wallets are much cheaper to keep synced (measured on a testnet wallet with 17
+  transparent receivers: 21.6% → 2.6% CPU while watching):
+  - `watchSync()` skips a full pass when the source tip is the block its last pass
+    reached and the wallet revision is unchanged (one tip read and one local read per poll).
+  - Standing unspent-address requests are answered once per target block instead of on
+    every poll, and all due ones share one tip bracket and one `GetAddressUtxos` call
+    (falling back to one request at a time if the combined inventory is too large).
+  - The Node gRPC transport reuses one HTTP/2 channel across operations and closes it
+    after 30 s idle, instead of a TCP+TLS handshake per request (~26 ms → ~5 ms CPU per
+    unary call).
+  One-off `sync()` calls still run full passes and answer every request.
 - Target native `zakura-wasm-bindings` with Node filesystem storage on macOS
   (`flock(2)` owner lease, `F_FULLFSYNC`) and Windows (exclusive-open owner lease
   under Node and Bun). CI runs the filesystem storage tests on macOS and Windows.
