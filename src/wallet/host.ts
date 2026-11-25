@@ -143,7 +143,9 @@ function snapshot(args: object, maximum: number, command: WalletCommand, pcztMax
     throw invalidArgument();
   }
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw invalidArgument();
-  return { args: value, size, signal };
+  // Each owned copy has a fresh, exactly sized backing store that only the queued job references.
+  const transfer = command === 'scan_ingest_batch' ? copied.map(bytes => bytes.buffer as ArrayBuffer) : [];
+  return { args: value, size, signal, transfer };
 }
 
 export interface WalletCompletion {
@@ -178,6 +180,7 @@ export function attachWalletWorker(port: MessagePort, destroy: () => Promise<voi
     command: WalletCommand;
     args: object;
     size: number;
+    transfer: ArrayBuffer[];
     ready: boolean;
     cancelled: boolean;
     cleanup: () => void;
@@ -246,7 +249,7 @@ export function attachWalletWorker(port: MessagePort, destroy: () => Promise<voi
     active = job;
     if (shared) shared.active = true;
     try {
-      port.postMessage({ id: job.id, command: job.command, args: job.args });
+      port.postMessage({ id: job.id, command: job.command, args: job.args }, job.transfer);
     } catch {
       crashed();
     }
@@ -266,7 +269,7 @@ export function attachWalletWorker(port: MessagePort, destroy: () => Promise<voi
     try {
       // One fixed close control is reserved even when the work queue is full.
       input = close
-        ? { args: {}, size: 0, signal: undefined }
+        ? { args: {}, size: 0, signal: undefined, transfer: [] }
         : snapshot(args ?? {}, maxQueuedBytes, command, maxPcztBytes);
       if (input.signal && aborted.call(input.signal)) throw abortError();
       if (!close && !cleanup
@@ -287,6 +290,7 @@ export function attachWalletWorker(port: MessagePort, destroy: () => Promise<voi
         command,
         args: admitted.args,
         size: admitted.size,
+        transfer: admitted.transfer,
         ready: false,
         cancelled: false,
         cleanup: () => { },

@@ -31,6 +31,26 @@ export async function runBrowser() {
     try { await fetch(url); } catch { revoked = true; }
     if (!revoked) throw Error('platform asset was not revoked');
   }
+  const scanTransfer = await (async () => {
+    const worker = new Worker('/tests/wallet/scan-transfer-worker.js', { type: 'module' });
+    const { port1, port2 } = new MessageChannel();
+    const host = attachWalletWorker(port1, async () => worker.terminate(), { maxQueuedJobs: 4, maxQueuedBytes: 65536 });
+    worker.onerror = host.crashed;
+    try {
+      await new Promise((resolve, reject) => {
+        worker.onmessage = ({ data }) => data === 'ready' ? resolve() : reject(Error('scan transfer worker'));
+        worker.postMessage({ port: port2 }, [port2]);
+      });
+      const backing = new Uint8Array([1, 2, 3, 4, 5, 6]), repeated = new Uint8Array([7]);
+      const args = { target: { height: 100, hash: '03'.repeat(32) }, revision: 'old',
+        blocks: [backing.subarray(2, 4), repeated, repeated], priorTreeState: backing.subarray(0, 1) };
+      const first = host.scan.ingest(args);
+      backing.fill(0); repeated.fill(0);
+      if ((await first).revision !== '1,3,4,7,7') throw Error('browser scan transfer bytes');
+      if (backing.buffer.byteLength !== 6 || repeated.byteLength !== 1) throw Error('browser caller buffer detached');
+      return true;
+    } finally { await host.close(); }
+  })();
   const fixture = await (await fetch('/fixture.json')).json();
   const root = `sdk-host-${crypto.randomUUID()}`;
   const parameters = new TextEncoder().encode('{"encoding":"regtest","Overwinter":10,"Sapling":20,"Blossom":30,"Heartwood":40,"Canopy":50,"Nu5":60,"Nu6":70,"Nu6_1":80,"Nu6_2":90,"Nu6_3":100}');
@@ -74,7 +94,7 @@ export async function runBrowser() {
     check(same(await host.addresses.list({ accountId: account.id }), addresses), 'OPFS persisted addresses');
   } finally { await host.close(); }
   await (await navigator.storage.getDirectory()).removeEntry(root, { recursive: true });
-  return { workerDestructions, addresses: addresses.length, persisted: true, userAgent: navigator.userAgent };
+  return { workerDestructions, addresses: addresses.length, persisted: true, scanTransfer, userAgent: navigator.userAgent };
 }
 
 if (typeof process !== 'undefined' && process.versions?.node) {
@@ -147,6 +167,7 @@ if (typeof process !== 'undefined' && process.versions?.node) {
       ['/tests/clients/public-chain-reads-fixtures.js', await readFile(new URL('../clients/public-chain-reads-fixtures.js', import.meta.url))],
     ]);
     assets.set('/tests/wallet/host-native-worker.js', await readFile(new URL('./host-native-worker.js', import.meta.url)));
+    assets.set('/tests/wallet/scan-transfer-worker.js', await readFile(new URL('./scan-transfer-worker.js', import.meta.url)));
     const { addBuildAssets } = await import('../support/build-assets.js');
     await addBuildAssets(assets, '/dist');
     for (const name of ['bindings.js', 'bindings_bg.wasm', 'views.mjs', 'wallet.mjs', 'bytes.mjs',
