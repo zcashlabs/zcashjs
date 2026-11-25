@@ -1,0 +1,41 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -597,5 +597,5 @@
+         character::complete::{alpha1, char, digit0, digit1, one_of},
+         combinator::{all_consuming, map_opt, map_res, opt, recognize},
+-        sequence::{preceded, separated_pair, tuple},
++        sequence::{preceded, tuple},
+     };
+     use percent_encoding::percent_decode;
+@@ -731,9 +731,28 @@
+     }
+
+-    /// The primary parser for `name=value` query-string parameter pairs.
++    /// Parses query parameters, including optional extension flags without `=`.
+     pub fn zcashparam(input: &str) -> IResult<&str, IndexedParam> {
+         map_res(
+-            separated_pair(indexed_name, char('='), recognize(qchars)),
+-            to_indexed_param,
++            tuple((indexed_name, opt(preceded(char('='), recognize(qchars))))),
++            |((name, index), value)| {
++                let value = match value {
++                    Some(value) => value,
++                    None => {
++                        // Only unknown optional parameters may omit `=`. Never turn
++                        // an incomplete payment field or required extension into a flag.
++                        let reserved = ["address", "amount", "memo", "label", "message"]
++                            .iter()
++                            .any(|reserved| name.eq_ignore_ascii_case(reserved));
++                        let required = name
++                            .get(..4)
++                            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("req-"));
++                        if reserved || required {
++                            return Err(format!("Parameter {name} requires a value delimiter"));
++                        }
++                        ""
++                    }
++                };
++                to_indexed_param(((name, index), value))
++            },
+         )(input)
+     }
