@@ -46,8 +46,14 @@ function transactionDto(value: Json, requested: TxId): TransactionDto {
     : undefined;
   if (typeof value.hex !== 'string' || !value.hex.length || value.hex.length > 4194304
     || value.hex.length % 2 !== 0 || !/^[0-9a-f]+$/.test(value.hex)) throw protocolError();
+  const raw = new Uint8Array(value.hex.length / 2);
+  for (let i = 0; i < raw.length; i++) {
+    const high = value.hex.charCodeAt(i * 2);
+    const low = value.hex.charCodeAt(i * 2 + 1);
+    raw[i] = ((high <= 57 ? high - 48 : high - 87) << 4) | (low <= 57 ? low - 48 : low - 87);
+  }
   return {
-    raw: Uint8Array.from(value.hex.match(/../g)!, byte => parseInt(byte, 16)),
+    raw,
     hash,
     height,
     confirmations,

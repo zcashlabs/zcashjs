@@ -141,3 +141,30 @@ test('validated mined height reaches native decoder; off-chain contexts remain n
     mined=false;await getTransaction(source,context,{txid:v.display});assert.equal(seen,null);
   }finally{await server.close();}
 });
+
+test('RPC transaction hex converts every byte value and rejects malformed hex before decoding', async () => {
+  const { getTransaction } = await import(pathToFileURL(`${build}/src/clients/public-transaction-reads.js`));
+  const { httpTransport } = await import(pathToFileURL(`${build}/src/http.js`));
+  const txid = vectors[0].display;
+  let hex = '';
+  const server = await fixture(() => result({ txid, hex, in_active_chain: false }));
+  const source = { transport: httpTransport(`${server.origin}/rpc`, { ...transportOptions, timeoutMs: 15000, maxResponseBytes: 8 * 1024 * 1024 }), sourceId: 'fixture' };
+  let decoded = 0;
+  const context = { txid, decodeTransaction: raw => { decoded++; return { bytes: raw.slice(), txid: Uint8Array.from(Buffer.from(txid, 'hex').reverse()), display: txid }; } };
+  try {
+    const all = Buffer.from(Array.from({ length: 512 }, (_, i) => (i * 7) & 255)).toString('hex');
+    for (const value of ['00', 'ff', '0a', 'a0', all, '0f'.repeat(2097152)]) {
+      hex = value;
+      const actual = await getTransaction(source, context, { txid });
+      assert.ok(actual.raw instanceof Uint8Array);
+      assert.equal(Buffer.from(actual.raw).toString('hex'), value);
+    }
+    const before = decoded;
+    for (const value of ['', '0', 'AB', 'ab cd', ' abcd', 'g0', '0g', 'abcg', '/0', ':0', '`0', '0'.repeat(4194306)]) {
+      hex = value;
+      await assert.rejects(getTransaction(source, context, { txid }), error => error.code === 'PROTOCOL_MISMATCH');
+    }
+    assert.equal(decoded, before);
+    assert.deepEqual(server.unexpected, []);
+  } finally { await server.close(); }
+});
