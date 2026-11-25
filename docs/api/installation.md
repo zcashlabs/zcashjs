@@ -5,7 +5,7 @@
 Use Node **22.23.4**, matching the package engine and repository pin, for Node applications.
 
 ```sh
-npm install @zcashlabs/zcash.js@0.1.3
+npm install @zcashlabs/zcash.js@0.1.4
 ```
 
 The package includes TypeScript declarations, the wallet engine, workers, and
