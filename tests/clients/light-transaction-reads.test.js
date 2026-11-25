@@ -138,7 +138,7 @@ test('accepted native protobuf and all13 native transaction vectors compose with
   const { decodeTransaction } = await import(`${packet}/transaction.mjs`);
   initialize(new Uint8Array(files.get('bindings_bg.wasm')));
   const { source } = fixture(); source.wire = codec;
-  let calls = 0, vector;
+  let calls = 0, sends = 0, vector;
   source.decodeTransaction = value => decodeTransaction(value, vector.branch);
   source.transport.unary = async ({ method, request }) => {
     calls++;
@@ -146,7 +146,7 @@ test('accepted native protobuf and all13 native transaction vectors compose with
       assert.deepEqual(request, bytesField(3, Buffer.from(vector.display, 'hex').reverse()));
       return concat(bytesField(1, Buffer.from(vector.hex, 'hex')), scalar(2, 7));
     }
-    assert.equal(method, 'SendTransaction');
+    assert.equal(method, 'SendTransaction'); sends++;
     assert.deepEqual(request, bytesField(1, Buffer.from(vector.hex, 'hex')));
     return bytesField(2, new TextEncoder().encode(JSON.stringify(vector.display))); // code0 + exact server txid
   };
@@ -157,4 +157,17 @@ test('accepted native protobuf and all13 native transaction vectors compose with
     assert.equal((await methods.broadcastTransaction(source, { bytes: Buffer.from(vector.hex, 'hex') })).outcome, 'acknowledged');
   }
   assert.equal(vectors.length, 13); assert.equal(calls, 26);
+  // Decoder output differing in length, first or last byte is a protocol mismatch, and broadcast never sends.
+  vector = vectors[0];
+  const before = sends, input = Buffer.from(vector.hex, 'hex');
+  for (const mutate of [value => value.subarray(1), value => value.subarray(0, -1),
+    value => { value[0] ^= 1; return value; }, value => { value[value.length - 1] ^= 1; return value; }]) {
+    source.decodeTransaction = value => {
+      const result = decodeTransaction(value, vector.branch);
+      return { ...result, bytes: mutate(new Uint8Array(result.bytes)) };
+    };
+    await assert.rejects(methods.getTransaction(source, { txid: vector.display }), { code: 'PROTOCOL_MISMATCH' });
+    await assert.rejects(methods.broadcastTransaction(source, { bytes: input }), { code: 'PROTOCOL_MISMATCH' });
+  }
+  assert.equal(sends, before); assert.equal(before, 13);
 });

@@ -53,6 +53,13 @@ function encode(source: LightTransactionSource, method: LightUnaryMethod | Light
     throw isZcashError(error) ? error : protocol();
   }
 }
+function equalBytes(left: Uint8Array, right: Uint8Array): boolean {
+  if (left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i] !== right[i]) return false;
+  }
+  return true;
+}
 async function decoded(source: LightTransactionSource, raw: Uint8Array, minedHeight: number | null) {
   let result;
   try {
@@ -62,7 +69,7 @@ async function decoded(source: LightTransactionSource, raw: Uint8Array, minedHei
   }
   const owned = ownBytes(result.bytes, protocol, resource),
     id = ownBytes(result.txid, protocol, resource);
-  if (hex(owned) !== hex(raw) || id.length !== 32 || hex(id.reverse()) !== result.display) throw protocol();
+  if (!equalBytes(owned, raw) || id.length !== 32 || hex(id.reverse()) !== result.display) throw protocol();
   return { raw: owned, txid: txId(result.display) };
 }
 async function transaction(
