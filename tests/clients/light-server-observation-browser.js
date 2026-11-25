@@ -182,7 +182,16 @@ catch (error) { window.lightObservationResult = { ok: false, error: String(error
     } while (!report.result);
     assert.equal(report.result.ok, true, JSON.stringify(report.result));
     await bounded(() => delay(100));
-    assert.equal(fixture.requests.length, 37);
+    // v0.6.0 is a separate successful observation. The exact sequence also
+    // excludes dispatch from the validation and pre-dispatch cancellation cases.
+    assert.deepEqual(fixture.requests.map(r => r.mode), [
+      'main', 'zero', 'maximum', 'unknown', 'fragmented', 'protocol-v060',
+      'default', 'golden', 'height-overflow', 'sapling-overflow', 'uint64-max', 'protocol-missing', 'protocol-other',
+      'branch-upper', 'branch-short', 'branch-newline', 'chain-empty', 'truncated-field', 'wrong-wire', 'utf8',
+      'field-bound', 'missing', 'no-message', 'two', 'base64', 'frame',
+      'message-bound', 'status12', 'status5', 'http-error', 'stall',
+      'main', 'stall', 'main', 'main', 'main', 'main', 'status5',
+    ]);
     assert.ok(fixture.requests.every(r => r.path === '/cash.z.wallet.sdk.rpc.CompactTxStreamer/GetLightdInfo' && r.method === 'POST' && r.body === 'AAAAAAA='));
     assert.equal(fixture.closed.filter(mode => mode === 'stall').length, 2);
     assert.deepEqual([...new Set(fixture.served)].sort(), [...assets.keys()].sort());
