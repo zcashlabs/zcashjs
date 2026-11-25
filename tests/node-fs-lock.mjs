@@ -12,8 +12,9 @@ if (!isMainThread) {
   let host;
   parentPort.on('message', (op) => {
     try {
-      if (op === 'acquire') host = acquire(workerData.root, { create: true });
+      if (op === 'acquire') host = acquire(workerData.root, { create: true, ledger: workerData.ledger });
       if (op === 'release') host.release();
+      if (op === 'hold') host.open('wallet.db', true, false); // left open when the worker dies
       if (op === 'operations') {
         // The SQLite VFS sequence: create, write, sync, close; reopen read-only and
         // read-write; truncate; delete a journal; probe access.
@@ -36,10 +37,12 @@ if (!isMainThread) {
     }
   });
 } else {
+  const { reclaim, LEDGER_SLOTS } = await import(new URL('../wallet-host/node-fs.mjs', import.meta.url));
   const root = mkdtempSync(join(tmpdir(), 'node-fs-lock-'));
-  const spawn = () => new Worker(new URL(import.meta.url), { workerData: { root } });
+  const newLedger = () => new Int32Array(new SharedArrayBuffer(LEDGER_SLOTS * 16));
+  const spawn = (ledger) => new Worker(new URL(import.meta.url), { workerData: { root, ledger } });
   const ask = (worker, op) => new Promise((resolve) => { worker.once('message', resolve); worker.postMessage(op); });
-  const a = spawn(), b = spawn();
+  const a = spawn(newLedger()), ledgerB = newLedger(), b = spawn(ledgerB);
   assert.deepEqual(await ask(a, 'acquire'), { ok: true });
   assert.deepEqual(await ask(a, 'operations'), { ok: true });
   const busy = await ask(b, 'acquire');
@@ -47,14 +50,22 @@ if (!isMainThread) {
   assert.equal(busy.code, 'EBUSY');
   assert.deepEqual(await ask(a, 'release'), { ok: true });
   assert.deepEqual(await ask(b, 'acquire'), { ok: true });
+  assert.deepEqual(await ask(b, 'operations'), { ok: true });
+  assert.deepEqual(await ask(b, 'hold'), { ok: true });
   // A worker that dies without releasing must not leave the lease held. Node closes
-  // the worker's descriptors (trackUnmanagedFds); Bun currently does not, so there
-  // the lease persists until the process exits (zcashlabs/zcashjs#34).
+  // the worker's descriptors (trackUnmanagedFds); Bun does not (zcashlabs/zcashjs#34),
+  // so the parent reclaims what the worker's ledger still lists.
+  const held = [...Array(LEDGER_SLOTS).keys()].filter(slot => ledgerB[slot * 4] !== 0).length;
+  assert.equal(held, process.platform === 'win32' ? 2 : 3, 'directory, owner lease and the open data file; closed files released');
   await b.terminate();
-  const c = spawn();
-  const after = await ask(c, 'acquire');
-  if (process.versions.bun) assert.equal(after.code, 'EBUSY');
-  else assert.deepEqual(after, { ok: true });
+  const c = spawn(newLedger());
+  if (process.versions.bun) {
+    assert.equal((await ask(c, 'acquire')).code, 'EBUSY', 'Bun keeps a terminated worker\'s descriptors open');
+    assert.equal(reclaim(ledgerB), held);
+  } else assert.equal(reclaim(ledgerB), 0);
+  assert.deepEqual(await ask(c, 'acquire'), { ok: true });
+  assert.equal(reclaim(ledgerB), 0, 'reclaim is idempotent');
+  assert.throws(() => reclaim(new Int32Array(4)), /invalid descriptor ledger/);
   await Promise.all([a.terminate(), c.terminate()]);
   console.log(`node-fs owner lease ok on ${process.platform} (${process.versions.bun ? `bun ${process.versions.bun}` : `node ${process.version}`})`);
 }
