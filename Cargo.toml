@@ -72,4 +72,3 @@ uuid = { version = "=1.26.1", features = ["js"], optional = true }
 [patch.crates-io]
 zakura-client-backend = { path = "native-policy/vendor/zakura-client-backend" }
 zakura-client-sqlite = { path = "native-policy/vendor/zakura-client-sqlite" }
-zakura-zip321 = { path = "native-policy/vendor/zakura-zip321" }
