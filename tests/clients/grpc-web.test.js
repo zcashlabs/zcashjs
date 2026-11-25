@@ -516,3 +516,34 @@ test('a terminal failure after an emitted message stays a trusted gRPC status', 
     return true;
   });
 });
+
+test('every byte is classified as a base64 symbol, pad or invalid, and nonzero pad bits fail', async t => {
+  let response;
+  t.mock.method(globalThis, 'fetch', async () => response);
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const all = Uint8Array.from({ length: 256 }, (_, i) => i);
+  response = reply(base64(concat(frame(all), trailer())));
+  assert.deepEqual(await collect(stream(create())), [[...all]]);
+  const body = new TextEncoder().encode(base64(concat(frame(new Uint8Array([1])), trailer())));
+  for (let byte = 0; byte < 256; byte++) {
+    if (byte === 61 || alphabet.includes(String.fromCharCode(byte))) continue;
+    for (const at of [0, 3, 10]) {
+      const bytes = body.slice();
+      bytes[at] = byte;
+      response = new Response(bytes, { headers: { 'content-type': media } });
+      await assert.rejects(collect(stream(create())), { code: 'PROTOCOL_MISMATCH' }, String(byte));
+    }
+  }
+  // A 7- or 8-byte frame leaves one or two bytes for a padded final quartet.
+  for (let value = 0; value < 64; value++) {
+    for (const [payload, quartet, mask] of [
+      [[5, 6], `B${alphabet[value]}==`, 15], [[5, 6, 7], `BB${alphabet[value]}=`, 3],
+    ]) {
+      const head = frame(new Uint8Array(payload)).subarray(0, 6);
+      response = reply(base64(head) + quartet + base64(trailer()));
+      const tail = [...atob(quartet)].map(symbol => symbol.charCodeAt(0));
+      if ((value & mask) === 0) assert.deepEqual(await collect(stream(create())), [[payload[0], ...tail]]);
+      else await assert.rejects(collect(stream(create())), { code: 'PROTOCOL_MISMATCH' }, quartet);
+    }
+  }
+});

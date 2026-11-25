@@ -86,11 +86,16 @@ function encode(request: Uint8Array): string {
   return btoa(binary);
 }
 
+// Byte to base64 symbol value; '=' maps to 64 and every other byte to -1.
+const base64Values = new Int8Array(256).fill(-1);
+for (const [index, symbol] of [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='].entries()) {
+  base64Values[symbol.charCodeAt(0)] = index;
+}
+
 async function* decodeBase64(
   read: () => Promise<ReadableStreamReadResult<Uint8Array>>,
   limits: Limits,
 ): AsyncGenerator<Uint8Array> {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   const quartet: number[] = [];
   let wire = 0,
     decoded = 0;
@@ -102,7 +107,7 @@ async function* decodeBase64(
     let output = new Uint8Array(12288),
       used = 0;
     for (const byte of chunk.value) {
-      const value = alphabet.indexOf(String.fromCharCode(byte));
+      const value = base64Values[byte]!;
       if (value < 0) throw protocol();
       quartet.push(value);
       if (quartet.length !== 4) continue;
