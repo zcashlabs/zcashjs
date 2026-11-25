@@ -51,6 +51,9 @@ export async function stageWalletWorkers(copyFile: (name: string) => Uint8Array,
       channels: () => new threads.MessageChannel() as unknown as MessageChannel,
       spawn(name: string, events: WorkerEvents): RuntimeWorker {
         const worker = new threads.Worker(new URL(urls[name]!), { trackUnmanagedFds: true });
+        // Bun's terminate() can resolve before the thread stops; descriptor reclaim
+        // after termination must not race a still-running worker.
+        const exited = new Promise<void>(resolve => worker.once('exit', () => resolve()));
         worker.on('message', events.message);
         worker.on('error', events.error);
         worker.on('exit', events.error);
@@ -58,7 +61,10 @@ export async function stageWalletWorkers(copyFile: (name: string) => Uint8Array,
         return {
           postMessage: (value, transfer) => worker.postMessage(value,
             transfer as import('node:worker_threads').Transferable[]),
-          terminate: () => worker.terminate(),
+          terminate: async () => {
+            await worker.terminate();
+            await exited;
+          },
           removeEvents() {
             worker.off('message', events.message);
             worker.off('error', events.error);

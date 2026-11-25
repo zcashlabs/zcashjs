@@ -16,6 +16,13 @@
   `SYNC_REQUIRED` and succeed on retry, which was common with NU7's 25 s blocks. A pass that
   changes nothing still ends with `SYNC_REQUIRED` (#35).
 
+- Under Bun, a filesystem wallet whose worker died without an orderly close (crash,
+  invalidation, runtime trap) can be reopened in the same process. Bun's
+  `Worker.terminate()` leaves the worker's descriptors open, so the owner lease stayed held
+  and reopening failed with `STORAGE_BUSY` until the process exited. Each wallet now records
+  its descriptors in a shared ledger that the runtime reclaims after the worker has fully
+  exited (native `zakura-wasm-bindings` v0.1.3) (#34).
+
 ## 0.1.3
 
 - Idle wallets are much cheaper to keep synced (measured on a testnet wallet with 17

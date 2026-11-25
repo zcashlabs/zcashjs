@@ -45,7 +45,9 @@ type OpenRequest = {
   type: 'open';
   id: unknown;
   port: MessagePort;
-  storage: { kind: 'memory' } | { kind: 'persistent'; location: string; hostUrl: string; encryptionKey?: Uint8Array };
+  storage: { kind: 'memory' } | {
+    kind: 'persistent'; location: string; hostUrl: string; encryptionKey?: Uint8Array; ledger?: Int32Array;
+  };
   parametersFormat: string;
   parameters: Uint8Array;
   genesis: Uint8Array;
@@ -87,7 +89,16 @@ function openRequest(data: Record<string, unknown>): OpenRequest {
     const key = record.encryptionKey;
     const validKey = key instanceof Uint8Array && key.length === ENCRYPTION_KEY_BYTES;
     if (key !== undefined && (!node || !validKey)) failed('INVALID_ARGUMENT');
-    location = { kind: 'persistent', location: path, hostUrl: data.hostUrl, ...(key ? { encryptionKey: key } : {}) };
+    const ledger = data.ledger;
+    if (ledger !== undefined && (!node || !(ledger instanceof Int32Array)
+      || !(ledger.buffer instanceof SharedArrayBuffer))) failed('INVALID_ARGUMENT');
+    location = {
+      kind: 'persistent',
+      location: path,
+      hostUrl: data.hostUrl,
+      ...(key ? { encryptionKey: key } : {}),
+      ...(ledger ? { ledger } : {}),
+    };
   }
   if (!isPort(data.port) || !(data.genesis instanceof Uint8Array) || data.genesis.length !== 32
     || !(data.parameters instanceof Uint8Array) || data.parameters.length < 1 || data.parameters.length > 256
@@ -211,7 +222,8 @@ async function acquireStorage(storage: PersistentRequest): Promise<StorageBacken
     }
   }
   const host = await import(storage.hostUrl);
-  const backend = await host.acquire(storage.location, { create: true }) as StorageBackend;
+  const backend = await host.acquire(storage.location,
+    { create: true, ...(storage.ledger ? { ledger: storage.ledger } : {}) }) as StorageBackend;
   try {
     if (!node) return backend;
     if (!storage.encryptionKey) return checkUnencryptedStorage(backend);
