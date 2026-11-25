@@ -11,8 +11,10 @@ const mainnet = await defineNetwork(); // same as defineNetwork('mainnet')
 const testnet = await defineNetwork('testnet');
 ```
 
-The package includes genesis hashes and activation schedules through NU6.3,
-matching the bundled `zcash_protocol` 0.10.6. Presets are release-pinned, not
+The package includes genesis hashes and activation schedules through NU7
+(mainnet 3543405, testnet 4465026). Presets are version-2 parameter documents.
+Upgrades through NU6.3 match the bundled `zcash_protocol` 0.10.6; NU7 uses the
+deployed activation heights, which that crate still leaves unset. Presets are release-pinned, not
 downloaded or inferred from your endpoint. Future upgrades require an updated
 SDK or an explicit matching definition. The normal light-client endpoint form
 creates this network for you; reuse `light.network` for the wallet.
