@@ -97,7 +97,7 @@ export class ProvingAssets {
   private closed = false;
   private readonly abort = new AbortController();
   private running: Promise<{ spend: Uint8Array; output: Uint8Array }> | undefined;
-  constructor(options: LocalProvingOptions) {
+  constructor(options: LocalProvingOptions, private readonly packageOwned = false) {
     const input = provingOptions(options);
     this.requirements = input.assets;
     this.cache = input.cache;
@@ -156,12 +156,16 @@ export class ProvingAssets {
           );
           this.check();
           pending.check();
-          value = ownBytes(
-            delivered,
-            () => fail('ASSET_INTEGRITY'),
-            () => fail('RESOURCE_LIMIT'),
-            expected.byteLength,
-          );
+          // The wallet's default package loader returns a fresh exact-size buffer nobody else holds;
+          // caller-supplied loaders are snapshotted because they may retain or mutate their bytes.
+          value = this.packageOwned
+            ? delivered
+            : ownBytes(
+                delivered,
+                () => fail('ASSET_INTEGRITY'),
+                () => fail('RESOURCE_LIMIT'),
+                expected.byteLength,
+              );
           if (value.byteLength !== expected.byteLength
             || await hash(value) !== expected.sha256) throw fail('ASSET_INTEGRITY');
           this.check();

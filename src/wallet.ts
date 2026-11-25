@@ -220,7 +220,7 @@ export async function createWalletClient(
     pending.check();
     accounts = walletAccounts(wallet, input.network);
     sync = new WalletSync(wallet.session, light, observation, runtime.scanBatchSize);
-    const proposals = new WalletProposals(wallet.session, input.network, proving);
+    const proposals = new WalletProposals(wallet.session, input.network, proving, input.proving === undefined);
     const submissionSync = sync;
     payments = new WalletPayments(wallet, proposals, options,
       light ? signal => submissionSync.refreshForSubmission(signal) : undefined);
