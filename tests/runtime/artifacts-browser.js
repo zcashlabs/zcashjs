@@ -116,6 +116,8 @@ export async function serveFixture({ cert, key, hostname = 'localhost' }) {
   const routes = new Map(await Promise.all([
     ['/tests/runtime/artifacts-browser.js', new URL(import.meta.url)],
     ['/dist/src/runtime/artifacts.js', new URL('../../dist/src/runtime/artifacts.js', import.meta.url)],
+    ['/dist/src/runtime/bundled-assets.mjs', new URL('../../dist/src/runtime/bundled-assets.mjs', import.meta.url)],
+    ['/dist/src/runtime/package-assets.js', new URL('../../dist/src/runtime/package-assets.js', import.meta.url)],
     ['/dist/src/abort.js', new URL('../../dist/src/abort.js', import.meta.url)],
     ['/dist/src/errors.js', new URL('../../dist/src/errors.js', import.meta.url)],
   ].map(async ([path, file]) => [path, await readFile(file)])));
