@@ -112,6 +112,8 @@ export function grpcAdapter(transport: GrpcTransport): CustomLightTransport {
           ...common,
           sourceId: options.sourceId,
           limits: { ...limits, totalBytes: Math.min(options.maxResponseBytes, 64 * 1024 * 1024) },
+          // Reuse the HTTP/2 connection across polls instead of a TLS handshake per request.
+          channelIdleMs: 30_000,
         },
       );
     }

@@ -1,5 +1,5 @@
 import type { LightClient, PublicTransaction, TxId } from '../types.js';
-import { failure } from '../errors.js';
+import { failure, isZcashError } from '../errors.js';
 import { snapshot, ownBytes } from '../clients/owned-plumbing.js';
 import { operation } from '../clients/light-chain-reads.js';
 import { blockHash, txId } from '../primitives.js';
@@ -246,6 +246,102 @@ async function unspent(session: Session, light: LightClient, revision: string,
       ...op,
     });
     return true;
+  } finally {
+    pending.close();
+  }
+}
+
+type AddressRequest = Extract<EnhancementRequest, { kind: 'address' }>;
+
+/**
+ * Answers several open-ended unspent-address requests against one source view: one tip
+ * bracket, one GetAddressUtxos (at most 100 addresses), shared raw-transaction reads,
+ * then one native commit per request, exactly as `unspent` would for each alone.
+ * Resolves the requests that were committed; an empty array means the inventory was
+ * deferred (the source moved). Resolves null when the combined inventory exceeds the
+ * response limit, so the caller answers the requests one by one instead.
+ */
+export async function applyUnspentBatch(session: Session, light: LightClient, revision: string,
+  requests: readonly AddressRequest[], signal?: AbortSignal): Promise<AddressRequest[] | null> {
+  if (!requests.length || requests.length > 100) {
+    throw failure('INVALID_ARGUMENT', 'sync', 'correct-input', 'Invalid unspent batch.');
+  }
+  const pending = operation(signal),
+    op = { signal: pending.signal };
+  try {
+    pending.check();
+    const before = sourcePoint(await pending.wait(light.getTip(op)));
+    const local = await session.scan.state(op),
+      block = await session.scan.block({ height: before.height, ...op });
+    const nativeHash = before.hash.match(/../g)!.reverse().join('');
+    if (local.revision !== revision || block.revision !== revision) {
+      throw failure('CURSOR_STALE', 'sync', 'sync', 'Wallet changed before unspent enhancement.');
+    }
+    if (local.tipHeight !== null && before.height > local.tipHeight) return [];
+    if (block.point?.height !== before.height || block.point.hash !== nativeHash) {
+      throw failure('RECOVERY_REQUIRED', 'sync', 'sync', 'Source tip is not the retained native chain point.');
+    }
+    if (local.tipHeight !== before.height) return [];
+    const addresses = [...new Set(requests.map(request => request.address))];
+    let response: unknown;
+    try {
+      response = await pending.wait(light.getAddressUtxos({ addresses: addresses as [string, ...string[]], ...op }));
+    } catch (error) {
+      if (isZcashError(error) && error.code === 'RESOURCE_LIMIT') return null;
+      throw error;
+    }
+    const all = evidence(response, ['items', 'tip', 'sourceId', 'observedAt']);
+    if (!Array.isArray(all.items)) throw protocol();
+    const count: unknown = Object.getOwnPropertyDescriptor(all.items, 'length')?.value;
+    if (typeof count !== 'number' || !Number.isInteger(count) || count < 0 || count > 1000) return null;
+    const byAddress = new Map<string, unknown[]>(addresses.map(address => [address, []]));
+    for (let i = 0; i < count; i++) {
+      const field = Object.getOwnPropertyDescriptor(all.items, String(i));
+      if (!field || !('value' in field)) throw protocol();
+      const owner = evidence(field.value, ['txid', 'outputIndex', 'address', 'value', 'script', 'minedHeight']).address;
+      const list = typeof owner === 'string' ? byAddress.get(owner) : undefined;
+      if (!list) throw protocol();
+      list.push(field.value);
+    }
+    // Each request is validated and bounded exactly as a single-address inventory.
+    const raws = new Map<TxId, Uint8Array>();
+    type Committed = { txid: TxId; bytes: Uint8Array; minedHeight: number | null; unspentOutputs: UnspentOutput[] };
+    const results: { request: AddressRequest; batch: Committed[] }[] = [];
+    for (const request of requests) {
+      const groups = unspentInventory({ ...all, items: byAddress.get(request.address)! }, before,
+        request.address, request.start);
+      const batch: Committed[] = [];
+      let bytes = 0;
+      for (const [id, group] of groups) {
+        pending.check();
+        const scriptBytes = group.outputs.reduce((n, output) => n + output.script.length, 0);
+        let raw = raws.get(id);
+        if (!raw) {
+          const supplied = await pending.wait(light.getTransaction({ txid: id, ...op }));
+          raw = unspentTransaction(supplied, id, before.sourceId, group.height, 2 * 1024 * 1024 - bytes - scriptBytes);
+          raws.set(id, raw);
+        } else if (raw.length > 2 * 1024 * 1024 - bytes - scriptBytes) throw limit();
+        batch.push({ txid: id, bytes: raw, minedHeight: group.height, unspentOutputs: group.outputs });
+        bytes += raw.length + scriptBytes;
+      }
+      results.push({ request, batch });
+    }
+    pending.check();
+    const after = sourcePoint(await pending.wait(light.getTip(op)));
+    if (after.sourceId !== before.sourceId) throw protocol();
+    if (after.height !== before.height || after.hash !== before.hash) return [];
+    const committed: AddressRequest[] = [];
+    for (const { request, batch } of results) {
+      pending.check();
+      revision = (await session.enhancement.apply({
+        revision,
+        request,
+        result: { transactions: batch, asOfHeight: before.height, asOfHash: nativeHash, complete: true },
+        ...op,
+      })).revision;
+      committed.push(request);
+    }
+    return committed;
   } finally {
     pending.close();
   }

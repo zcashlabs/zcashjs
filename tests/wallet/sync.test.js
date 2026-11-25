@@ -447,7 +447,9 @@ test('watch retries only transient network failures and closes all subscribers o
   await assert.rejects(async () => { for await (const status of iterator) statuses.push(status); }, error => error.code === 'PROTOCOL_MISMATCH');
   assert(statuses.some(status => status.activity === 'failed' && status.lastError.code === 'TRANSPORT_ERROR'));
   assert(statuses.some(status => status.targetReached));
-  assert.equal(attempts, 3);
+  // After the reached pass, the settled probe's tip read fails too; it falls through to a
+  // full pass, which surfaces the terminal error.
+  assert.equal(attempts, 4);
   await f.owner.stop();
 });
 
@@ -532,4 +534,72 @@ test('standing unspent-address polls are answered once per target block, not on 
   // Without a cache (one-off callers) every pass still answers it.
   await syncWallet(session, light, target);
   assert.equal(inventories, 3);
+});
+
+test('watch skips full passes while the tip and wallet revision are unchanged', async () => {
+  const hash = '03'.repeat(32);
+  let tip = { height: 1, hash }, revision = 0, plans = 0, tips = 0;
+  const session = { scan: {
+    async state() { return { revision: String(revision), fullyScannedHeight: tip.height, maxScannedHeight: tip.height,
+      tipHeight: tip.height, scanComplete: true }; },
+    async block({ height }) { return { revision: String(revision), point: { height, hash } }; },
+    async plan() { plans++; return { revision: String(revision), ranges: [] }; },
+    async complete() {},
+  }, enhancement: { async requests() { return { revision: String(revision), requests: [] }; } } };
+  const light = {
+    async getTip() { tips++; return tip; },
+    async getTreeState({ height }) { return { point: { height, hash }, encoded: new Uint8Array() }; },
+  };
+  const owner = new WalletSync(session, light, { pollIntervalMs: 2, maxBufferedUpdates: 64 });
+  const iterator = owner.watchSync();
+  const reading = (async () => { for await (const _ of iterator); })().catch(() => {}); // starts lazily on read
+  try {
+    await until(() => plans === 1);
+    await until(() => tips >= 8);
+    assert.equal(plans, 1, 'unchanged tip and revision: no further passes');
+    // A local write (for example a new transaction) makes the next poll run a full pass.
+    revision++;
+    await until(() => plans === 2);
+    await until(() => tips >= 16);
+    assert.equal(plans, 2);
+    // So does a new block.
+    tip = { height: 2, hash };
+    await until(() => plans === 3);
+    // An explicit sync is never skipped.
+    await iterator.return();
+    await owner.stop();
+    await reading;
+    await owner.sync();
+    assert.equal(plans, 4);
+  } finally { await iterator.return(); await owner.stop(); }
+});
+
+test('a pass batches all due standing polls into one inventory and answers each once per block', async () => {
+  const hash = Array.from({ length: 32 }, (_, i) => i.toString(16).padStart(2, '0')).join('');
+  const nativeHash = hash.match(/../g).reverse().join('');
+  const requests = ['a', 'b', 'c', 'd'].map(address => ({ kind: 'address', address, start: 1, endExclusive: null,
+    requestAt: null, txStatus: 'all', outputStatus: 'unspent' }));
+  let revision = 0, inventories = 0, applied = 0;
+  const session = { scan: {
+    async state() { return { revision: String(revision), tipHeight: 50, fullyScannedHeight: 50, maxScannedHeight: 50, scanComplete: true }; },
+    async block({ height }) { return { revision: String(revision), point: { height, hash: nativeHash } }; },
+    async plan() { return { revision: String(revision), ranges: [] }; },
+    async complete() {},
+  }, enhancement: {
+    async requests() { return { revision: String(revision), requests }; }, // native reissues them all
+    async apply() { applied++; return { revision: String(++revision) }; },
+  } };
+  const light = {
+    async getTip() { return { height: 50, hash, sourceId: 'source', observedAt: 'fixture' }; },
+    async getTreeState({ height }) { return { point: { height, hash }, encoded: new Uint8Array() }; },
+    async getAddressUtxos({ addresses }) { inventories++; assert.equal(addresses.length, 4);
+      return { items: [], tip: null, sourceId: 'source', observedAt: 'fixture' }; },
+  };
+  const polled = new Map();
+  await syncWallet(session, light, { height: 50, hash }, undefined, 16, polled);
+  assert.equal(inventories, 1);
+  assert.equal(applied, 4);
+  await syncWallet(session, light, { height: 50, hash }, undefined, 16, polled);
+  assert.equal(inventories, 1);
+  assert.equal(applied, 4);
 });
