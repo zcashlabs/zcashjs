@@ -69,6 +69,8 @@ stable conflicting hashes still fail. No broadcast occurs in this polling path.
 
 `pending.events()` observes changing state. `pending.wait({ confirmations, timeoutMs, signal })` observes every required step. Aborting or timing out a wait does not cancel a transaction, erase its attempts, or release its locks.
 
+Every `PaymentState` reports `lockExpiryHeight`, the height at which the wallet's input locks for the operation lapse. A step that was signed but never mined also keeps its inputs spent until the chain tip reaches that step's `expiry.height`. An operation whose signed bytes were never dispatched, for example after `send()` signed and then failed with `SYNC_REQUIRED`, can be shown as "funds locked until block N", where N is the larger of `lockExpiryHeight` and the step expiry heights. Alternatively, call `pending.broadcast()` after catching up to dispatch the same bytes.
+
 Memory storage has no restart recovery. Copying or rolling back database files is outside the SDK's backup/restore API; there is no public database backup/restore method. A mnemonic recovers account authority and scan history, not a lost database's operation journal.
 
 

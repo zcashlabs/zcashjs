@@ -13,7 +13,7 @@ const network=await defineNetwork(networkDefinition()),txid='12'.repeat(32),hash
 const operationId=n=>n.toString(16).padStart(64,'0');
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function setup(t,{count=1,finalized=true,light=true,online=false,buffer=2,delayed=false,steps=1,retry,submissionSync=false,recoveryTimeoutMs=30}={}){
-  const journal=Array.from({length:count},(_,index)=>({sequence:String(index+1),observationSequence:'0',state:{operationId:operationId(index+1),revision:'1',accountIds:['account'],phase:finalized?'ready':'proposed',missing:finalized?[]:['artifact','finalizedBytes'],steps:[{index:0,dependsOn:[],txid:finalized?txid:null,exactBytesSha256:finalized?'56'.repeat(32):null,attempts:[],inclusion:null,observation:null,expiry:{height:0,reached:false,confirmedUnminedAt:null},blockedBy:[]}]}}));
+  const journal=Array.from({length:count},(_,index)=>({sequence:String(index+1),observationSequence:'0',state:{operationId:operationId(index+1),revision:'1',accountIds:['account'],lockExpiryHeight:40021,phase:finalized?'ready':'proposed',missing:finalized?[]:['artifact','finalizedBytes'],steps:[{index:0,dependsOn:[],txid:finalized?txid:null,exactBytesSha256:finalized?'56'.repeat(32):null,attempts:[],inclusion:null,observation:null,expiry:{height:0,reached:false,confirmedUnminedAt:null},blockedBy:[]}]}}));
   const stepTxid=index=>(0x12+index).toString(16).repeat(32);
   for(const row of journal){row.state.steps=Array.from({length:steps},(_,index)=>({...structuredClone(row.state.steps[0]),index,dependsOn:index?[index-1]:[],txid:finalized?stepTxid(index):null}));row.observationSequences=Array(steps).fill('0');}
   const control={revision:1,calls:[],requests:0,dispatches:0,finish:0,position:'0',closed:0,reads:0,mined:false,stalled:false,started:null,reply:null};
@@ -158,6 +158,15 @@ test('submission refresh SYNC_REQUIRED identifies the retained finalized operati
   assert.equal(state.steps[0].exactBytesSha256,journal[0].state.steps[0].exactBytesSha256);
 });
 
+test('payment state reports lock expiry and rejects a malformed native height',async t=>{
+  const {payments,journal}=setup(t,{light:false});
+  await payments.recover();
+  assert.equal((await payments.operations.get({operationId:operationId(1)})).lockExpiryHeight,40021);
+  for(const bad of [-1,1.5,2**32,'40021',undefined]){
+    journal[0].state.lockExpiryHeight=bad;
+    await assert.rejects(payments.operations.get({operationId:operationId(1)}),{code:'PROTOCOL_MISMATCH'});
+  }
+});
 test('offline recovery traverses more than one page without IDs or network, then paginates locally',async t=>{
   const {payments,control}=setup(t,{count:405,finalized:false,light:false});
   const result=await payments.recover();assert.equal(result.operations,405);assert.equal(result.local,'complete');assert.equal(result.deferredOperations,0);assert.equal(control.requests,0);

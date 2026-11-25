@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Native components are built from zakura-wasm-bindings v0.1.4, which no longer patches any
+  upstream crate. Behaviour is unchanged.
+- `PaymentState` now reports `lockExpiryHeight`, so apps can show when a signed but
+  never-dispatched operation's inputs become spendable again (#36).
 - The `mainnet` and `testnet` presets now include NU7 (mainnet 3543405, testnet 4465026),
   as version-2 network documents. Before this, preset wallets and light clients failed with
   `NETWORK_MISMATCH` against any server past NU7 activation (#30).

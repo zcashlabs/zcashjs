@@ -676,6 +676,12 @@ export interface PaymentState {
   readonly accountIds: NonEmpty<AccountId>;
 
   readonly durability: 'durable' | 'ephemeral';
+  /** The wallet's input locks for this operation lapse once the chain tip reaches this height.
+   * A step that was signed but never mined also keeps its inputs spent until the tip reaches
+   * its `expiry.height`, so the inputs are spendable again from the larger of the two heights.
+   * Abandoned operations have already released their locks.
+   */
+  readonly lockExpiryHeight: number;
   /** Journal presentation, NOT a linear proof/authorization pipeline. */
 
   readonly phase: 'proposed'
