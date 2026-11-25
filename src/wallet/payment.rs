@@ -115,7 +115,7 @@ fn state<D:WalletRead>(db:&D,ext:&ExtensionTransaction<'_>,p:&crate::Document,op
     let complete_bytes=finalized["transactions"].as_array().is_some_and(|t|!t.is_empty()&&t.len()==steps.len());
     let is_abandoned=abandoned(ext,&raw)?;
     let mut missing=vec![];if !artifact&&!complete_bytes{missing.push("artifact");}if !complete_bytes{missing.push("finalizedBytes");}if is_abandoned{missing.clear();}
-    Ok(json!({"state":{"operationId":operation,"revision":super::revision::read(ext)?,"accountIds":[review["accountId"]],"phase":if is_abandoned{"abandoned"}else if mined{"complete"}else if has_attempt{"observing"}else if complete_bytes{"ready"}else if facts["authorizationComplete"]==false{"awaitingAuthorization"}else{"proposed"},"missing":missing,"steps":steps},"observationSequence":position.to_string(),"observationSequences":sequences,"artifactFacts":facts}))
+    Ok(json!({"state":{"operationId":operation,"revision":super::revision::read(ext)?,"accountIds":[review["accountId"]],"lockExpiryHeight":review["lockExpiryHeight"],"phase":if is_abandoned{"abandoned"}else if mined{"complete"}else if has_attempt{"observing"}else if complete_bytes{"ready"}else if facts["authorizationComplete"]==false{"awaitingAuthorization"}else{"proposed"},"missing":missing,"steps":steps},"observationSequence":position.to_string(),"observationSequences":sequences,"artifactFacts":facts}))
 }
 fn observation(input:&Value,txid:&Value)->Result<Value>{
     let v=input.get("observation").ok_or(Failure("INVALID_ARGUMENT".into()))?;

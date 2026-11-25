@@ -262,7 +262,7 @@ fn payment_migration_enumerates_unfinalized_and_preserves_identity(){
     let id=&plan["operationId"];
     let state=payment(g,"payment_get",json!({"operationId":id})).unwrap();
     assert_eq!(state["state"]["phase"],"proposed");assert_eq!(state["state"]["missing"],json!(["artifact","finalizedBytes"]));
-    assert_eq!(state["state"]["steps"][0]["expiry"]["height"],40041);assert_eq!(state["state"]["steps"][0]["expiry"]["reached"],Value::Null);
+    assert_eq!(state["state"]["lockExpiryHeight"],plan["lockExpiryHeight"]);assert_eq!(state["state"]["lockExpiryHeight"],40021);assert_eq!(state["state"]["steps"][0]["expiry"]["height"],40041);assert_eq!(state["state"]["steps"][0]["expiry"]["reached"],Value::Null);
     let conn=rusqlite::Connection::open(&path).unwrap();let original_policy:String=conn.query_row("SELECT policy FROM ext_wallet_proposals",[],|r|r.get(0)).unwrap();let mut disabled:Value=serde_json::from_str(&original_policy).unwrap();disabled["expiry"]=json!({"kind":"disabled"});conn.execute("UPDATE ext_wallet_proposals SET policy=?1",[disabled.to_string()]).unwrap();
     let disabled=payment(g,"payment_get",json!({"operationId":id})).unwrap();assert_eq!(disabled["state"]["steps"][0]["expiry"],json!({"height":null,"reached":false,"confirmedUnminedAt":null}));conn.execute("UPDATE ext_wallet_proposals SET policy=?1",[original_policy]).unwrap();drop(conn);
     let page=payment(g,"payment_list",json!({"afterSequence":"0","limit":1})).unwrap();assert_eq!(page["items"][0]["operationId"],*id);
