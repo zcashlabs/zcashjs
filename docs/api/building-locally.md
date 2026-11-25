@@ -39,7 +39,7 @@ This repo builds the TypeScript SDK, worker and npm package. The Rust crate
 selects either a release tag (`release`) or an exact 40-character Git commit
 (`revision`), never both. Branch names and abbreviated commits are rejected.
 The SDK pins the published native
-[v0.1.1 tag](https://github.com/jp4g/zakura-wasm-bindings/releases/tag/v0.1.1)
+[v0.1.2 tag](https://github.com/jp4g/zakura-wasm-bindings/releases/tag/v0.1.2)
 from `jp4g/zakura-wasm-bindings`.
 Build receipts retain the resolved commit; the toolchain,
 lockfiles and tool hashes pin the build inputs.
@@ -72,7 +72,7 @@ npm pack --pack-destination /tmp/zcash-package
 assets and licenses. Install the resulting tarball from your application:
 
 ```sh
-npm install /tmp/zcash-package/zcashlabs-zcash.js-0.1.2.tgz
+npm install /tmp/zcash-package/zcashlabs-zcash.js-0.1.3.tgz
 ```
 
 Use the filename printed by `npm pack` for the current version.

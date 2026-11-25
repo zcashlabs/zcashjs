@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3
 
 - Idle wallets are much cheaper to keep synced (measured on a testnet wallet with 17
   transparent receivers: 21.6% → 2.6% CPU while watching):
@@ -13,9 +13,15 @@
     after 30 s idle, instead of a TCP+TLS handshake per request (~26 ms → ~5 ms CPU per
     unary call).
   One-off `sync()` calls still run full passes and answer every request.
-- Target native `zakura-wasm-bindings` with Node filesystem storage on macOS
-  (`flock(2)` owner lease, `F_FULLFSYNC`) and Windows (exclusive-open owner lease
-  under Node and Bun). CI runs the filesystem storage tests on macOS and Windows.
+- Target native `zakura-wasm-bindings` v0.1.2 from `jp4g/zakura-wasm-bindings`, with
+  Node filesystem storage on macOS (`flock(2)` owner lease, `F_FULLFSYNC`) and Windows
+  (exclusive-open owner lease under Node and Bun). CI runs the filesystem storage tests
+  on macOS and Windows. The native runtime also gains ZIP-321 payment request parsing;
+  the SDK does not expose payment request URIs yet.
+- Accept lightwallet-protocol v0.6.0 servers alongside v0.5.0, so the documented
+  `testnet.zec.rocks` endpoint no longer fails with `PROTOCOL_MISMATCH` (#28).
+- Add an isolated native THS client with scoped tests and sandbox controls for
+  local integration testing (#27).
 
 - Add optional authenticated at-rest encryption for Node filesystem wallet
   storage (`storage.encryptionKey`), covering the database and rollback journal,
