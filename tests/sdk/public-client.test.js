@@ -126,6 +126,54 @@ test('unconsumed subtree iterator owns no dependent signal or request', () => {
   } finally {AbortSignal.any=original;}
 });
 
+test('getUtxos matches each row to the expected script of its own requested address', async () => {
+  const { createHash } = await import('node:crypto');
+  const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  const sha = value => createHash('sha256').update(value).digest();
+  const synthetic = (i, p2sh) => {
+    const payload = Buffer.alloc(20); payload.writeUInt32BE(i);
+    const body = Buffer.concat([Buffer.from([0x1c, p2sh ? 0xbd : 0xb8]), payload]);
+    let n = BigInt('0x' + Buffer.concat([body, sha(sha(body)).subarray(0, 4)]).toString('hex')), text = '';
+    while (n) { text = alphabet[Number(n % 58n)] + text; n /= 58n; }
+    return { address: text, script: p2sh ? `a914${payload.toString('hex')}87` : `76a914${payload.toString('hex')}88ac` };
+  };
+  const pkh = synthetic(1, false), sh = synthetic(2, true), foreign = synthetic(3, false);
+  const shSamePayload = { script: `a914${pkh.script.slice(6, 46)}87` };
+  const row = (owner, index, script = owner.script) => ({ address: owner.address, txid: vector.display, outputIndex: index, satoshis: index + 1, height: 1, script });
+  let utxos = [];
+  const server = await fixture(call => {
+    if (call.method === 'getblockheader') return result(call.params[1] ? genesis.verbose : genesis.raw);
+    if (call.method === 'getaddressutxos') {
+      assert.deepEqual(call.params, [{ addresses: [pkh.address, sh.address, pkh.address], chainInfo: true }]);
+      return result({ hash: blockOne.verbose.hash, height: 1, utxos });
+    }
+    throw Error(call.method);
+  });
+  try {
+    const client = createPublicClient({ network, transport: httpTransport(`${server.origin}/rpc`, transportOptions), observation });
+    const addresses = [pkh.address, sh.address, pkh.address];
+    utxos = [row(pkh, 0), row(sh, 1), row(pkh, 2), row(sh, 3)];
+    const { items } = await client.getUtxos({ addresses });
+    assert.deepEqual(items.map(v => [v.address, v.outputIndex, v.value, Buffer.from(v.script).toString('hex')]),
+      utxos.map(v => [v.address, v.outputIndex, BigInt(v.satoshis), v.script]));
+    assert.notEqual(items[0].script, items[2].script);
+    items[0].script.fill(0);
+    assert.equal(Buffer.from(items[2].script).toString('hex'), pkh.script);
+    for (const bad of [
+      [row(pkh, 0, sh.script)],
+      [row(sh, 0, pkh.script)],
+      [row(pkh, 0, shSamePayload.script)],
+      [row(foreign, 0)],
+      [{ ...row(pkh, 0), address: 7 }],
+      [row(pkh, 0), row(pkh, 0)],
+    ]) {
+      utxos = bad;
+      await assert.rejects(client.getUtxos({ addresses }), { code: 'PROTOCOL_MISMATCH' });
+    }
+    assert.deepEqual(server.unexpected, []);
+  } finally { await server.close(); }
+});
+
 test('mined transaction decoding uses its registered historical branch', async () => {
   const future=vectors.find(v=>v.hex.startsWith('05000080'));
   assert.ok(future);

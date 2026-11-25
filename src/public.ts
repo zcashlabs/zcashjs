@@ -210,8 +210,17 @@ export function createPublicClient(
     getUtxos: async args => unary(addressInput(args), ['addresses'], async (a) => {
       const { address } = await codecs();
       let addresses: string[];
+      const scripts = new Map<string, string>();
       try {
-        addresses = a.addresses.map(value => address.decode(value, family).canonical);
+        addresses = a.addresses.map((value) => {
+          const decoded = address.decode(value, family);
+          if (!scripts.has(decoded.canonical)) {
+            scripts.set(decoded.canonical, decoded.kind === 'p2pkh'
+              ? `76a914${hex(decoded.payload)}88ac`
+              : `a914${hex(decoded.payload)}87`);
+          }
+          return decoded.canonical;
+        });
       } catch {
         throw invalidArgument();
       }
@@ -228,14 +237,12 @@ export function createPublicClient(
           || !/^(0|[1-9][0-9]*)$/.test(row.satoshis.text)) throw protocolError();
         const value = BigInt(row.satoshis.text);
         if (value > 2100000000000000n) throw protocolError();
-        if (typeof row.address !== 'string' || !addresses.includes(row.address)
+        if (typeof row.address !== 'string') throw protocolError();
+        const expected = scripts.get(row.address);
+        if (expected === undefined
           || seen.has(`${id}:${outputIndex}`)) throw protocolError();
         seen.add(`${id}:${outputIndex}`);
-        const script = bytes(row.script),
-          decoded = address.decode(row.address, family);
-        const expected = decoded.kind === 'p2pkh'
-          ? `76a914${hex(decoded.payload)}88ac`
-          : `a914${hex(decoded.payload)}87`;
+        const script = bytes(row.script);
         if (hex(script) !== expected) throw protocolError();
         return { txid: id, outputIndex, address: row.address, value, script, minedHeight };
       });
