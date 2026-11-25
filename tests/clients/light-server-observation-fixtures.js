@@ -161,7 +161,7 @@ export const vectors = {
       "lightwallet_protocol_version": ""
     }
   },
-  "protocol-other": {
+  "protocol-v060": {
     "hex": "0a0f6c69676874642d6275696c642dc3a9121053796e7468657469632076656e646f72180122046d61696e2880cb193208633865373130353538c08db70160ffffffffffffffffff016a196261636b656e642d6275696c642d6e6f742d76657273696f6e92010676302e362e30",
     "dto": {
       "version": "lightd-build-é",
@@ -182,6 +182,29 @@ export const vectors = {
       "upgrade_name": "",
       "upgrade_height": "0",
       "lightwallet_protocol_version": "v0.6.0"
+    }
+  },
+  "protocol-other": {
+    "hex": "0a0f6c69676874642d6275696c642dc3a9121053796e7468657469632076656e646f72180122046d61696e2880cb193208633865373130353538c08db70160ffffffffffffffffff016a196261636b656e642d6275696c642d6e6f742d76657273696f6e92010676302e372e30",
+    "dto": {
+      "version": "lightd-build-é",
+      "vendor": "Synthetic vendor",
+      "taddr_support": true,
+      "chain_name": "main",
+      "sapling_activation_height": "419200",
+      "consensus_branch_id": "c8e71055",
+      "block_height": "3000000",
+      "git_commit": "",
+      "branch": "",
+      "build_date": "",
+      "build_user": "",
+      "estimated_height": "18446744073709551615",
+      "zcashd_build": "backend-build-not-version",
+      "zcashd_subversion": "",
+      "donation_address": "",
+      "upgrade_name": "",
+      "upgrade_height": "0",
+      "lightwallet_protocol_version": "v0.7.0"
     }
   },
   "branch-upper": {

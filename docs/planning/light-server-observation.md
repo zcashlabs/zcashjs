@@ -22,8 +22,10 @@ framing, response cardinality, deadline, and status behavior.
 
 [Reference lightwalletd common.go](https://github.com/zcash/lightwalletd/blob/09593edbee4ee68d47e5a53f8ce1c83514c4e8e6/common/common.go)
 lines 288–347 supplies the mapping. Version and vendor are lightwalletd labels,
-not backend build labels. `lightwallet_protocol_version` must advertise exactly
-`v0.5.0`; this is distinct from the custom transport's schema digest.
+not backend build labels. `lightwallet_protocol_version` must advertise one of
+the revisions this client speaks, `v0.5.0` or `v0.6.0`; this is distinct from the custom transport's schema digest.
+`v0.6.0` added only `GetStandardFee`, so every message this client exchanges is
+unchanged; a server advertising a different revision is rejected, not guessed at.
 `chain_name` must be nonempty. `consensus_branch_id` must have exactly eight
 lowercase hex digits. Both consumed heights must be canonical decimal strings
 within uint32, checked lexically before Number conversion. Zero is valid.

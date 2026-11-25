@@ -18,7 +18,7 @@ test('actual accepted Rust codec + byte transport + observation assertions', asy
     else globalThis.fetch = fixtureFetch(requests);
     const result = await observationChecks({ readLightdInfo, createGrpcWebByteTransport, codec, origin: fixture?.origin ?? 'http://fixture.invalid' });
     const received = fixture?.requests ?? requests;
-    assert.equal(received.length, 37);
+    assert.equal(received.length, 38);
     assert.ok(received.every(r => r.path === '/cash.z.wallet.sdk.rpc.CompactTxStreamer/GetLightdInfo' && r.method === 'POST' && r.body === 'AAAAAAA='));
     console.log(JSON.stringify({ ...result, node: process.version, requests: received.length, sockets: !!fixture, codec: packet.provenance }));
   } finally { globalThis.fetch = original; await fixture?.close(); }
