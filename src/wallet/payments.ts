@@ -177,7 +177,10 @@ export class WalletPayments {
       || !Array.isArray(state.accountIds)
       || !state.accountIds.length
       || !Array.isArray(state.steps)
-      || state.steps.length > 16) throw protocol();
+      || state.steps.length > 16
+      || !Number.isSafeInteger(state.lockExpiryHeight)
+      || state.lockExpiryHeight < 0
+      || state.lockExpiryHeight > 0xffffffff) throw protocol();
     id(state.operationId);
     sequence(value.observationSequence);
     if (!Array.isArray(value.observationSequences)
