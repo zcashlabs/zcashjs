@@ -32,15 +32,15 @@ for browser and optional integration tests.
 
 ## Source inputs
 
-This repo builds the TypeScript SDK, worker and npm package. The Rust crate
-`zakura-network-bindings` and native codecs live in
-[zakura-wasm-bindings](https://github.com/jp4g/zakura-wasm-bindings), built via
-`cargo xtask build`. [native-source.json](https://github.com/zcashlabs/zcashjs/blob/main/scripts/native-source.json)
+This repo builds the TypeScript SDK, worker and npm package. The Rust crates
+(`zakura-bindings-core` with its WebAssembly and native front-ends) and native codecs
+live in [zakura-bindings](https://github.com/jp4g/zakura-bindings), built via
+`cargo xtask build` (WebAssembly) and `cargo xtask build-mobile` (React Native).
+[native-source.json](https://github.com/zcashlabs/zcashjs/blob/main/scripts/native-source.json)
 selects either a release tag (`release`) or an exact 40-character Git commit
 (`revision`), never both. Branch names and abbreviated commits are rejected.
-The SDK pins the published native
-[v0.1.4 tag](https://github.com/jp4g/zakura-wasm-bindings/releases/tag/v0.1.4)
-from `jp4g/zakura-wasm-bindings`.
+The SDK pins an exact commit of `jp4g/zakura-bindings` (formerly
+`zakura-wasm-bindings`; releases up to v0.1.4 were published under that name).
 Build receipts retain the resolved commit; the toolchain,
 lockfiles and tool hashes pin the build inputs.
 
