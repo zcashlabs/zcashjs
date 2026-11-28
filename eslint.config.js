@@ -3,6 +3,13 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
 
+// Portable code goes through src/abort.ts and src/hash.ts (React Native lacks both APIs).
+const portability = [
+  { selector: "MemberExpression[object.name='AbortSignal'][property.name=/^(any|timeout)$/]",
+    message: 'Use anySignal/timeoutSignal from src/abort.ts.' },
+  { selector: "MemberExpression[property.name='subtle']", message: 'Use sha256 from src/hash.ts.' },
+];
+
 export default defineConfig({
   files: ['src/**/*.{ts,mts}'],
   extends: [
@@ -26,5 +33,10 @@ export default defineConfig({
     }],
     '@stylistic/no-mixed-operators': 'off',
     curly: ['error', 'multi-line'],
+    'no-restricted-syntax': ['error', ...portability],
   },
+}, {
+  // Fallback implementations and Node-only entries may use the platform APIs directly.
+  files: ['src/abort.ts', 'src/hash.ts', 'src/testing.ts', 'src/clients/grpc-node.ts'],
+  rules: { 'no-restricted-syntax': 'off' },
 });

@@ -1,4 +1,4 @@
-import { delay } from '../abort.js';
+import { delay, anySignal } from '../abort.js';
 import { observationOptions } from '../options.js';
 import { ObserverBuffer } from '../observer-buffer.js';
 import type { ChainPoint, ErrorInfo, LightClient, ObservationOptions, Op, SyncStatus } from '../types.js';
@@ -268,7 +268,7 @@ export class WalletSync {
       if (!this.light) throw unavailable();
       const dependent = signal === undefined
         ? this.controller!.signal
-        : AbortSignal.any([signal, this.controller!.signal]);
+        : anySignal([signal, this.controller!.signal]);
       if (this.subscribers.size) this.publish(await this.getSyncStatus());
       for (let attempt = 0; ; attempt++) {
         const point = target ?? await this.light.getTip({ signal: dependent });

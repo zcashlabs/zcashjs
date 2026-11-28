@@ -1,9 +1,10 @@
-import { waitFor } from '../abort.js';
+import { waitFor, addListener, removeListener } from '../abort.js';
 /* eslint-disable no-control-regex -- Canonical encoding and URL validation intentionally match ASCII control characters. */
 import type { ArtifactFile, ArtifactManifest, WasmArtifact, ZcashError } from '../types.js';
 import { failure, invalidArgument, isZcashError } from '../errors.js';
 import { bundledArtifact, bundledUrls } from './bundled-assets.mjs';
 import { packageAsset } from './package-assets.js';
+import { sha256Hex } from '../hash.js';
 
 /** Internal exact profile supplied by the integration owner. No supported production
  * ABI, operation, network-parameter or host-service revisions are assumed here. */
@@ -29,8 +30,8 @@ export interface VerifiedArtifacts {
 
 // Use native signal slots/hooks; caller-owned shadow properties are untrusted.
 const signalAborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted')!.get!;
-const signalAdd = EventTarget.prototype.addEventListener;
-const signalRemove = EventTarget.prototype.removeEventListener;
+const signalAdd = addListener;
+const signalRemove = removeListener;
 
 const digestPattern = /^[0-9a-f]{64}$/;
 const kinds = ['module', 'worker', 'wasm', 'glue', 'thread-bootstrap'];
@@ -169,8 +170,7 @@ function assetUrl(file: ArtifactFile, directory: URL): string {
   return resolved.href;
 }
 async function sha(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
-  const hash = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', bytes));
-  return Array.from(hash, n => n.toString(16).padStart(2, '0')).join('');
+  return sha256Hex(bytes);
 }
 
 /** Acquisition only. Inspects the entire declared inventory before fetching assets;

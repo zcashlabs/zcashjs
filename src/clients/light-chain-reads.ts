@@ -1,4 +1,4 @@
-import { signalAborted, admitSignal, waitFor } from '../abort.js';
+import { signalAborted, admitSignal, waitFor, anySignal } from '../abort.js';
 import type {
   BlockSelector,
   Network,
@@ -67,7 +67,7 @@ const aborted = () => failure('ABORTED', 'query', 'none', 'Light-chain read abor
 export function operation(signal: AbortSignal | undefined, release: () => void = () => { }) {
   admitSignal(signal);
   const controller = new AbortController();
-  const dependent = signal === undefined ? undefined : AbortSignal.any([signal]);
+  const dependent = signal === undefined ? undefined : anySignal([signal]);
   let cancelled = false,
     closed = false;
   const interruption = new AbortController();

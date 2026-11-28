@@ -2,6 +2,8 @@ import type { AssetRequirement, LocalProvingOptions } from '../types.js';
 import { snapshot, ownBytes } from '../clients/owned-plumbing.js';
 import { errorMessage, failure, invalidArgument, isZcashError } from '../errors.js';
 import { operation } from '../clients/light-chain-reads.js';
+import { anySignal } from '../abort.js';
+import { sha256Hex } from '../hash.js';
 const fail = (code: 'ASSET_UNAVAILABLE' | 'ASSET_INTEGRITY' | 'RESOURCE_LIMIT') => failure(
   code,
   'proving',
@@ -31,10 +33,7 @@ export const saplingAssets = Object.freeze([
 ] as const);
 const total = saplingAssets.reduce((sum, asset) => sum + asset.byteLength, 0);
 async function hash(bytes: Uint8Array): Promise<string> {
-  return Array.from(
-    new Uint8Array(await crypto.subtle.digest('SHA-256', bytes as Uint8Array<ArrayBuffer>)),
-    b => b.toString(16).padStart(2, '0'),
-  ).join('');
+  return sha256Hex(bytes);
 }
 type Builtins = {
   'fs/promises': typeof import('node:fs/promises');
@@ -134,7 +133,7 @@ export class ProvingAssets {
 
   private async loadSapling(signal?: AbortSignal): Promise<{ spend: Uint8Array; output: Uint8Array }> {
     const caller = operation(signal),
-      pending = operation(AbortSignal.any([caller.signal, this.abort.signal]));
+      pending = operation(anySignal([caller.signal, this.abort.signal]));
     try {
       this.check();
       pending.check();

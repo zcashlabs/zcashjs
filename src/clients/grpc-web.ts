@@ -1,4 +1,6 @@
-import { signalAborted, unsupportedSignalProxy, waitFor } from '../abort.js';
+import { signalAborted, unsupportedSignalProxy, waitFor, currentAddListener, currentRemoveListener } from '../abort.js';
+import { bodyReader, selectFetch } from './body.js';
+import type { BodyReader } from './body.js';
 import type { LightUnaryMethod, LightStreamMethod, ZcashError } from '../types.js';
 import { failure, invalidArgument, isZcashError } from '../errors.js';
 import { recordNotFound } from './grpc-status.js';
@@ -16,6 +18,7 @@ type Limits = { readonly [K in keyof typeof defaults]: number };
 export interface GrpcWebByteOptions {
   readonly timeoutMs: number;
   readonly headers?: () => Promise<Readonly<Record<string, string>>>;
+  readonly fetch?: typeof fetch;
   readonly limits?: Partial<Limits>;
 }
 const aborted = () => failure('ABORTED', 'transport', 'none', 'Request aborted.');
@@ -257,7 +260,7 @@ function messages(url: string, args: Args<LightUnaryMethod | LightStreamMethod>,
   options: GrpcWebByteOptions): AsyncIterableIterator<Uint8Array> {
   const controller = new AbortController();
   let stopped: ZcashError | undefined;
-  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  let reader: BodyReader | undefined;
   let response: Response | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let started: number | undefined;
@@ -271,13 +274,11 @@ function messages(url: string, args: Args<LightUnaryMethod | LightStreamMethod>,
     clearTimeout(timer);
     // Foreign listener teardown must not replace the outcome or skip owned cancellation.
     try {
-      if (args.signal) EventTarget.prototype.removeEventListener.call(args.signal, 'abort', onAbort);
+      if (args.signal) currentRemoveListener.call(args.signal, 'abort', onAbort);
     } catch { /* Best effort on a caller-owned signal. */ }
     controller.abort();
-    if (reader) {
-      void reader.cancel().catch(() => { });
-      reader.releaseLock();
-    } else void response?.body?.cancel().catch(() => { });
+    if (reader) reader.cancel();
+    else void response?.body?.cancel().catch(() => { });
   }
   function stop(error: ZcashError) {
     if (stopped || finished) return;
@@ -313,7 +314,8 @@ function messages(url: string, args: Args<LightUnaryMethod | LightStreamMethod>,
       }
       const body = encode(args.request);
       check();
-      const current = await bounded(fetch(endpoint, {
+      const fetcher = selectFetch(options.fetch);
+      const current = await bounded(fetcher(endpoint, {
         method: 'POST',
         headers,
         body,
@@ -329,11 +331,12 @@ function messages(url: string, args: Args<LightUnaryMethod | LightStreamMethod>,
         return value;
       }));
       const headersOnly = responseStatus(current, limits);
-      if (!current.body) {
+      if (!current.body && headersOnly) return;
+      reader = bodyReader(current, streamMethods.has(args.method as LightStreamMethod));
+      if (!reader) {
         if (headersOnly) return;
         throw protocol();
       }
-      reader = current.body.getReader();
       for await (const payload of decodeFrames(responseChunks(), limits, headersOnly)) {
         check();
         yield payload;
@@ -357,7 +360,7 @@ function messages(url: string, args: Args<LightUnaryMethod | LightStreamMethod>,
         if (started === undefined) {
           started = performance.now();
           if (args.signal) {
-            EventTarget.prototype.addEventListener.call(args.signal, 'abort', onAbort, { once: true });
+            currentAddListener.call(args.signal, 'abort', onAbort, { once: true });
             if (signalAborted.call(args.signal)) stop(aborted());
           }
           if (!stopped) timer = setTimeout(() => stop(timeout()), options.timeoutMs);
@@ -399,10 +402,11 @@ export function createGrpcWebByteTransport(url: string, options: GrpcWebByteOpti
     if (!['http:', 'https:'].includes(endpoint.protocol) || endpoint.username || endpoint.password
       || endpoint.pathname !== '/') throw invalidArgument();
     url = endpoint.href;
-    record(options, ['timeoutMs', 'headers', 'limits']);
-    const { timeoutMs, headers, limits: supplied } = options;
+    record(options, ['timeoutMs', 'headers', 'limits', 'fetch']);
+    const { timeoutMs, headers, limits: supplied, fetch: fetcher } = options;
     integer(timeoutMs, 2147483647);
     if (headers !== undefined && typeof headers !== 'function') throw invalidArgument();
+    if (fetcher !== undefined && typeof fetcher !== 'function') throw invalidArgument();
     const values = { ...defaults };
     if (supplied !== undefined) {
       record(supplied, Object.keys(defaults));
@@ -413,7 +417,11 @@ export function createGrpcWebByteTransport(url: string, options: GrpcWebByteOpti
       }
     }
     limits = Object.freeze(values);
-    snapshot = Object.freeze({ timeoutMs, ...(headers === undefined ? {} : { headers }) });
+    snapshot = Object.freeze({
+      timeoutMs,
+      ...(headers === undefined ? {} : { headers }),
+      ...(fetcher === undefined ? {} : { fetch: fetcher }),
+    });
   } catch {
     throw invalidArgument();
   }

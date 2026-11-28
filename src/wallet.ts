@@ -1,4 +1,4 @@
-import { admitSignal } from './abort.js';
+import { admitSignal, anySignal } from './abort.js';
 import { addressInput, broadcastInput } from './clients/request-inputs.js';
 import { confirmationsPolicy, observationOptions, recoveryPolicy } from './options.js';
 import { provingOptions } from './wallet/proving-assets.js';
@@ -243,7 +243,7 @@ export async function createWalletClient(
         const original = defaults && args === undefined ? {} : args;
         const owned = callInput(original as A);
         admitSignal(owned.signal);
-        const work = operation(AbortSignal.any(owned.signal ? [owned.signal, stopped.signal] : [stopped.signal]));
+        const work = operation(anySignal(owned.signal ? [owned.signal, stopped.signal] : [stopped.signal]));
         let result: Promise<R>;
         try {
           work.check();
@@ -352,7 +352,7 @@ export async function createWalletClient(
             try {
               if (!iterator) {
                 admitSignal(owned.signal);
-                pending = operation(AbortSignal.any(owned.signal ? [owned.signal, stopped.signal] : [stopped.signal]));
+                pending = operation(anySignal(owned.signal ? [owned.signal, stopped.signal] : [stopped.signal]));
                 pending.check();
                 iterator = syncOwner.watchSync({ signal: pending.signal });
               }

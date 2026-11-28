@@ -16,6 +16,7 @@ import { failure, invalidArgument } from '../errors.js';
 import { delay } from '../abort.js';
 import { blockHash, txId } from '../primitives.js';
 import { initialize } from '../runtime/lightwire-capsule.mjs';
+import { sha256Hex } from '../hash.js';
 const protocol = () => failure(
   'PROTOCOL_MISMATCH',
   'observation',
@@ -147,10 +148,7 @@ export class PaymentSource {
     const bytes = new TextEncoder().encode(
       JSON.stringify([this.protocolName, this.endpoint, this.bound.definition.binding]),
     );
-    return Array.from(
-      new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
-      b => b.toString(16).padStart(2, '0'),
-    ).join('');
+    return sha256Hex(bytes);
   }
 
   private async tree(height: number, signal: AbortSignal): Promise<ChainPoint & { sourceId: string }> {
