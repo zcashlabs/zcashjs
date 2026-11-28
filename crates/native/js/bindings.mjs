@@ -9,7 +9,8 @@
 //   createRuntime(): number, destroyRuntime(id): void
 // }
 const encoder = new TextEncoder();
-const decoder = new TextDecoder('utf-8', { fatal: true });
+// Created on first use: React Native installs a TextDecoder fallback after module load.
+let decoder;
 const OK = 0, ERROR = 1, FATAL = 2, ERROR_OBJECT = 4;
 
 class Writer {
@@ -49,7 +50,7 @@ function readValue(bytes, at) {
   switch (tag) {
     case 0: return undefined;
     case 1: return view.getUint32(at + 1, true);
-    case 2: { const n = view.getUint32(at + 1, true); return decoder.decode(bytes.subarray(at + 5, at + 5 + n)); }
+    case 2: { const n = view.getUint32(at + 1, true); return (decoder ??= new TextDecoder('utf-8', { fatal: true })).decode(bytes.subarray(at + 5, at + 5 + n)); }
     case 3: { const n = view.getUint32(at + 1, true); return bytes.slice(at + 5, at + 5 + n); }
     case 4: return bytes[at + 1] === 1;
     case 5: return { handle: view.getBigUint64(at + 1, true) };
@@ -132,6 +133,10 @@ export function createStatelessBindings(transport) {
     identity: () => JSON.parse(call('identity')),
     proving_load: (path, sha256, length) => call('proving_load', path, sha256, length),
     file_sha256: path => call('file_sha256', path),
+    file_append: (path, bytes) => call('file_append', path, bytes),
+    file_size: path => call('file_size', path),
+    file_remove: path => call('file_remove', path),
+    file_commit: (from, to) => call('file_commit', from, to),
   });
 }
 

@@ -142,7 +142,7 @@ function lowerPayment(args, operation) {
   if(operation==='payment_attempt_begin'&&(!Number.isInteger(input.maximum)||input.maximum<1||input.maximum>2097152))throw TypeError('RESOURCE_LIMIT');
   return input;
 }
-function lowerScan(args, operation) {
+function lowerScan(args,operation,native=false) {
   if(payments.has(operation))return lowerPayment(args,operation);
   if(pczt.has(operation)) {
     const keys=operation==='fused_send'?['operationId','proposalId','reviewCommitment','token','spend','output','maximum']:operation==='pczt_build'?['operationId','proposalId','reviewCommitment']:operation==='pczt_import'?['operationId','bytes','maximum']:(operation==='pczt_prove'||operation==='pczt_finalize')?['operationId','artifactId','spend','output','maximum']:operation==='finalized_get'?['operationId']:['operationId','artifactId'];
@@ -152,7 +152,8 @@ function lowerScan(args, operation) {
       if(!Number.isInteger(input.maximum)||input.maximum<1||input.maximum>4194304)throw TypeError('RESOURCE_LIMIT');
       for(const [key,size] of [['spend',47958396],['output',3592860]]) {
         let length;try{length=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype),'byteLength').get.call(input[key]);}catch{throw TypeError('INVALID_ARGUMENT');}
-        if(length!==0&&length!==size)throw TypeError('INVALID_ARGUMENT');
+        // Native runtimes also accept a 40-byte token for parameters loaded and verified natively.
+        if(length!==0&&length!==size&&!(native&&length===40))throw TypeError('INVALID_ARGUMENT');
         input[key]=copyBytes(input[key],size,'INVALID_ARGUMENT',0);
       }
     }
@@ -307,7 +308,7 @@ export function viewsForStorage(storage) {
         if(descriptor&&!('value' in descriptor))throw TypeError('INVALID_ARGUMENT');
         signal=descriptor?.value;
         abort(signal,'none');
-        const lowered=scans.has(operation)?lowerScan(args,operation):lower(args);
+        const lowered=scans.has(operation)?lowerScan(args,operation,storage.api!==undefined):lower(args);
         if(operation==='pczt_import'){ownedPczt=lowered.bytes;pcztOperationId=lowered.operationId;pcztMaximum=lowered.maximum;delete lowered.bytes;}
         if(operation==='fused_send'||operation==='pczt_prove'||operation==='pczt_finalize'){proof={...lowered};delete lowered.spend;delete lowered.output;}
         input=JSON.stringify(lowered);

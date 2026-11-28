@@ -42,7 +42,7 @@ pub fn load(path: &str, sha256: &str, length: u32) -> Result<Vec<u8>, String> {
     let mut token = MAGIC.to_vec();
     token.extend_from_slice(&expected);
     if CACHE.lock().map_err(|_| "DOMAIN_INVALID")?.as_ref().is_some_and(|c| c.contains_key(&expected)) { return Ok(token); }
-    let file = std::fs::File::open(path).map_err(|e| if e.kind() == std::io::ErrorKind::NotFound { "ASSET_UNAVAILABLE" } else { "ASSET_INTEGRITY" })?;
+    let file = std::fs::File::open(parameter_path(path)?).map_err(|e| if e.kind() == std::io::ErrorKind::NotFound { "ASSET_UNAVAILABLE" } else { "ASSET_INTEGRITY" })?;
     let mut bytes = Vec::with_capacity(length as usize);
     // Read one byte past the expected length to detect oversized files.
     file.take(u64::from(length) + 1).read_to_end(&mut bytes).map_err(|_| "ASSET_INTEGRITY")?;
@@ -53,7 +53,7 @@ pub fn load(path: &str, sha256: &str, length: u32) -> Result<Vec<u8>, String> {
 
 /// SHA-256 of a file, streamed (download verification without loading into JS).
 pub fn file_sha256(path: &str) -> Result<String, String> {
-    let mut file = std::fs::File::open(path).map_err(|_| "ASSET_UNAVAILABLE")?;
+    let mut file = std::fs::File::open(parameter_path(path)?).map_err(|_| "ASSET_UNAVAILABLE")?;
     let mut hasher = Sha256::new();
     let mut buffer = vec![0u8; 1 << 20];
     loop {
@@ -65,3 +65,44 @@ pub fn file_sha256(path: &str) -> Result<String, String> {
 }
 
 pub fn unload_all() { if let Ok(mut c) = CACHE.lock() { c.take(); } }
+
+/// Parameter-file operations for the SDK's download helper (React Native has no JS
+/// filesystem). Restricted to absolute paths of `*.params` / `*.params.part` files.
+fn parameter_path(path: &str) -> Result<&std::path::Path, String> {
+    let p = std::path::Path::new(path);
+    let name = p.file_name().and_then(|n| n.to_str()).ok_or("INVALID_ARGUMENT")?;
+    if !p.is_absolute() || path.contains('\0') || !(name.ends_with(".params") || name.ends_with(".params.part")) {
+        return Err("INVALID_ARGUMENT".into());
+    }
+    Ok(p)
+}
+pub fn file_append(path: &str, bytes: &[u8]) -> Result<(), String> {
+    use std::io::Write;
+    let p = parameter_path(path)?;
+    if let Some(parent) = p.parent() { std::fs::create_dir_all(parent).map_err(|_| "STORAGE_ERROR")?; }
+    let mut file = std::fs::OpenOptions::new().create(true).append(true).open(p).map_err(|_| "STORAGE_ERROR")?;
+    file.write_all(bytes).map_err(|_| "STORAGE_ERROR")?;
+    Ok(())
+}
+pub fn file_size(path: &str) -> Result<Option<u32>, String> {
+    match std::fs::metadata(parameter_path(path)?) {
+        Ok(meta) => Ok(Some(u32::try_from(meta.len()).map_err(|_| "RESOURCE_LIMIT")?)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(_) => Err("STORAGE_ERROR".into()),
+    }
+}
+pub fn file_remove(path: &str) -> Result<(), String> {
+    match std::fs::remove_file(parameter_path(path)?) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(_) => Err("STORAGE_ERROR".into()),
+    }
+}
+/// Durably move a completed download into place.
+pub fn file_commit(from: &str, to: &str) -> Result<(), String> {
+    let (from, to) = (parameter_path(from)?, parameter_path(to)?);
+    std::fs::File::open(from).and_then(|f| f.sync_all()).map_err(|_| "STORAGE_ERROR")?;
+    std::fs::rename(from, to).map_err(|_| "STORAGE_ERROR")?;
+    if let Some(parent) = to.parent() { let _ = std::fs::File::open(parent).and_then(|d| d.sync_all()); }
+    Ok(())
+}
