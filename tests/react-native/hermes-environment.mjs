@@ -8,6 +8,7 @@ Object.defineProperty(globalThis, 'navigator', { value: { product: 'ReactNative'
 for (const name of ['WebAssembly', 'structuredClone', 'MessageChannel', 'MessagePort', 'Worker', 'TextDecoder',
   'SharedArrayBuffer', 'FinalizationRegistry']) delete globalThis[name];
 Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true });
+// Hermes has no Symbol.asyncIterator (Node's cannot be deleted; see hermes/run.mjs).
 delete AbortSignal.any;
 delete AbortSignal.timeout;
 // React Native's abort-controller polyfill has no reason or throwIfAborted.

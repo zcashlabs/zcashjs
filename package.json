@@ -33,7 +33,8 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "check": "npm run lint && npm test",
-    "test:react-native": "node --test --test-concurrency=1 tests/react-native/simulated.check.js tests/react-native/cross-format.check.js"
+    "test:react-native": "node --test --test-concurrency=1 tests/react-native/simulated.check.js tests/react-native/cross-format.check.js",
+    "test:hermes": "scripts/test-hermes.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

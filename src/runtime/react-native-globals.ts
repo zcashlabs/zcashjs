@@ -5,6 +5,12 @@ import { FallbackTextDecoder } from './text-decoder.js';
 import { cloneMessage } from './local-channel.js';
 
 const globals = globalThis as Record<string, unknown>;
+
+// Hermes has no Symbol.asyncIterator: `[Symbol.asyncIterator]()` methods would be
+// keyed "undefined" and for-await (lowered by Babel) could not find them.
+if (typeof Symbol.asyncIterator !== 'symbol') {
+  Object.defineProperty(Symbol, 'asyncIterator', { value: Symbol.for('Symbol.asyncIterator') });
+}
 type Decoder = { decode(input?: Uint8Array): string };
 
 function decoderUsable(): boolean {
@@ -62,6 +68,17 @@ if (!Object.getOwnPropertyDescriptor(signalPrototype, 'reason')?.get) {
     configurable: true,
     get(this: AbortSignal) {
       return reasons.get(this);
+    },
+  });
+}
+if (typeof (AbortSignal as { abort?: unknown }).abort !== 'function') {
+  Object.defineProperty(AbortSignal, 'abort', {
+    configurable: true,
+    writable: true,
+    value(reason?: unknown) {
+      const controller = new AbortController();
+      controller.abort(reason);
+      return controller.signal;
     },
   });
 }

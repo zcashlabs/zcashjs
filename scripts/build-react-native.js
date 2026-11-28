@@ -118,6 +118,9 @@ const inputs = {};
 const bundle = await rolldown({
   input: join(dist, 'react-native.js'),
   platform: 'neutral',
+  // Hermes has no async generators (or async iteration syntax); ship them lowered
+  // rather than relying on the app's Babel preset.
+  transform: { target: 'es2017' },
   // package.json declares sideEffects:false; the environment setup is a side effect.
   treeshake: { moduleSideEffects: id => /[\\/]runtime[\\/]react-native-(globals|setup)\.js$/.test(id) },
   plugins: [{
@@ -157,6 +160,8 @@ const bundle = await rolldown({
   }],
   onLog(level, log) {
     if (log.code === 'CIRCULAR_DEPENDENCY') return;
+    // BigInt literals stay as written: Hermes supports BigInt.
+    if (log.code === 'TOLERATED_TRANSFORM' && /Big integer literals/.test(log.message)) return;
     throw Error(`${level}: ${log.code} ${log.message}`);
   },
 });

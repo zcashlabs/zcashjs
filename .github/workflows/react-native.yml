@@ -41,6 +41,30 @@ jobs:
           path: dist
           retention-days: 3
 
+  # The SDK on the Hermes engine React Native pins, through the real JSI module over
+  # the native library, after React Native's Babel preset.
+  hermes:
+    needs: simulate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/native
+            .cache/proving
+            build/hermes-check
+          key: rn-hermes-${{ runner.os }}-${{ hashFiles('scripts/native-source.json', 'scripts/test-hermes.sh') }}
+      - run: sudo apt-get update && sudo apt-get install -y cmake libicu-dev
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:hermes
+
   # Native libraries from the pinned zakura-bindings revision.
   mobile:
     name: Native ${{ matrix.target }}

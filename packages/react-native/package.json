@@ -13,6 +13,7 @@
   "react-native": "index.js",
   "files": [
     "index.js",
+    "url.js",
     "index.d.ts",
     "app.plugin.js",
     "react-native.config.js",
@@ -27,6 +28,9 @@
     "native-build.json",
     "licenses"
   ],
+  "dependencies": {
+    "react-native-url-polyfill": "^2.0.0"
+  },
   "peerDependencies": {
     "@zcashlabs/zcash.js": "0.1.4",
     "react-native": ">=0.77.0"
