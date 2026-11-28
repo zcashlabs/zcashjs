@@ -41,7 +41,10 @@ npm install @zcashlabs/zcash.js @zcashlabs/zcash.js-native
 Android libraries for `arm64-v8a` and `x86_64`) and a C++ TurboModule, so it needs the
 New Architecture (the default from React Native 0.76) and iOS 15.1+ / Android API 24+.
 Both packages must have the same version. With Expo, add `@zcashlabs/zcash.js-native` to
-`plugins` and use a development build; Expo Go cannot load native modules.
+`plugins` and use a development build; Expo Go cannot load native modules. The plugin also
+limits the Android build to the 64-bit ABIs. Bare React Native apps set
+`reactNativeArchitectures=arm64-v8a,x86_64` in `android/gradle.properties`. 32-bit Android
+devices are not supported.
 
 Metro selects the React Native build through the package's `react-native` field and
 export condition. It contains no WebAssembly. The same JavaScript glue that drives the
