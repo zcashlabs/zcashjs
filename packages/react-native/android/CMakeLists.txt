@@ -13,5 +13,6 @@ add_library(react_codegen_zakura_native OBJECT
   ${ZAKURA_ROOT}/cpp/NativeZakura.cpp
   ${ZAKURA_ROOT}/cpp/ZakuraJsi.cpp)
 target_include_directories(react_codegen_zakura_native PUBLIC ${ZAKURA_ROOT}/cpp ${ZAKURA_ROOT}/include)
-target_link_libraries(react_codegen_zakura_native jsi react_nativemodule_core react_codegen_ZakuraNativeSpec
+# React Native >= 0.76 merges its native libraries into libreactnative.so.
+target_link_libraries(react_codegen_zakura_native jsi reactnative react_codegen_ZakuraNativeSpec
   zakura_bindings_native)
