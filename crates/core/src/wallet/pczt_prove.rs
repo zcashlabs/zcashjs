@@ -1,7 +1,6 @@
 //! Native proving of a retained artifact; immutable publication reuses import.
 use super::accounts::{Failure,Result};
 use sha2::{Digest,Sha256};
-use wasm_bindgen::prelude::*;
 
 // Canonical Sapling parameters, checked against zakura-proofs 1.0.0's BLAKE2b
 // constants before these SHA256 pins were recorded. No parameter downloads.
@@ -32,7 +31,6 @@ fn prove(value:pczt::Pczt,spend:&[u8],output:&[u8])->Result<pczt::Pczt> {
     Ok(role.finish())
 }
 
-#[wasm_bindgen]
 pub fn pczt_prove_call(generation:u32,operation_id:&str,artifact_id:&str,spend:&[u8],output:&[u8],maximum:u32)->std::result::Result<String,String>{
     if maximum==0||maximum>4194304{return Err("RESOURCE_LIMIT".into());}
     let retained=super::pczt_build::pczt_build_call(generation,"pczt_get_artifact",&serde_json::json!({"operationId":operation_id,"artifactId":artifact_id}).to_string())?;

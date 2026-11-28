@@ -1,7 +1,6 @@
 //! Standalone PCZT roles. Inspection reports material completeness, not validity.
 use pczt::{Pczt, roles::{combiner::Combiner, redactor::Redactor, verifier::Verifier}};
 use serde_json::json;
-use wasm_bindgen::prelude::*;
 use zcash_primitives::transaction::TxVersion;
 use zcash_script::script::Evaluable;
 use zcash_protocol::constants::{V5_VERSION_GROUP_ID,V6_VERSION_GROUP_ID};
@@ -10,7 +9,6 @@ use zcash_protocol::{PoolType, consensus::{BranchId,Parameters,NetworkConstants,
 type Result<T> = std::result::Result<T, String>;
 const INVALID: &str = "INVALID_PCZT";
 
-#[wasm_bindgen]
 pub struct StandalonePczt {
     value: Pczt,
     parameters: Vec<u8>,
@@ -19,7 +17,6 @@ pub struct StandalonePczt {
     branch: u32,
     maximum: u32,
 }
-#[wasm_bindgen]
 impl StandalonePczt {
     pub fn serialize(&self) -> Result<Vec<u8>> {
         let bytes = self.value.clone().serialize().map_err(|_| INVALID)?;
@@ -81,7 +78,6 @@ impl StandalonePczt {
         output.serialize()?; Ok(output)
     }
 }
-#[wasm_bindgen]
 pub fn parse_standalone_pczt(parameters:&[u8],genesis:&[u8],height:u32,branch:u32,bytes:&[u8],maximum:u32)->Result<StandalonePczt> {
     if maximum==0 || genesis.len()!=32 {return Err("INVALID_ARGUMENT".into());}
     if bytes.len()>maximum as usize {return Err("RESOURCE_LIMIT".into());}

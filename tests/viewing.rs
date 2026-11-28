@@ -1,5 +1,5 @@
 #![cfg(feature = "viewing")]
-use zakura_network_bindings::{viewing::*,consensus_branch};
+use zakura_bindings_core::{viewing::*,consensus_branch};
 use zcash_keys::keys::UnifiedSpendingKey;
 use zcash_protocol::consensus::MAIN_NETWORK;
 use zcash_address::unified::{self, Container, Encoding};

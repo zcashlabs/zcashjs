@@ -70,7 +70,7 @@ mod tests {
     }
     #[test]
     fn pczt_import_verifies_partial_maps_and_finalized_scripts(){
-        let fixture:Value=serde_json::from_str(include_str!("../../tests/signer-fixture.json")).unwrap();
+        let fixture:Value=serde_json::from_str(include_str!("../../../../tests/signer-fixture.json")).unwrap();
         let parameters=fixture["parameters"].as_str().unwrap().as_bytes();let p=crate::Document::parse(parameters).unwrap();
         let seed=bip39::Mnemonic::parse(fixture["mnemonic"].as_str().unwrap()).unwrap().to_seed("");
         let key=zcash_keys::keys::UnifiedSpendingKey::from_seed(&p,&seed,zip32::AccountId::ZERO).unwrap();

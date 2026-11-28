@@ -5,7 +5,6 @@ use prost::Message;
 use zcash_protocol::consensus::BranchId;
 use serde_json::{json,Value};
 use sha2::{Digest,Sha256};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::WalletRead;
 pub(super) const TABLE:&str="ext_wallet_finalized";
 pub(super) const SQL:&str="CREATE TABLE ext_wallet_finalized(operation BLOB NOT NULL REFERENCES ext_wallet_proposals(operation) CHECK(typeof(operation)='blob' AND length(operation)=32),step INTEGER NOT NULL CHECK(step>=0 AND step<=4294967295),artifact TEXT CHECK(artifact IS NULL OR (typeof(artifact)='text' AND length(artifact)=64)),txid BLOB NOT NULL CHECK(typeof(txid)='blob' AND length(txid)=32),bytes BLOB NOT NULL CHECK(typeof(bytes)='blob' AND length(bytes)>0 AND length(bytes)<=4194304),digest BLOB NOT NULL CHECK(typeof(digest)='blob' AND length(digest)=32),PRIMARY KEY(operation,step))";
@@ -43,7 +42,6 @@ pub(super) fn read_all(ext:&zcash_client_sqlite::ExtensionTransaction<'_>,parame
     }
     Ok(json!({"operationId":operation_id,"revision":super::revision::read(ext)?,"transactions":transactions}))
 }
-#[wasm_bindgen]
 pub fn finalized_get(generation:u32,operation_id:&str)->std::result::Result<String,String>{
     id(operation_id).map_err(|e|e.0)?;
     super::DOMAIN.with(|domain|->Result<Value>{
@@ -56,7 +54,6 @@ pub fn finalized_get(generation:u32,operation_id:&str)->std::result::Result<Stri
         })
     }).map(|v|v.to_string()).map_err(|e|e.0)
 }
-#[wasm_bindgen]
 pub fn pczt_finalize_call(generation:u32,operation_id:&str,artifact_id:&str,spend:&[u8],output:&[u8],maximum:u32)->std::result::Result<String,String>{
     let operation=id(operation_id).map_err(|e|e.0)?;id(artifact_id).map_err(|e|e.0)?;
     if maximum==0||maximum>4194304{return Err("RESOURCE_LIMIT".into());}

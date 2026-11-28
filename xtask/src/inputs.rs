@@ -82,7 +82,8 @@ pub fn verify(root: &Path, cargo: &Path, metadata: &Value) -> Result<Value> {
         )
         .parent()
         .ok_or("missing source")?;
-        if source == root {
+        // Workspace members (crates/*) are this repository's own sources.
+        if source.starts_with(root) && package["source"].is_null() {
             continue;
         }
         let (checksum, actual) = {

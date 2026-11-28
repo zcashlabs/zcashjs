@@ -3,7 +3,6 @@ use super::accounts::{fields,string,Failure,Result};
 use prost::Message;
 use rusqlite::{Connection,OptionalExtension};
 use serde_json::{json,Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::{data_api::{Account,WalletRead,wallet::create_pczt_from_proposal},proto::proposal as wire,wallet::OvkPolicy};
 use zcash_keys::{address::{Address,UnifiedAddress},keys::UnifiedFullViewingKey};
 use zcash_note_encryption::{Domain,ShieldedOutput,try_output_recovery_with_pkd_esk};
@@ -103,13 +102,11 @@ fn projection(value:&pczt::Pczt,p:&crate::Document,key:&UnifiedFullViewingKey,re
     }
     Ok(result)
 }
-#[wasm_bindgen]
 pub fn pczt_build_call(generation:u32,operation:&str,input:&str)->std::result::Result<String,String> {
     if input.len()>4096{return Err("RESOURCE_LIMIT".into());}
     let input:Value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT")?;
     execute(generation,operation,&input,None).map(|v|v.to_string()).map_err(|e|e.0)
 }
-#[wasm_bindgen]
 pub fn pczt_import_call(generation:u32,operation_id:&str,bytes:&[u8],maximum:u32)->std::result::Result<String,String>{
     if operation_id.len()!=64{return Err("INVALID_ARGUMENT".into());}
     if maximum==0||maximum>4194304||bytes.len()>maximum as usize{return Err("RESOURCE_LIMIT".into());}

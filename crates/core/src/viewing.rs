@@ -1,7 +1,6 @@
 //! Pure viewing authority and address operations. No wallet or storage owner.
 use crate::Document;
 use serde_json::{json, Value};
-use wasm_bindgen::prelude::*;
 use zcash_address::{unified::{self, Container, Encoding}, ConversionError, TryFromAddress, ZcashAddress};
 use zcash_keys::{address::Address, keys::{AddressGenerationError, ReceiverRequirement, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedIncomingViewingKey}};
 use zcash_protocol::consensus::{BlockHeight, BranchId, NetworkType, NetworkUpgrade, Parameters};
@@ -33,14 +32,12 @@ fn index_string(j: DiversifierIndex) -> String {
 }
 
 // wasm-bindgen owns this allocation; the facade exposes only a closeable opaque closure.
-#[wasm_bindgen]
 pub struct ViewingHandle {
     parameters: Document,
     full: Option<UnifiedFullViewingKey>,
     incoming: UnifiedIncomingViewingKey,
     enabled: [bool;3],
 }
-#[wasm_bindgen]
 impl ViewingHandle {
     pub fn describe(&self) -> String {
         let mut components = vec![];
@@ -120,7 +117,6 @@ impl ViewingHandle {
     }
 }
 
-#[wasm_bindgen]
 pub fn viewing_open(parameters: &[u8], format: &str, encoded: &str, pools: &str) -> Result<ViewingHandle> {
     let p = params(parameters)?; token(encoded)?;
     let full = match format {
@@ -166,7 +162,6 @@ fn decode(p: &Document, encoded: &str) -> Result<(String,Receivers)> {
     let receivers = address.convert_if_network(p.network_type()).map_err(|_| "INVALID_ADDRESS")?;
     Ok((canonical,receivers))
 }
-#[wasm_bindgen]
 pub fn viewing_decode_address(parameters: &[u8], encoded: &str) -> Result<String> {
     let (encoded, Receivers(receivers)) = decode(&params(parameters)?, encoded)?;
     let mut known = vec![]; let mut unknown = vec![];
@@ -179,7 +174,6 @@ pub fn viewing_decode_address(parameters: &[u8], encoded: &str) -> Result<String
     }
     Ok(json!({"encoded":encoded,"knownReceivers":known,"unknownTypecodes":unknown}).to_string())
 }
-#[wasm_bindgen]
 pub fn viewing_select_receiver(parameters: &[u8], encoded: &str, pool: &str, height: u32, branch: u32) -> Result<String> {
     let p = params(parameters)?;
     let h = BlockHeight::from_u32(height);

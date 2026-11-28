@@ -1,23 +1,12 @@
 //! Private storage lifecycle only; not H1 wallet_open or operation recovery.
 use std::{cell::RefCell, rc::Rc};
 use rusqlite::{Connection, OpenFlags};
-use wasm_bindgen::prelude::*;
 use zcash_client_sqlite::{WalletDb, util::Clock, wallet::init::WalletMigrator};
 
 #[derive(Clone)]
 struct HostClock;
 impl Clock for HostClock {
-    fn now(&self) -> std::time::SystemTime {
-        #[cfg(not(target_arch = "wasm32"))]
-        { std::time::SystemTime::now() }
-        #[cfg(target_arch = "wasm32")]
-        {
-            unsafe extern "C" { fn wallet_time() -> f64; }
-            let ms = unsafe { wallet_time() };
-            assert!(ms.is_finite() && (0.0..8e15).contains(&ms), "clock unavailable");
-            std::time::UNIX_EPOCH + std::time::Duration::from_millis(ms as u64)
-        }
-    }
+    fn now(&self) -> std::time::SystemTime { crate::host::host().now() }
 }
 
 // WalletDb has no consuming close API. Its owned connection wrapper reports the
@@ -79,11 +68,7 @@ fn initialize(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<
         domain.active.try_reserve(1).map_err(|_| "RESOURCE_LIMIT")?;
         let generation = domain.generation.checked_add(1).ok_or("DOMAIN_EXHAUSTED")?;
         let flags = OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE | OpenFlags::SQLITE_OPEN_NO_MUTEX;
-        #[cfg(target_arch = "wasm32")]
-        let conn = Connection::open_with_flags_and_vfs(path, flags, "storage-host");
-        #[cfg(not(target_arch = "wasm32"))]
-        let conn = Connection::open_with_flags(path, flags);
-        let conn = conn.map_err(|_| "STORAGE_OPEN_FAILED")?;
+        let conn = crate::host::host().open(path, flags).map_err(|_| "STORAGE_OPEN_FAILED")?;
         let receipt = Rc::new(RefCell::new(CloseReceipt::default()));
         let mut owned = OwnedConnection { connection: Some(conn), receipt: receipt.clone() };
         let prepared = (|| -> Result<(), String> {
@@ -95,11 +80,7 @@ fn initialize(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<
             let synchronous: u32 = conn.query_row("PRAGMA synchronous", [], |r| r.get(0)).map_err(|_| "STORAGE_POLICY_FAILED")?;
             let temp: u32 = conn.query_row("PRAGMA temp_store", [], |r| r.get(0)).map_err(|_| "STORAGE_POLICY_FAILED")?;
             if journal != if memory { "memory" } else { "truncate" } || synchronous != 2 || temp != 2 { return Err("STORAGE_POLICY_FAILED".into()); }
-            #[cfg(target_arch = "wasm32")]
-            {
-                unsafe extern "C" { fn wallet_policy(conn: *mut rusqlite::ffi::sqlite3, memory: i32) -> i32; }
-                if unsafe { wallet_policy(conn.handle(), i32::from(memory)) } != 0 { return Err("STORAGE_POLICY_FAILED".into()); }
-            }
+            crate::host::host().configure(conn, memory).map_err(|_| "STORAGE_POLICY_FAILED")?;
             rusqlite::vtab::array::load_module(conn).map_err(|_| "STORAGE_INIT_FAILED")?;
             bind_network(conn, bytes, genesis)?;
             // The backend's metadata initializer uses expect. Establish it via a
@@ -155,32 +136,21 @@ fn initialize(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<
     })
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-pub fn initialize_path(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<u32, String> {
+/// Open or create the wallet database at `path` through the installed host.
+pub fn storage_initialize_path(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<u32, String> {
     initialize(path, format, bytes, genesis)
 }
 
-#[wasm_bindgen]
-pub fn storage_initialize(format: &str, bytes: &[u8], genesis: &[u8]) -> Result<u32, String> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        unsafe extern "C" { fn wallet_ready() -> i32; }
-        if unsafe { wallet_ready() } != 1 { return Err("RUNTIME_UNAVAILABLE".into()); }
-    }
-    initialize("/wallet.db", format, bytes, genesis)
-}
-
-#[wasm_bindgen]
+/// Open an in-memory wallet database through the installed host.
 pub fn storage_initialize_memory(format: &str, bytes: &[u8], genesis: &[u8]) -> Result<u32, String> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        unsafe extern "C" { fn wallet_ready() -> i32; }
-        if unsafe { wallet_ready() } != 1 { return Err("RUNTIME_UNAVAILABLE".into()); }
-    }
     initialize(":memory:", format, bytes, genesis)
 }
 
-#[wasm_bindgen]
+/// Retained name for existing native tests.
+pub fn initialize_path(path: &str, format: &str, bytes: &[u8], genesis: &[u8]) -> Result<u32, String> {
+    storage_initialize_path(path, format, bytes, genesis)
+}
+
 pub fn storage_binding(generation: u32) -> Result<Vec<u8>, String> {
     DOMAIN.with(|domain| {
         let domain = domain.try_borrow().map_err(|_| "STORAGE_BUSY")?;
@@ -190,7 +160,6 @@ pub fn storage_binding(generation: u32) -> Result<Vec<u8>, String> {
     })
 }
 
-#[wasm_bindgen]
 pub fn storage_close(generation: u32) -> Result<(), String> {
     DOMAIN.with(|domain| {
         let mut domain = domain.try_borrow_mut().map_err(|_| "STORAGE_BUSY")?;
@@ -205,7 +174,7 @@ pub fn storage_close(generation: u32) -> Result<(), String> {
 }
 
 #[cfg(test)]
-#[path = "../tests/wallet-schema/prefix.rs"]
+#[path = "../../../tests/wallet-schema/prefix.rs"]
 mod schema_prefix;
 
 mod accounts;
@@ -228,3 +197,18 @@ mod enhancement;
 mod query;
 
 mod inventory;
+
+// Exported surface (see crate::api); child modules stay private.
+pub use accounts::{views_call, views_mnemonic_call, views_seed_call};
+pub use account_lifecycle::account_lifecycle_call;
+pub use enhancement::enhancement_call;
+pub use fused_send::fused_send_call;
+pub use payment::payment_call;
+pub use pczt_build::{pczt_build_call, pczt_import_call};
+pub use pczt_finalize::{finalized_get, pczt_finalize_call};
+pub use pczt_prove::pczt_prove_call;
+pub use proposal::proposal_call;
+pub use query::query_call;
+pub use scan::scan_call;
+pub use sync::sync_call;
+pub use signer::{signer_authorize, signer_bind, signer_capabilities, signer_create_account, signer_describe, signer_release, signer_unbind};

@@ -1,7 +1,6 @@
 //! Native transaction-data requests and atomic replies; no host-owned completion ledger.
 use super::accounts::{fields,height,string,Failure,Result};
 use serde_json::{json,Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{WalletRead,WalletWrite,TransactionDataRequest,TransactionStatus,
     TransactionStatusFilter,OutputStatusFilter,wallet::decrypt_and_store_transaction};
 use zcash_keys::encoding::AddressCodec;
@@ -210,7 +209,6 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
         Ok(result)
     })
 }
-#[wasm_bindgen]
 pub fn enhancement_call(generation:u32,operation:&str,input:&str)->std::result::Result<String,String> {
     if !matches!(operation,"enhancement_requests"|"enhancement_apply"){return Err("INVALID_ARGUMENT".into());}
     if input.len()>4*1024*1024+262144{return Err("RESOURCE_LIMIT".into());}

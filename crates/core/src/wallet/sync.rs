@@ -1,7 +1,6 @@
 //! Wallet-wide scan reads and native rewind; no network scheduler or history reconstruction.
 use super::accounts::{fields, height, string, Failure, Result};
 use serde_json::{json, Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{WalletRead, WalletWrite, WalletCommitmentTrees, wallet::ConfirmationsPolicy};
 use zcash_client_sqlite::error::SqliteClientError;
 
@@ -112,7 +111,6 @@ fn execute(generation: u32, operation: &str, input: &Value) -> Result<Value> {
     })
 }
 
-#[wasm_bindgen]
 pub fn sync_call(generation:u32, operation:&str, input:&str)->std::result::Result<String,String> {
     if input.len()>if operation=="scan_complete" {132096}else{1024} {return Err("RESOURCE_LIMIT".into());}
     let value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT".to_string())?;

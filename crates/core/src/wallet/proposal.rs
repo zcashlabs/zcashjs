@@ -4,7 +4,6 @@ use super::accounts::{fields, height, string, Failure, Result};
 use prost::Message;
 use rusqlite::{Connection, OptionalExtension};
 use serde_json::{json, Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::{data_api::{WalletRead, locking::{LockOwner, LockRequest},
     wallet::{propose_transfer, propose_shielding, ConfirmationsPolicy, input_selection::{GreedyInputSelector, SpendPolicy, TransparentSpendPolicy}}},
     fees::{StandardFeeRule, DustOutputPolicy, standard::SingleOutputChangeStrategy}, proto::proposal as wire};
@@ -332,7 +331,6 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
         })
     })
 }
-#[wasm_bindgen]
 pub fn proposal_call(generation:u32,operation:&str,input:&str)->std::result::Result<String,String> {
     if input.len()>65536{return Err("RESOURCE_LIMIT".into());}
     let value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT")?;

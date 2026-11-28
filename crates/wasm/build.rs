@@ -12,9 +12,9 @@ fn main() {
     if threaded { command.args(["-matomics", "-mbulk-memory", "-pthread"]); }
     let status = command.args([ "-O2", "-ffunction-sections", "-fdata-sections",
             "-Wall", "-Wextra", "-Werror", "-Wno-unused-parameter", "-I", &sqlite,
-            "-c", "wallet-host/adapter.c", "-o", &object]).status().unwrap();
+            "-c", "../../wallet-host/adapter.c", "-o", &object]).status().unwrap();
     assert!(status.success(), "VFS compile failed");
-    println!("cargo:rerun-if-changed=wallet-host/adapter.c");
+    println!("cargo:rerun-if-changed=../../wallet-host/adapter.c");
     println!("cargo:rustc-link-arg={object}");
     println!("cargo:rustc-link-search=native={sdk}/share/wasi-sysroot/lib/{target}");
     println!("cargo:rustc-link-lib=static=c");

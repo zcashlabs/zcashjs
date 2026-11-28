@@ -1,10 +1,8 @@
 use zcash_protocol::consensus::{BlockHeight, BranchId, NetworkType, NetworkUpgrade, Parameters};
-use wasm_bindgen::prelude::*;
 use zcash_primitives::transaction::Transaction;
 
 /// Internal codec: exact upstream serialization is required before returning identity.
 /// This does not validate signatures, proofs, consensus rules, or activation.
-#[wasm_bindgen]
 pub fn transaction_id(raw: &[u8], branch: u32) -> Result<Vec<u8>, String> {
     if raw.is_empty() || raw.len() > 2097152 { return Err("invalid transaction bytes".into()); }
     let branch = BranchId::try_from(branch).map_err(|_| "unknown context branch")?;
@@ -79,7 +77,6 @@ impl Document {
 
 /// Validate the reviewed document and select the pinned upstream branch at height.
 /// The JS entry checks types/ranges before generated glue; raw glue is internal.
-#[wasm_bindgen]
 pub fn consensus_branch(format: &str, bytes: &[u8], height: u32) -> Result<u32, String> {
     let document = Document::parse_format(format, bytes)?;
     Ok(u32::from(BranchId::for_height(&document, height.into())))
@@ -98,5 +95,10 @@ pub mod birthday;
 #[cfg(feature = "standalone-pczt")]
 pub mod standalone_pczt;
 
-#[cfg(feature = "wallet-threaded")]
-mod wallet_threads;
+pub mod host;
+
+#[cfg(feature = "viewing")]
+pub mod transparent;
+
+/// The exact exported surface shared by the WASM and native front-ends.
+pub mod api;

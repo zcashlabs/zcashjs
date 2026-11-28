@@ -1,5 +1,5 @@
 #![cfg(feature="birthday")]
-use zakura_network_bindings::birthday::validate_birthday;
+use zakura_bindings_core::birthday::validate_birthday;
 use zcash_client_backend::proto::service::TreeState;
 use prost::Message;
 const DOC:&[u8]=br#"{"encoding":"regtest","Overwinter":10,"Sapling":20,"Blossom":30,"Heartwood":40,"Canopy":50,"Nu5":60,"Nu6":70,"Nu6_1":80,"Nu6_2":90,"Nu6_3":100}"#;

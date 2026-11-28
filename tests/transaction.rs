@@ -1,4 +1,4 @@
-use zakura_network_bindings::transaction_id;
+use zakura_bindings_core::transaction_id;
 
 #[test]
 fn exact_source_vectors_and_lossy_rejection() {

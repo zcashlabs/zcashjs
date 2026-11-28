@@ -3,7 +3,6 @@ use super::accounts::{fields,string,Failure,Result};
 use prost::Message;
 use rusqlite::{params,OptionalExtension};
 use serde_json::{json,Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{WalletRead,locking::{OutputLockStore,LockOwner}};
 use zcash_client_sqlite::ExtensionTransaction;
 
@@ -215,7 +214,6 @@ fn begin<D:WalletRead>(db:&D,ext:&ExtensionTransaction<'_>,p:&crate::Document,in
     super::revision::advance(ext)?;
     Ok(json!({"attemptId":hex::encode(attempt),"bytes":finalized["bytes"],"txid":finalized["txid"]}))
 }
-#[wasm_bindgen]
 pub fn payment_call(generation:u32,command:&str,input:&str)->std::result::Result<String,String>{
     (||->Result<Value>{
         if input.len()>16384{return Err("RESOURCE_LIMIT".into());}

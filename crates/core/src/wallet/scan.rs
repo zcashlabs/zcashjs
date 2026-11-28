@@ -9,7 +9,6 @@
 use super::accounts::{birthday, fields, height, string, Failure, Result};
 use prost::Message;
 use serde_json::{json, Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::{data_api::{WalletRead, WalletWrite}, proto::compact_formats::CompactBlock};
 #[cfg(not(feature = "wallet-threaded"))]
 use zcash_client_backend::scanning::{scan_block, Nullifiers, ScanningKeys};
@@ -90,7 +89,7 @@ fn execute(generation: u32, operation: &str, v: &Value) -> Result<Value> {
             super::creation::invalidate(ext)?;
             #[cfg(feature = "wallet-threaded")]
             {
-                crate::wallet_threads::assert_ready();
+                crate::host::host().threads_ready();
                 zcash_client_backend::data_api::chain::scan_cached_blocks(&p,&ThreadedBlocks(&blocks),db,first.into(),state,blocks.len()).map_err(|_|Failure::from("SCAN_FAILED"))?;
             }
             #[cfg(not(feature = "wallet-threaded"))]
@@ -116,7 +115,6 @@ fn execute(generation: u32, operation: &str, v: &Value) -> Result<Value> {
     })
 }
 
-#[wasm_bindgen]
 pub fn scan_call(generation:u32, operation:&str, input:&str)->std::result::Result<String,String> {
     if input.len()>MAX_INPUT_BYTES {return Err("RESOURCE_LIMIT".into());}
     let value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT".to_string())?;

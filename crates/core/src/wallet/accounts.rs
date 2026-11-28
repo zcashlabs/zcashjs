@@ -1,5 +1,4 @@
 //! Private UFVK and durable address operations on the existing storage owner.
-use wasm_bindgen::prelude::*;
 use secrecy::{Secret, SecretString, SecretVec, ExposeSecret};
 use bip39::{Language, Mnemonic};
 use std::borrow::Cow;
@@ -335,7 +334,6 @@ fn execute(generation: u32, operation: &str, v: &Value) -> Result<Value> {
 }
 // Private prerequisite: caller supplies a birthday trust input, not verified current state.
 // Vec ownership crosses generated glue once and immediately enters a zeroizing wrapper.
-#[wasm_bindgen]
 pub fn views_seed_call(generation: u32, operation: &str, input: &str, seed: Vec<u8>) -> std::result::Result<String,String> {
     let seed=SecretVec::new(seed);
     execute_seed(generation,operation,input,&seed).map(|(v,_)|v.to_string()).map_err(|e|e.0)
@@ -349,7 +347,6 @@ fn normalized_secret(bytes: &SecretVec<u8>, limit: usize) -> Result<SecretString
     if text.expose_secret().len()>limit {return Err("INVALID_ARGUMENT".into());}
     Ok(text)
 }
-#[wasm_bindgen]
 pub fn views_mnemonic_call(generation: u32, input: &str, mnemonic: Vec<u8>, passphrase: Vec<u8>) -> std::result::Result<String,String> {
     mnemonic_account(generation,"account_import_hd",input,SecretVec::new(mnemonic),SecretVec::new(passphrase)).map(|(v,_)|v.to_string()).map_err(|e|e.0)
 }
@@ -443,7 +440,6 @@ fn execute_seed(generation: u32, operation: &str, input: &str, seed: &SecretVec<
         })
     })
 }
-#[wasm_bindgen]
 pub fn views_call(generation: u32, operation: &str, input: &str) -> std::result::Result<String,String> {
     if input.len()>160000 { return Err("INVALID_ARGUMENT".into()); }
     let value = serde_json::from_str(input).map_err(|_| "INVALID_ARGUMENT".to_string())?;
@@ -460,5 +456,5 @@ pub fn views_call(generation: u32, operation: &str, input: &str) -> std::result:
     }).map_err(|e|e.0)
 }
 #[cfg(test)]
-#[path = "../../tests/wallet-views/native.rs"]
+#[path = "../../../../tests/wallet-views/native.rs"]
 mod tests;

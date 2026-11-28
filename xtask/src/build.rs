@@ -81,15 +81,14 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "metadata",
             "--locked",
             "--offline",
-            "--features",
-            "wallet-storage",
+            "--all-features",
             "--format-version",
             "1",
         ],
     )?)?;
     let packages = inputs::verify(root, &cargo, &metadata)?;
     configure_wallet(&mut run, root, &cargo, &sdk, &metadata)?;
-    run.run(root, "cargo", &["test", "--locked", "--offline", "--lib"])?;
+    run.run(root, "cargo", &["test", "--locked", "--offline", "-p", "zakura-bindings-core", "--lib"])?;
     for name in ["primitive", "bundle"] {
         let mut args = vec![
             "build",
@@ -98,6 +97,8 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "--release",
             "--target",
             "wasm32-unknown-unknown",
+            "-p",
+            "zakura-bindings-wasm",
             "--lib",
         ];
         if name == "bundle" {
@@ -117,7 +118,7 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
                 "--out-name",
                 "bindings",
                 text(&cache.join(
-                    "target/wallet/wasm32-unknown-unknown/release/zakura_network_bindings.wasm",
+                    "target/wallet/wasm32-unknown-unknown/release/zakura_bindings_wasm.wasm",
                 )),
             ],
         )?;

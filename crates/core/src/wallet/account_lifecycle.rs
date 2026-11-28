@@ -1,7 +1,6 @@
 //! Native account correspondence and deletion; no signer authority is inferred from IDs.
 use super::accounts::{fields, string, Failure, Result};
 use serde_json::{json, Value};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{Account, AccountPurpose, WalletRead, WalletWrite};
 use zcash_client_sqlite::AccountUuid;
 use zcash_keys::keys::UnifiedFullViewingKey;
@@ -45,7 +44,6 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
         })
     })
 }
-#[wasm_bindgen]
 pub fn account_lifecycle_call(generation:u32,operation:&str,input:&str)->std::result::Result<String,String> {
     if input.len()>160000{return Err("INVALID_ARGUMENT".into());}
     let value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT".to_string())?;

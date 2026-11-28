@@ -4,10 +4,8 @@ use prost::Message;
 use rusqlite::OptionalExtension;
 use serde_json::{json,Value};
 use sha2::{Digest,Sha256};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::{data_api::{Account,WalletRead,wallet::{create_proposed_transactions,SpendingKeys}},proto::proposal as wire,wallet::OvkPolicy};
 
-#[wasm_bindgen]
 pub fn fused_send_call(generation:u32,operation_id:&str,proposal_id:&str,review_commitment:&str,token:u32,spend:&[u8],output:&[u8],maximum:u32)->std::result::Result<String,String>{
     for id in [operation_id,proposal_id,review_commitment] {if id.len()!=64||!id.bytes().all(|b|b.is_ascii_digit()||(b'a'..=b'f').contains(&b)){return Err("INVALID_ARGUMENT".into());}}
     if maximum==0||maximum>4194304{return Err("RESOURCE_LIMIT".into());}

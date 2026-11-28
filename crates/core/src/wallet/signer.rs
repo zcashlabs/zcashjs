@@ -2,7 +2,6 @@
 use std::cell::RefCell;
 use serde_json::json;
 use secrecy::SecretVec;
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{Account,AccountPurpose,WalletRead};
 use zcash_client_sqlite::AccountUuid;
 use zcash_keys::keys::UnifiedSpendingKey;
@@ -14,7 +13,6 @@ struct Signer { key: UnifiedSpendingKey, parameters: Vec<u8>, genesis: Vec<u8>, 
 // Tokens never recycle within this native instance; exhausted instances fail closed.
 thread_local! { static SIGNERS: RefCell<Vec<Option<Signer>>> = const { RefCell::new(Vec::new()) }; }
 
-#[wasm_bindgen]
 pub fn signer_create_account(generation:u32, operation:&str, input:&str, mnemonic:Vec<u8>, passphrase:Vec<u8>) -> Result<String,String> {
     let mnemonic=SecretVec::new(mnemonic);
     let passphrase=SecretVec::new(passphrase);
@@ -41,7 +39,6 @@ pub fn signer_create_account(generation:u32, operation:&str, input:&str, mnemoni
     })
 }
 fn index(token:u32)->Result<usize,String> { token.checked_sub(1).map(|n|n as usize).ok_or("STALE_HANDLE".into()) }
-#[wasm_bindgen]
 pub fn signer_describe(token:u32)->Result<String,String> {
     super::DOMAIN.with(|domain| {
         if domain.try_borrow().map_err(|_|"STORAGE_BUSY")?.failed.is_some() {Err("DOMAIN_INVALID")} else {Ok(())}
@@ -55,7 +52,6 @@ pub fn signer_describe(token:u32)->Result<String,String> {
     })
 }
 /// Native role profile; the host maps the retained network identity to its registered ID.
-#[wasm_bindgen]
 pub fn signer_capabilities(token:u32)->Result<String,String> {
     use zcash_protocol::consensus::BranchId;
     let identity:serde_json::Value=serde_json::from_str(&signer_describe(token)?).map_err(|_|"DOMAIN_INVALID")?;
@@ -74,7 +70,6 @@ pub fn signer_capabilities(token:u32)->Result<String,String> {
     Ok(json!({"revision":"zakura-memory-signer/1","parameters":identity["parameters"],"genesis":identity["genesis"],
         "authorizations":authorizations,"accountDiscovery":"explicit-index","exportableViewing":["ufvk","uivk"],"maxPcztBytes":MAX_PCZT_BYTES}).to_string())
 }
-#[wasm_bindgen]
 pub fn signer_release(token:u32)->Result<(),String> {
     SIGNERS.with(|table| {
         let mut table=table.try_borrow_mut().map_err(|_|"STORAGE_BUSY")?;
@@ -86,7 +81,6 @@ pub(super) fn detach_wallet(generation:u32) {
     SIGNERS.with(|table| { for signer in table.borrow_mut().iter_mut().flatten() { signer.bindings.retain(|(g,_)|*g!=generation); } });
 }
 
-#[wasm_bindgen]
 pub fn signer_bind(token:u32,generation:u32,account_id:&str)->Result<String,String> {
     let account_id=AccountUuid::from_uuid(uuid::Uuid::parse_str(account_id).map_err(|_|"INVALID_ARGUMENT")?);
     SIGNERS.with(|table| {
@@ -116,7 +110,6 @@ pub fn signer_bind(token:u32,generation:u32,account_id:&str)->Result<String,Stri
         Ok(state.into())
     })
 }
-#[wasm_bindgen]
 pub fn signer_unbind(token:u32,generation:u32,account_id:&str)->Result<(),String> {
     let account_id=AccountUuid::from_uuid(uuid::Uuid::parse_str(account_id).map_err(|_|"INVALID_ARGUMENT")?);
     SIGNERS.with(|table| {
@@ -131,7 +124,6 @@ pub(super) fn is_bound(generation:u32,account_id:&str)->bool {
 }
 
 /// Authorize only spends controlled by this retained key; account IDs are not authority.
-#[wasm_bindgen]
 pub fn signer_authorize(token:u32,parameters:&[u8],genesis:&[u8],height:u32,branch:u32,bytes:&[u8],maximum:u32)->Result<Vec<u8>,String> {
     use pczt::roles::{signer::{Signer as Role,Error as RoleError},verifier::{Verifier,OrchardError}};
     use zcash_transparent::keys::{TransparentKeyScope,NonHardenedChildIndex};

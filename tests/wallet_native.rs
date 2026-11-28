@@ -1,4 +1,4 @@
-use zakura_network_bindings::wallet;
+use zakura_bindings_core::wallet;
 
 fn document() -> Vec<u8> {
     br#"{"encoding":"regtest","Overwinter":10,"Sapling":20,"Blossom":30,"Heartwood":40,"Canopy":50,"Nu5":60,"Nu6":70,"Nu6_1":80,"Nu6_2":90,"Nu6_3":100}"#.to_vec()

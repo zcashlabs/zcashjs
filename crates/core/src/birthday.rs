@@ -3,7 +3,6 @@ use prost::Message;
 use serde_json::{json,Value};
 use zcash_client_backend::{data_api::AccountBirthday,proto::service::TreeState};
 use zcash_protocol::consensus::{Parameters,NetworkType,NetworkUpgrade};
-use wasm_bindgen::prelude::*;
 type Result<T> = std::result::Result<T,String>;
 pub(crate) fn string<'a>(v: &'a Value, name: &str) -> Result<&'a str> { v.get(name).and_then(Value::as_str).ok_or("INVALID_ARGUMENT".into()) }
 pub(crate) fn height(v: &Value, name: &str) -> Result<u32> { v.get(name).and_then(Value::as_u64).and_then(|n| n.try_into().ok()).ok_or("INVALID_ARGUMENT".into()) }
@@ -50,7 +49,6 @@ pub(crate) fn validate(v: &Value, parameters: &[u8], genesis: &[u8], p: &crate::
     Ok(decoded)
 }
 
-#[wasm_bindgen]
 pub fn validate_birthday(parameters:&[u8], genesis:&[u8], first:u32, tree:&[u8], recover:Option<u32>) -> Result<()> {
     if genesis.len()!=32 { return Err("NETWORK_MISMATCH".into()); }
     if tree.is_empty() || tree.len()>65536 { return Err("INVALID_BIRTHDAY".into()); }

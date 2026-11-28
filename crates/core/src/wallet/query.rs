@@ -2,7 +2,6 @@
 use super::accounts::{fields,string,Failure,Result};
 use serde_json::{json,Value};
 use rusqlite::{params,OptionalExtension};
-use wasm_bindgen::prelude::*;
 use zcash_client_backend::data_api::{WalletRead,wallet::ConfirmationsPolicy};
 use zcash_client_sqlite::ExtensionTransaction;
 
@@ -163,7 +162,6 @@ fn execute(generation:u32,operation:&str,input:&Value)->Result<Value> {
         })
     })
 }
-#[wasm_bindgen]
 pub fn query_call(generation:u32,operation:&str,input:&str)->std::result::Result<String,String> {
     if input.len()>4096{return Err("RESOURCE_LIMIT".into());}
     let value=serde_json::from_str(input).map_err(|_|"INVALID_ARGUMENT".to_string())?;
