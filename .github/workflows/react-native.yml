@@ -33,6 +33,8 @@ jobs:
       - run: npm run build
       - run: node --test tests/runtime/text-decoder.test.js tests/runtime/local-channel.test.js
       - run: npm run test:react-native
+      - name: Native module compiles against React Native headers
+        run: scripts/check-react-native-cpp.sh
       - uses: actions/upload-artifact@v4
         with:
           name: sdk-dist
