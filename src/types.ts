@@ -243,6 +243,8 @@ export interface LightClient {
 export type WalletStorage
   = | { readonly kind: 'node-filesystem'; readonly path: string; readonly encryptionKey?: Uint8Array }
     | { readonly kind: 'browser-opfs'; readonly name: string }
+    /** React Native: an absolute directory path in app storage (e.g. the documents directory). */
+    | { readonly kind: 'native-filesystem'; readonly path: string; readonly encryptionKey?: Uint8Array }
     | { readonly kind: 'memory' };
 /** Application-pinned canonical manifest; H1.1 defines URL and verification rules. */
 export interface WasmArtifact {

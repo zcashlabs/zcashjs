@@ -32,7 +32,8 @@
     "test:package:node": "npm run build && node scripts/verify-bundled-browser.js --node-only",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm test",
+    "test:react-native": "node --test --test-concurrency=1 tests/react-native/simulated.check.js tests/react-native/cross-format.check.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -48,11 +49,16 @@
   "type": "module",
   "files": [
     "dist/src",
+    "dist/react-native",
     "CHANGELOG.md",
     "licenses"
   ],
   "exports": {
     ".": {
+      "react-native": {
+        "types": "./dist/react-native/index.d.ts",
+        "default": "./dist/react-native/index.js"
+      },
       "types": "./dist/src/index.d.ts",
       "import": "./dist/src/index.js"
     },
@@ -70,6 +76,7 @@
     }
   },
   "types": "./dist/src/index.d.ts",
+  "react-native": "./dist/react-native/index.js",
   "sideEffects": false,
   "dependencies": {
     "@grpc/grpc-js": "1.14.7"

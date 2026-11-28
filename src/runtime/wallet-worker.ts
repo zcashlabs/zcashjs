@@ -240,6 +240,8 @@ async function acquireStorage(storage: PersistentRequest): Promise<StorageBacken
   }
 }
 
+const isDomException = (error: unknown, name: string) =>
+  typeof DOMException === 'function' && error instanceof DOMException && error.name === name;
 const knownFailures = new Set([KEY_MISMATCH, 'INVALID_ARGUMENT', 'PROTOCOL_MISMATCH', 'RESOURCE_LIMIT',
   'NETWORK_MISMATCH', 'SCHEMA_MISMATCH', 'VIEWING_SCHEMA_REQUIRED', 'MIGRATION_REQUIRED']);
 function failureInfo(error: unknown, fallback: string) {
@@ -248,9 +250,9 @@ function failureInfo(error: unknown, fallback: string) {
   try {
     const systemCode = Object.getOwnPropertyDescriptor(error, 'code')?.value;
     if (systemCode === 'ENOSPC' || systemCode === 'EDQUOT'
-      || error instanceof DOMException && error.name === 'QuotaExceededError') code = 'STORAGE_QUOTA';
+      || isDomException(error, 'QuotaExceededError')) code = 'STORAGE_QUOTA';
     else if (systemCode === 'EBUSY'
-      || error instanceof DOMException && error.name === 'NoModificationAllowedError') code = 'STORAGE_BUSY';
+      || isDomException(error, 'NoModificationAllowedError')) code = 'STORAGE_BUSY';
   } catch { /* Keep the fixed fallback. */ }
   const known = typeof tag === 'string' && knownFailures.has(tag);
   if (known && typeof tag === 'string') code = tag;

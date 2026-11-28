@@ -12,6 +12,8 @@ export { parseZec, formatZec } from './amounts.js';
 export { accountIndex, diversifierIndex, txId, blockHash } from './primitives.js';
 export { isZcashError } from './errors.js';
 export { httpTransport, readGenesisHash } from './http.js';
+// React Native proving parameters (native file-backed); RUNTIME_UNAVAILABLE elsewhere.
+export { nativeProving, downloadProvingParameters } from './runtime/react-native-proving.js';
 export type {
 
   WalletClient,

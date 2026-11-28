@@ -172,7 +172,7 @@ export class WalletSession {
       this.completions.set(error, 'none');
       return Promise.reject(error);
     }
-    const result = this.tail.then(() => {
+    const result = this.tail.then(async () => {
       try {
         // The accepted owner supplies the frozen API DTOs, including bigint indices.
         if (operation === 'signer_bind' || operation === 'signer_unbind') {
@@ -191,7 +191,8 @@ export class WalletSession {
         if (operation === 'account_import_mnemonic_signer' || operation === 'account_create_mnemonic_signer'
           || operation === 'account_restore_mnemonic_signer') {
           const { mnemonic, passphrase, ...input } = args as MnemonicAccountInput;
-          return this.owner.call(
+          // Native runtimes answer asynchronously; await so rejections are recorded below.
+          return await this.owner.call(
             this.generation,
             this.instance,
             operation,
@@ -201,7 +202,8 @@ export class WalletSession {
             passphrase,
           ) as ReturnType<NativeWalletCalls[C]>;
         }
-        return this.owner.call(this.generation, this.instance, operation, args) as ReturnType<NativeWalletCalls[C]>;
+        const value = await this.owner.call(this.generation, this.instance, operation, args);
+        return value as ReturnType<NativeWalletCalls[C]>;
       } catch (error) {
         if (typeof error === 'object' && error !== null && !this.completions.has(error)) {
           let commit: unknown;
