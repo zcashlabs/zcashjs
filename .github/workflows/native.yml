@@ -1,0 +1,76 @@
+name: Native front-end
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Core logic, native ABI and native/WASM parity on the host.
+  host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: .cache/sdk
+          key: native-host-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml', 'xtask/Cargo.lock') }}
+      - name: Core tests (wallet storage)
+        run: |
+          mkdir -p "$RUNNER_TEMP/wallets"
+          WALLET_TEST_ROOT="$RUNNER_TEMP/wallets" cargo test --locked -p zakura-bindings-core --features wallet-storage
+      - name: Native unit tests
+        run: cargo test --locked -p zakura-bindings-native
+      - name: WASM build
+        run: cargo xtask build --output "$RUNNER_TEMP/sdk" --cache .cache/sdk
+      - name: Native host build
+        run: cargo xtask build-mobile --targets host --output "$RUNNER_TEMP/native" --cache .cache/sdk
+      - name: C ABI
+        run: |
+          cc crates/native/tests/abi.c -Icrates/native/include -L"$RUNNER_TEMP/native/host" -lzakura_bindings_native -o "$RUNNER_TEMP/abi"
+          LD_LIBRARY_PATH="$RUNNER_TEMP/native/host" "$RUNNER_TEMP/abi"
+      - name: Native/WASM parity
+        run: node tests/native-parity.mjs "$RUNNER_TEMP/sdk" "$RUNNER_TEMP/native/host/zakura-native-bridge"
+
+  mobile:
+    name: Mobile (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-24.04
+          - target: ios
+            os: macos-15
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_LATEST_HOME }}
+        run: cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache .cache/sdk
+      - name: Size report
+        run: |
+          python3 - "$RUNNER_TEMP/native/native-build.json" <<'PY'
+          import json, os, sys
+          receipt = json.load(open(sys.argv[1]))
+          root = os.path.dirname(sys.argv[1])
+          for name in sorted(receipt['artifacts']):
+              size = os.path.getsize(os.path.join(root, name))
+              print(f"{size / 1048576:8.1f} MiB  {name}")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: ${{ runner.temp }}/native
+          retention-days: 7
