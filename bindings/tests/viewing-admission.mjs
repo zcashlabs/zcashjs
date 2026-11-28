@@ -1,0 +1,52 @@
+// Facade lifetime/admission only. tests/viewing.rs exercises the real upstream keys.
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import fs from 'node:fs';
+import {copyBytes} from '../bytes.mjs';
+let opens=0,frees=0,initializations=0,pcztOpens=0,pcztFrees=0;
+const parsed=[];
+const pczt=()=>({serialize:()=>new Uint8Array([1,2]),inspect:()=>'{}',combine:()=>pczt(),redact:()=>pczt(),free(){pcztFrees++;}});
+const native=()=>({describe:()=>'{"kind":"ufvk"}',export:()=> 'viewing-key',to_incoming:native,derive:()=>'{"index":"0"}',find:()=>'{"index":"1"}',free(){frees++;}});
+const context=vm.createContext({Uint8Array,JSON,Object,WeakMap,Number,TypeError,Error,parseInt});
+const facade=new vm.SourceTextModule(fs.readFileSync(new URL('../network.mjs',import.meta.url),'utf8'),{context});
+await facade.link(specifier=>{
+  const exports=specifier==='./bytes.mjs'?{copyBytes}:{parse_standalone_pczt(...args){pcztOpens++;parsed.push(args);return pczt();},validate_birthday(){},initSync(){initializations++;},consensus_branch(){return 0;},viewing_open(){opens++;return native();},viewing_decode_address(){return '{"encoded":"address","knownReceivers":[],"unknownTypecodes":[100]}';},viewing_select_receiver(){return '{"pool":"sapling","type":"sapling","bytes":"00ff"}';}};
+  return new vm.SyntheticModule(Object.keys(exports),function(){for(const [key,value]of Object.entries(exports))this.setExport(key,value);},{context});
+});
+await facade.evaluate();
+const api=facade.namespace,parameters=new Uint8Array([1]);
+const full=api.openViewingAuthority(parameters,'ufvk','key','["sapling"]'),alias=full,incoming=full.toIncoming();
+assert.equal(full.export('ufvk','discloses-viewing-authority'),'viewing-key');
+assert.equal(full.derive('0','{}').index,'0');assert.equal(full.find('0','{}',1).index,'1');
+full.dispose();full.dispose();assert.equal(frees,1);
+for(const fn of [()=>alias.describe(),()=>alias.export('ufvk','discloses-viewing-authority'),()=>alias.derive('0','{}'),()=>alias.find('0','{}',1),()=>alias.toIncoming()])assert.throws(fn,/CLOSED/);
+assert.equal(incoming.describe().kind,'ufvk');incoming.dispose();assert.equal(frees,2);
+let coerced=0;const bad={toString(){coerced++;return 'key';}};
+assert.throws(()=>api.openViewingAuthority(parameters,'ufvk',bad,'[]'));
+assert.equal(coerced,0);assert.equal(opens,1);
+assert.throws(()=>api.selectViewingReceiver(parameters,'address','sapling',-1,0));
+assert.throws(()=>api.selectViewingReceiver(parameters,'address','sapling',0,2**32));
+assert.deepEqual([...api.selectViewingReceiver(parameters,'address','sapling',0,0).bytes],[0,255]);
+console.log('standalone viewing facade admission, independent ownership and idempotent release passed');
+
+api.initialize(new Uint8Array(3 * 1048576));
+assert.equal(initializations,1);
+assert.throws(()=>api.initialize(new Uint8Array(3 * 1048576 + 1)));
+assert.equal(initializations,1);
+
+const original=new Uint8Array([1,2]),genesis=new Uint8Array(32);
+const first=api.parseStandalonePczt(parameters,genesis,0,0,original,2);
+original.fill(9);genesis.fill(9);assert.deepEqual([...parsed[0][4]],[1,2]);assert.equal(parsed[0][1][0],0);
+const second=api.parseStandalonePczt(parameters,new Uint8Array(32),0,0,new Uint8Array([3]),2);
+const combined=first.combine(second),redacted=first.redact('zakura-signer-full/1');
+first.dispose();first.dispose();assert.equal(pcztFrees,1);
+for(const action of [()=>first.serialize(),()=>first.inspect(),()=>first.combine(second),()=>first.redact('zakura-signer-full/1'),()=>second.combine(first)])assert.throws(action,/CLOSED/);
+assert.throws(()=>second.combine({}),/INVALID_ARGUMENT/);
+assert.throws(()=>second.redact({toString(){coerced++;return 'profile';}}),/INVALID_ARGUMENT/);assert.equal(coerced,0);
+assert.deepEqual([...combined.serialize()],[1,2]);assert.deepEqual([...redacted.serialize()],[1,2]);
+for(const [height,branch,maximum]of [[-1,0,2],[0,2**32,2],[0,0,0],[0,0,2**32],[0.5,0,2]])assert.throws(()=>api.parseStandalonePczt(parameters,new Uint8Array(32),height,branch,new Uint8Array([1]),maximum));
+assert.throws(()=>api.parseStandalonePczt(parameters,new Uint8Array(31),0,0,new Uint8Array([1]),2));
+assert.throws(()=>api.parseStandalonePczt(parameters,new Uint8Array(32),0,0,new Uint8Array(3),2));
+assert.equal(pcztOpens,2);
+second.dispose();combined.dispose();redacted.dispose();assert.equal(pcztFrees,4);
+console.log('standalone PCZT facade owned inputs, independent results, range admission and disposal passed');

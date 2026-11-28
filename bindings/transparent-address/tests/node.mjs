@@ -1,0 +1,11 @@
+import {readFileSync} from 'node:fs';
+import {pathToFileURL} from 'node:url';
+import {resolve} from 'node:path';
+import {createHash} from 'node:crypto';
+import {runChecks} from './runtime.mjs';
+const build=resolve(process.argv[2]);
+const receipt=JSON.parse(readFileSync(build+'/receipt.json'));
+for(const [path,hash] of Object.entries(receipt.artifacts))if(createHash('sha256').update(readFileSync(build+'/'+path)).digest('hex')!==hash)throw Error('artifact mismatch '+path);
+const {createTransparentAddressCodec}=await import(pathToFileURL(build+'/codec.mjs'));
+const result=runChecks(createTransparentAddressCodec,new Uint8Array(readFileSync(build+'/wasm/zakura_transparent_address_bg.wasm')),JSON.parse(readFileSync(new URL('./fixtures.json',import.meta.url))));
+console.log(JSON.stringify({...result,node:process.version,receipt: createHash('sha256').update(readFileSync(build+'/receipt.json')).digest('hex')}));

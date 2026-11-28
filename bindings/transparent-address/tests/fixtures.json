@@ -1,0 +1,53 @@
+{
+  "source": "882ecd278050bb92365c9d1250c55f0dadc0f648/components/zcash_address/src/encoding.rs:278-376",
+  "positive": [
+    {
+      "address": "t1Hsc1LR8yKnbbe3twRp88p6vFfC5t7DLbs",
+      "family": "main",
+      "kind": "p2pkh",
+      "hex": "0000000000000000000000000000000000000000"
+    },
+    {
+      "address": "tm9iMLAuYMzJ6jtFLcA7rzUmfreGuKvr7Ma",
+      "family": "test",
+      "kind": "p2pkh",
+      "hex": "0000000000000000000000000000000000000000"
+    },
+    {
+      "address": "t3JZcvsuaXE6ygokL4XUiZSTrQBUoPYFnXJ",
+      "family": "main",
+      "kind": "p2sh",
+      "hex": "0000000000000000000000000000000000000000"
+    },
+    {
+      "address": "t26YoyZ1iPgiMEWL4zGUm74eVWfhyDMXzY2",
+      "family": "test",
+      "kind": "p2sh",
+      "hex": "0000000000000000000000000000000000000000"
+    },
+    {
+      "address": "t1VmmGiyjVNeCjxDZzg7vZmd99WyzVby9yC",
+      "family": "main",
+      "kind": "p2pkh",
+      "hex": "8286bf790866805397e3a947640b77a43f0b43a5"
+    },
+    {
+      "address": "tm9ofD7kHR7AF8MsJomEzLqGcrLCBkD9gDj",
+      "family": "test",
+      "kind": "p2pkh",
+      "hex": "0101010101010101010101010101010101010101"
+    }
+  ],
+  "unsupported": [
+    "zc8E5gYid86n4bo2Usdq1cpr7PpfoJGzttwBHEEgGhGkLUg7SPPVFNB2AkRFXZ7usfphup5426dt1buMmY3fkYeRrQGLa8y",
+    "ztJ1EWLKcGwF2S4NA17pAJVdco8Sdkz4AQPxt1cLTEfNuyNswJJc2BbBqYrsRZsp31xbVZwhF7c7a2L9jsF3p3ZwRWpqqyS",
+    "zs1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpq6d8g",
+    "ztestsapling1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqfhgwqu",
+    "zregtestsapling1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqknpr3m",
+    "u1qpatys4zruk99pg59gcscrt7y6akvl9vrhcfyhm9yxvxz7h87q6n8cgrzzpe9zru68uq39uhmlpp5uefxu0su5uqyqfe5zp3tycn0ecl",
+    "utest10c5kutapazdnf8ztl3pu43nkfsjx89fy3uuff8tsmxm6s86j37pe7uz94z5jhkl49pqe8yz75rlsaygexk6jpaxwx0esjr8wm5ut7d5s",
+    "uregtest15xk7vj4grjkay6mnfl93dhsflc2yeunhxwdh38rul0rq3dfhzzxgm5szjuvtqdha4t4p2q02ks0jgzrhjkrav70z9xlvq0plpcjkd5z3",
+    "tex1s2rt77ggv6q989lr49rkgzmh5slsksa9khdgte",
+    "textest1qyqszqgpqyqszqgpqyqszqgpqyqszqgpfcjgfy"
+  ]
+}

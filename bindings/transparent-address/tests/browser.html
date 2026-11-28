@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>Private transparent address fixture</title><link rel="icon" href="data:,">
+<script type="module">
+import {createTransparentAddressCodec} from '/build/codec.mjs';
+import {runChecks} from '/runtime.mjs';
+let worker;
+try {
+ const bytes=new Uint8Array(await(await fetch('/build/wasm/zakura_transparent_address_bg.wasm')).arrayBuffer());
+ const fixtures=await(await fetch('/fixtures.json')).json();
+ const page=runChecks(createTransparentAddressCodec,bytes,fixtures);
+ const result=await new Promise((resolve,reject)=>{
+  worker=new Worker('/browser.mjs',{type:'module'});
+  const timer=setTimeout(()=>reject(Error('worker timeout')),15000);
+  worker.onmessage=event=>{clearTimeout(timer);resolve(event.data);};
+  worker.onerror=event=>{clearTimeout(timer);reject(Error(event.message));};
+ });
+ if(!result.ok)throw Error(JSON.stringify(result));
+ worker.terminate();
+ window.transparentAddressResult={ok:true,page,worker:result,workerTerminated:true,userAgent:navigator.userAgent,crossOriginIsolated};
+} catch(error){worker?.terminate();window.transparentAddressResult={ok:false,error:String(error),stack:error.stack};}
+</script>

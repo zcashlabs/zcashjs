@@ -1,0 +1,22 @@
+{
+  "packages": [
+    {
+      "name": "prost",
+      "version": "0.14.4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "528ac67416ff8646872a3c02cad9cc4ee5dc9f9540c9b10771855c95cb2e5ae1"
+    },
+    {
+      "name": "zakura-client-backend",
+      "version": "0.1.0-rc4",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "5a70f61bb142b29dfd260561cccb21a657acdf86c2e901189817acdf3e25d5d6"
+    }
+  ],
+  "qualified_wallet_lock_sha256": "2603a28221ff5f3639c05caaa0147dfa1a5027150db98e97d726387512b1cc62",
+  "wallet_source_commit": "a9142ee100b3a563b7d9ba7a8e94201d00ad8154",
+  "reference_server_commit": "09593edbee4ee68d47e5a53f8ce1c83514c4e8e6",
+  "wire_version": "v0.5.0",
+  "upstream_protocol_commit": "ac7cee052a1bf5d430985a478d39e8b513fc4bd4",
+  "note": "Wallet service.proto differs from upstream tag by one comment; source files in SHA256.json are retained exact."
+}

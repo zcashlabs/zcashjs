@@ -1,0 +1,305 @@
+[
+  {
+    "method": "GetLatestBlock",
+    "direction": "request",
+    "dto": {},
+    "hex": ""
+  },
+  {
+    "method": "GetLatestBlock",
+    "direction": "response",
+    "dto": {
+      "height": "18446744073709551615",
+      "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    "hex": "08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+  },
+  {
+    "method": "GetLightdInfo",
+    "direction": "request",
+    "dto": {},
+    "hex": ""
+  },
+  {
+    "method": "GetLightdInfo",
+    "direction": "response",
+    "dto": {
+      "version": "fixture-version-é",
+      "vendor": "fixture-vendor-é",
+      "taddr_support": true,
+      "chain_name": "fixture-chainName-é",
+      "sapling_activation_height": "18446744073709551615",
+      "consensus_branch_id": "fixture-consensusBranchId-é",
+      "block_height": "18446744073709551615",
+      "git_commit": "fixture-gitCommit-é",
+      "branch": "fixture-branch-é",
+      "build_date": "fixture-buildDate-é",
+      "build_user": "fixture-buildUser-é",
+      "estimated_height": "18446744073709551615",
+      "zcashd_build": "fixture-zcashdBuild-é",
+      "zcashd_subversion": "fixture-zcashdSubversion-é",
+      "donation_address": "fixture-donationAddress-é",
+      "upgrade_name": "fixture-upgradeName-é",
+      "upgrade_height": "18446744073709551615",
+      "lightwallet_protocol_version": "fixture-lightwalletProtocolVersion-é"
+    },
+    "hex": "0a12666978747572652d76657273696f6e2dc3a91211666978747572652d76656e646f722dc3a918012214666978747572652d636861696e4e616d652dc3a928ffffffffffffffffff01321c666978747572652d636f6e73656e7375734272616e636849642dc3a938ffffffffffffffffff014214666978747572652d676974436f6d6d69742dc3a94a11666978747572652d6272616e63682dc3a95214666978747572652d6275696c64446174652dc3a95a14666978747572652d6275696c64557365722dc3a960ffffffffffffffffff016a16666978747572652d7a63617368644275696c642dc3a9721b666978747572652d7a636173686453756276657273696f6e2dc3a97a1a666978747572652d646f6e6174696f6e416464726573732dc3a9820116666978747572652d757067726164654e616d652dc3a98801ffffffffffffffffff01920125666978747572652d6c6967687477616c6c657450726f746f636f6c56657273696f6e2dc3a9"
+  },
+  {
+    "method": "GetTransaction",
+    "direction": "request",
+    "dto": {
+      "block": {
+        "height": "18446744073709551615",
+        "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+      },
+      "index": "18446744073709551615",
+      "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    "hex": "0a2d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff011a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+  },
+  {
+    "method": "GetTransaction",
+    "direction": "response",
+    "dto": {
+      "data": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "height": "18446744073709551615"
+    },
+    "hex": "0a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff01"
+  },
+  {
+    "method": "GetAddressUtxos",
+    "direction": "request",
+    "dto": {
+      "addresses": [
+        "fixture-addresses-é"
+      ],
+      "start_height": "18446744073709551615",
+      "max_entries": 4294967295
+    },
+    "hex": "0a14666978747572652d6164647265737365732dc3a910ffffffffffffffffff0118ffffffff0f"
+  },
+  {
+    "method": "GetAddressUtxos",
+    "direction": "response",
+    "dto": {
+      "address_utxos": [
+        {
+          "address": "fixture-address-é",
+          "txid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+          "index": -1,
+          "script": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+          "value_zat": "-9223372036854775808",
+          "height": "18446744073709551615"
+        }
+      ]
+    },
+    "hex": "0a790a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff011a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f208080808080808080800128ffffffffffffffffff013212666978747572652d616464726573732dc3a9"
+  },
+  {
+    "method": "GetTaddressBalance",
+    "direction": "request",
+    "dto": {
+      "addresses": [
+        "fixture-addresses-é"
+      ]
+    },
+    "hex": "0a14666978747572652d6164647265737365732dc3a9"
+  },
+  {
+    "method": "GetTaddressBalance",
+    "direction": "response",
+    "dto": {
+      "value_zat": "-9223372036854775808"
+    },
+    "hex": "0880808080808080808001"
+  },
+  {
+    "method": "GetTreeState",
+    "direction": "request",
+    "dto": {
+      "height": "18446744073709551615",
+      "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    "hex": "08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+  },
+  {
+    "method": "GetTreeState",
+    "direction": "response",
+    "dto": {
+      "network": "fixture-network-é",
+      "height": "18446744073709551615",
+      "hash": "fixture-hash-é",
+      "time": 4294967295,
+      "sapling_tree": "fixture-saplingTree-é",
+      "orchard_tree": "fixture-orchardTree-é",
+      "ironwood_tree": "fixture-ironwoodTree-é"
+    },
+    "hex": "0a12666978747572652d6e6574776f726b2dc3a910ffffffffffffffffff011a0f666978747572652d686173682dc3a920ffffffff0f2a16666978747572652d7361706c696e67547265652dc3a93216666978747572652d6f726368617264547265652dc3a93a17666978747572652d69726f6e776f6f64547265652dc3a9"
+  },
+  {
+    "method": "SendTransaction",
+    "direction": "request",
+    "dto": {
+      "data": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "height": "18446744073709551615"
+    },
+    "hex": "0a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff01"
+  },
+  {
+    "method": "SendTransaction",
+    "direction": "response",
+    "dto": {
+      "error_code": -1,
+      "error_message": "fixture-errorMessage-é"
+    },
+    "hex": "08ffffffffffffffffff011217666978747572652d6572726f724d6573736167652dc3a9"
+  },
+  {
+    "method": "GetSubtreeRoots",
+    "direction": "request",
+    "dto": {
+      "start_index": 4294967295,
+      "shielded_protocol": 2,
+      "max_entries": 4294967295
+    },
+    "hex": "08ffffffff0f100218ffffffff0f"
+  },
+  {
+    "method": "GetSubtreeRoots",
+    "direction": "item",
+    "dto": {
+      "root_hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "completing_block_hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "completing_block_height": "18446744073709551615"
+    },
+    "hex": "1220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20ffffffffffffffffff01"
+  },
+  {
+    "method": "GetBlockRange",
+    "direction": "request",
+    "dto": {
+      "start": {
+        "height": "18446744073709551615",
+        "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+      },
+      "end": {
+        "height": "18446744073709551615",
+        "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+      },
+      "pool_types": [
+        2
+      ]
+    },
+    "hex": "0a2d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f122d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a0102"
+  },
+  {
+    "method": "GetBlockRange",
+    "direction": "item",
+    "dto": {
+      "height": "18446744073709551615",
+      "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "prev_hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "time": 4294967295,
+      "header": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "vtx": [
+        {
+          "index": "18446744073709551615",
+          "txid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+          "fee": 4294967295,
+          "spends": [
+            {
+              "nf": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            }
+          ],
+          "outputs": [
+            {
+              "cmu": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ephemeral_key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ciphertext": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233"
+            }
+          ],
+          "actions": [
+            {
+              "nullifier": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "cmx": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ephemeral_key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ciphertext": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233"
+            }
+          ],
+          "ironwood_actions": [
+            {
+              "nullifier": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "cmx": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ephemeral_key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "ciphertext": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233"
+            }
+          ],
+          "vin": [
+            {
+              "prevout_txid": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+              "prevout_index": 4294967295
+            }
+          ],
+          "vout": [
+            {
+              "value": "18446744073709551615",
+              "script_pub_key": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            }
+          ]
+        }
+      ],
+      "chain_metadata": {
+        "sapling_commitment_tree_size": 4294967295,
+        "orchard_commitment_tree_size": 4294967295,
+        "ironwood_commitment_tree_size": 4294967295
+      }
+    },
+    "hex": "10ffffffffffffffffff011a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f28ffffffff0f3220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f3aea0408ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f18ffffffff0f22220a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2a7a0a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a34000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233329c010a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2234000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333a280a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffff0f422d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f4a9c010a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2234000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233421208ffffffff0f10ffffffff0f18ffffffff0f"
+  },
+  {
+    "method": "GetTaddressTransactions",
+    "direction": "request",
+    "dto": {
+      "address": "fixture-address-é",
+      "range": {
+        "start": {
+          "height": "18446744073709551615",
+          "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "end": {
+          "height": "18446744073709551615",
+          "hash": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+        },
+        "pool_types": [
+          2
+        ]
+      }
+    },
+    "hex": "0a12666978747572652d616464726573732dc3a912610a2d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f122d08ffffffffffffffffff011220000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f1a0102"
+  },
+  {
+    "method": "GetTaddressTransactions",
+    "direction": "item",
+    "dto": {
+      "data": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "height": "18446744073709551615"
+    },
+    "hex": "0a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff01"
+  },
+  {
+    "method": "GetMempoolStream",
+    "direction": "request",
+    "dto": {},
+    "hex": ""
+  },
+  {
+    "method": "GetMempoolStream",
+    "direction": "item",
+    "dto": {
+      "data": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "height": "18446744073709551615"
+    },
+    "hex": "0a20000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f10ffffffffffffffffff01"
+  }
+]
