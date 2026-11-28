@@ -8,3 +8,10 @@ resolver = "3"
 members = ["crates/core", "crates/wasm", "crates/native"]
 default-members = ["crates/core", "crates/wasm", "crates/native"]
 exclude = ["lightwire", "transparent-address", "xtask"]
+
+# Native mobile libraries (cargo xtask build-mobile). The WASM build keeps `release`.
+[profile.mobile]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+strip = "debuginfo"

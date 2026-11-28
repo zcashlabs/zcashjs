@@ -2,6 +2,7 @@ mod build;
 mod codec;
 mod generate;
 mod inputs;
+mod mobile;
 mod support;
 mod tools;
 
@@ -38,6 +39,21 @@ fn run() -> Result<()> {
             }
             build::build(&root, &output, &cache)
         }
+        Some("build-mobile") => {
+            let mut output = root.join("build/native");
+            let mut cache = root.join(".cache/sdk");
+            let mut targets = vec!["android".to_string(), "ios".to_string()];
+            while let Some(option) = args.next() {
+                let value = args.next().ok_or_else(|| format!("missing value for {option}"))?;
+                match option.as_str() {
+                    "--output" => output = value.into(),
+                    "--cache" => cache = value.into(),
+                    "--targets" => targets = value.split(',').map(String::from).collect(),
+                    _ => return Err(format!("unknown build-mobile option: {option}").into()),
+                }
+            }
+            mobile::build(&root, &output, &cache, &targets)
+        }
         Some("generate") => {
             let options: Vec<_> = args.collect();
             match options.as_slice() {
@@ -48,7 +64,9 @@ fn run() -> Result<()> {
         }
         None | Some("--help" | "-h") => {
             println!(
-                "cargo xtask build [--output PATH] [--cache PATH]\ncargo xtask generate [--check]"
+                "cargo xtask build [--output PATH] [--cache PATH]\n\
+                 cargo xtask build-mobile [--output PATH] [--cache PATH] [--targets android,ios,host]\n\
+                 cargo xtask generate [--check]"
             );
             Ok(())
         }
