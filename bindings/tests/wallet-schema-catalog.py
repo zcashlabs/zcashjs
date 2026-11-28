@@ -7,7 +7,7 @@ from pathlib import Path
 source_root, receipt_path, output_path = map(Path, sys.argv[1:])
 source = json.loads(Path(__file__).with_name('wallet-schema-source.json').read_text())
 receipt = json.loads(receipt_path.read_text())
-assert receipt['pairs'] == 389 and len(receipt['effects']) == len(source) == 87
+assert receipt['pairs'] == 396 and len(receipt['effects']) == len(source) == 91
 for item in source:
     path = source_root / (item['name'] + '.rs')
     assert hashlib.sha256(path.read_bytes()).hexdigest() == item['source_sha256'], path

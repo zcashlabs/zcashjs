@@ -18,7 +18,7 @@ fn schema_document_committed_prefixes_resume() {
     let root = std::env::var("WALLET_TEST_ROOT").expect("fresh owned scratch required");
     let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
     let params = document();
-    for committed in 0..=87 {
+    for committed in 0..=91 {
         let path = format!("{root}/document-prefix-{}-{stamp}-{committed}.db", std::process::id());
         assert!(!std::path::Path::new(&path).exists());
         let mut db = rusqlite::Connection::open(&path).unwrap();
@@ -33,7 +33,7 @@ fn schema_document_committed_prefixes_resume() {
             WalletMigrator::new().init_or_migrate(&mut wallet)
         };
         unsafe { rusqlite::ffi::sqlite3_commit_hook(db.handle(), None, std::ptr::null_mut()); }
-        assert_eq!(migrated.is_ok(), committed == 87, "commit boundary {committed}: {migrated:?}");
+        assert_eq!(migrated.is_ok(), committed == 91, "commit boundary {committed}: {migrated:?}");
         let ids: Vec<String> = db.prepare("SELECT lower(hex(id)) FROM schemer_migrations ORDER BY id").unwrap()
             .query_map([], |r| r.get(0)).unwrap().collect::<Result<_, _>>().unwrap();
         assert_eq!(ids.len(), committed);
@@ -69,7 +69,7 @@ fn read_schema(conn: &rusqlite::Connection) -> Schema {
 fn schema_source_effects_compose() {
     use std::collections::{BTreeMap, BTreeSet};
     let source: Vec<serde_json::Value> = serde_json::from_str(include_str!("../wallet-schema-source.json")).unwrap();
-    assert_eq!(source.len(), 87);
+    assert_eq!(source.len(), 91);
     let ids: Vec<_> = source.iter().map(|m| m["id"].as_str().unwrap()).collect();
     let mut closures: Vec<BTreeSet<usize>> = Vec::new();
     for (i, migration) in source.iter().enumerate() {
@@ -134,7 +134,7 @@ fn schema_source_effects_compose() {
             pairs += 1;
         }
     }
-    assert_eq!(pairs, 389);
+    assert_eq!(pairs, 396);
     let root = std::env::var("WALLET_TEST_ROOT").expect("owned scratch required");
     let out = serde_json::json!({"sqlite_version": rusqlite::version(), "pairs": pairs, "contexts": pairs * 2, "effects": effects});
     std::fs::write(format!("{root}/native-effects.json"), serde_json::to_vec_pretty(&out).unwrap()).unwrap();

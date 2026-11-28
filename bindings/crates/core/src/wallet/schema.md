@@ -11,7 +11,7 @@ writable initialization; integer exhaustion rejects and rolls back mutations.
 
 The contract is the schema produced by the existing host from an empty database,
 with its own version-1 binding marker and the locked `zakura-client-sqlite
-0.1.0-rc9.4` migrations, Orchard and transparent inputs enabled. Native SQLite is
+0.1.0-rc9.8` migrations, Orchard and transparent inputs enabled. Native SQLite is
 3.50.2 from locked rusqlite 0.37.0. The WASM build uses the same vendored SQLite
 with the approved host compile flags; its real Node/Firefox checks remain a
 separate acceptance gate. This is structural admission, not general wallet
@@ -48,7 +48,7 @@ recovery scenario.
 
 ## Source effects, not sampled schemas
 
-`tests/wallet-schema-source.json` records all 87 pinned source hashes, IDs,
+`tests/wallet-schema-source.json` records all 91 pinned source hashes, IDs,
 direct dependencies, source SQL block lines and the 498 projected statements.
 The source checker verifies those source bytes, IDs, edges and rendered
 statements. Its lexical extraction is a consistency check for the frozen audited
@@ -101,7 +101,7 @@ fixture or production database.
 ## Composition scope and checks
 
 Direct dependencies order every overlapping persistent writer in the native
-net-effect inventory: all 389 incomparable pairs have disjoint replacement/
+net-effect inventory: all 396 incomparable pairs have disjoint replacement/
 tombstone names. Table replacements carry their automatic index effects. ALTER
 renames operate on the fixed source identifiers and their stored references;
 the whole-inventory delta includes the affected FK/view/index definitions.
@@ -123,7 +123,7 @@ sets. Observed backend prefixes never determine catalog membership.
 
 ## Historical variants and remaining exceptions
 
-The producer scope is explicit: the host's locked rc9.4-from-empty history and the earlier RC4 prefixes. Its
+The producer scope is explicit: the host's locked rc9.8-from-empty history, wallets created on rc9.4 (the first 87 migrations, a dependency-closed prefix that migrates forward on open) and the earlier RC4 prefixes. Its
 binding marker is established before the same pinned backend creates tables;
 there is no general historical-wallet import/binding operation. Previously
 accepting arbitrary marker-shaped schemas was the admission bug, not an import
@@ -173,7 +173,7 @@ The new source audit includes these paths that a literal inventory alone misses:
   changes rows only. Dropped ZIP 318 tables were not used by this runtime; their
   historical migrations remain recognized and their removal is catalogued.
 
-The native composition check covers 389 incomparable migration pairs in both
+The native composition check covers 396 incomparable migration pairs in both
 minimal and maximal dependency contexts. Interrupted migration tests cover all
 88 committed prefixes. Schema rejection tests retain exact input bytes on
 failure. These native checks do not qualify browser storage or a live payment.
