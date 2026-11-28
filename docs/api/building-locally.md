@@ -77,6 +77,25 @@ npm install /tmp/zcash-package/zcashlabs-zcash.js-0.1.4.tgz
 
 Use the filename printed by `npm pack` for the current version.
 
+## React Native
+
+`npm run build` also writes `dist/react-native/`, the WebAssembly-free bundle Metro
+loads. The native libraries come from the pinned bindings source:
+
+```sh
+cd .cache/native/<pinned revision>/source
+cargo xtask build-mobile --targets android --output /tmp/native   # needs ANDROID_NDK_HOME
+cargo xtask build-mobile --targets ios --output /tmp/native-ios   # macOS with Xcode
+cd -
+node scripts/build-react-native-package.js /tmp/native            # fills packages/react-native
+```
+
+`npm run test:react-native` builds the host library (`--targets host`). It runs
+`dist/react-native` in a Node process that lacks WebAssembly, workers and WebCrypto,
+against the actual native library, and checks that encrypted wallets move between
+Node and the native library. Device runs use the
+[example app](https://github.com/zcashlabs/zcashjs/tree/main/examples/react-native).
+
 ## Documentation
 
 ```sh

@@ -57,6 +57,7 @@ Storage is required: the SDK never silently chooses a temporary wallet.
 | --- | --- |
 | Node | `{ kind: 'node-filesystem', path: './my-wallet' }` |
 | Browser | `{ kind: 'browser-opfs', name: 'my-wallet' }` |
+| React Native | `{ kind: 'native-filesystem', path: '/absolute/app/path/my-wallet' }` |
 | Disposable session | `{ kind: 'memory' }` |
 
 Memory storage loses local wallet state and operation records after close.
@@ -66,7 +67,7 @@ Browser endpoints must support gRPC-Web and CORS. See [platforms](platforms.md).
 
 ## Encrypt storage at rest
 
-On Node, pass a 32-byte `encryptionKey` with filesystem storage:
+On Node and React Native, pass a 32-byte `encryptionKey` with filesystem storage:
 
 ```ts
 import { createWalletClient } from '@zcashlabs/zcash.js';
@@ -97,7 +98,38 @@ account recovery.
 Encryption covers file contents. It does not hide file sizes, write timing, or
 the `owner.lock` file. It also does not stop an attacker with write access
 from rolling an individual block back to an earlier version of the same block.
-OPFS storage does not support encryption yet.
+OPFS storage does not support encryption yet. React Native's `native-filesystem`
+storage uses the same format, so encrypted wallets move between Node and devices.
+
+## React Native
+
+On React Native, storage and proving parameters live in app directories. Give both as
+absolute paths, for example derived from the documents directory:
+
+```ts
+import { createWalletClient, nativeProving } from '@zcashlabs/zcash.js';
+
+export async function openOnDevice(directory: string, key: Uint8Array, streamingFetch: typeof fetch) {
+  return createWalletClient('https://testnet.zec.rocks:443', {
+    network: 'testnet',
+    storage: { kind: 'native-filesystem', path: `${directory}/wallet`, encryptionKey: key },
+    proving: nativeProving({ directory: `${directory}/zcash-params` }),
+    transportOptions: { fetch: streamingFetch },
+  });
+}
+```
+
+Fetch the parameters once, before the first proof, with `downloadProvingParameters`.
+It verifies each file natively and renames it into place. Files that are already
+present and valid are skipped:
+
+```ts
+import { downloadProvingParameters } from '@zcashlabs/zcash.js';
+
+export async function prepareProving(directory: string, streamingFetch: typeof fetch) {
+  await downloadProvingParameters({ directory: `${directory}/zcash-params`, fetch: streamingFetch });
+}
+```
 
 ## Override configuration
 

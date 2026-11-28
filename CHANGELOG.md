@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- React Native support with the same API, through the companion package
+  `@zcashlabs/zcash.js-native`. The Zakura core runs as a native library (iOS
+  XCFramework, Android `arm64-v8a`/`x86_64`) instead of WebAssembly.
+- `native-filesystem` wallet storage on React Native, with optional at-rest
+  encryption in the Node format.
+- `nativeProving` and `downloadProvingParameters` for proving parameters read and
+  verified by the native library.
+- `transportOptions.fetch` to supply a `fetch` implementation (for example a
+  streaming `fetch` on React Native).
+
+### Changed
+- JSON-RPC parsing no longer requires `JSON.parse` reviver `context.source`; an
+  equivalent strict parser is used when the engine lacks it.
+- Cancellation and hashing no longer require `AbortSignal.any` or WebCrypto.
+- The native bindings were restructured into shared core, WebAssembly and native
+  crates. Behavior is unchanged, and a native/WebAssembly parity suite checks this.
+
 ## 0.1.4
 
 - Native components are built from zakura-wasm-bindings v0.1.4, which no longer patches any
