@@ -5,7 +5,7 @@ import { copyBytes } from './bytes.mjs';
 
 export function initialize(wasmBytes) {
   // This bounded binding accepts verified bytes only, never a URL/default fetch.
-  initSync({ module: copyBytes(wasmBytes, 3 * 1048576, 'invalid wasm bytes') });
+  initSync({ module: copyBytes(wasmBytes, 4 * 1048576, 'invalid wasm bytes') });
 }
 
 export function consensusContext(parametersFormat, parameters, height) {

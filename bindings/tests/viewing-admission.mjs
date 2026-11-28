@@ -29,9 +29,9 @@ assert.throws(()=>api.selectViewingReceiver(parameters,'address','sapling',0,2**
 assert.deepEqual([...api.selectViewingReceiver(parameters,'address','sapling',0,0).bytes],[0,255]);
 console.log('standalone viewing facade admission, independent ownership and idempotent release passed');
 
-api.initialize(new Uint8Array(3 * 1048576));
+api.initialize(new Uint8Array(4 * 1048576));
 assert.equal(initializations,1);
-assert.throws(()=>api.initialize(new Uint8Array(3 * 1048576 + 1)));
+assert.throws(()=>api.initialize(new Uint8Array(4 * 1048576 + 1)));
 assert.equal(initializations,1);
 
 const original=new Uint8Array([1,2]),genesis=new Uint8Array(32);
