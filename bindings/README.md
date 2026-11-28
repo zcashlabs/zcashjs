@@ -18,7 +18,7 @@ fresh-checkout workflow.
 A `publish = false` production Rust binding crate for bounded network documents
 and exact transaction bytes/identity, related to zcash.js #3/#4/#6. The crate name
 `zakura-network-bindings` is retained for compatibility. Exact dependencies include
-`zakura-protocol 4.0.0`, `zakura-primitives 4.0.0` (no defaults, std and backend-halo2), and genuine
+`zakura-protocol 5.4.0`, `zakura-primitives 5.4.0` (no defaults, std and backend-halo2), and genuine
 `wasm-bindgen 0.2.128`, with the full Cargo lock.
 
 The JS entry exposes `consensusContext(parametersFormat, parameters, height)` and

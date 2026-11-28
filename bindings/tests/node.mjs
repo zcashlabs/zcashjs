@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 const out = process.argv[2];
 const { initialize, consensusContext } = await import(pathToFileURL(`${out}/network.mjs`));
-for (const value of [undefined, './bindings_bg.wasm', {}, new Uint8Array(0), new Uint8Array(3 * 1048576 + 1)]) {
+for (const value of [undefined, './bindings_bg.wasm', {}, new Uint8Array(0), new Uint8Array(4 * 1048576 + 1)]) {
   assert.throws(() => initialize(value), /invalid wasm bytes/);
 }
 const wasm = new Uint8Array(await readFile(`${out}/bindings_bg.wasm`));

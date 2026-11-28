@@ -1171,114 +1171,114 @@
     "dependencies": [
       "cccc623f324343c7b884ceef25149e04"
     ],
-    "source_sha256": "a274af86738fb2fe2bbee63593bb653fda2e0a1b3befb835dc4a5fb9c6be78b5",
+    "source_sha256": "4127d8c0ca4892b11804024636bd05439360da1285539d41061f0d7189b88cb4",
     "source_sql_lines": [
-      174,
-      295,
-      437,
-      476,
-      621,
-      656
+      176,
+      297,
+      439,
+      478,
+      623,
+      658
     ],
     "statements": [
       {
-        "line": 174,
+        "line": 176,
         "sql": "\n            ALTER TABLE addresses ADD COLUMN key_scope INTEGER NOT NULL DEFAULT 0;"
       },
       {
-        "line": 174,
+        "line": 176,
         "sql": "\n            ALTER TABLE addresses ADD COLUMN transparent_child_index INTEGER;"
       },
       {
-        "line": 174,
+        "line": 176,
         "sql": "\n            ALTER TABLE addresses ADD COLUMN exposed_at_height INTEGER;"
       },
       {
-        "line": 174,
+        "line": 176,
         "sql": "\n            ALTER TABLE addresses ADD COLUMN receiver_flags INTEGER;"
       },
       {
-        "line": 295,
+        "line": 297,
         "sql": "\n            CREATE TABLE addresses_new (\n                id INTEGER NOT NULL PRIMARY KEY,\n                account_id INTEGER NOT NULL,\n                key_scope INTEGER NOT NULL,\n                diversifier_index_be BLOB NOT NULL,\n                address TEXT NOT NULL,\n                transparent_child_index INTEGER,\n                cached_transparent_receiver_address TEXT,\n                exposed_at_height INTEGER,\n                receiver_flags INTEGER NOT NULL,\n                transparent_receiver_next_check_time INTEGER,\n                FOREIGN KEY (account_id) REFERENCES accounts(id),\n                CONSTRAINT diversification UNIQUE (account_id, key_scope, diversifier_index_be),\n                CONSTRAINT transparent_index_consistency CHECK (\n                    (transparent_child_index IS NOT NULL) == (cached_transparent_receiver_address IS NOT NULL)\n                )\n            );"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n            PRAGMA legacy_alter_table = ON;"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n\n            DROP TABLE addresses;"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n            ALTER TABLE addresses_new RENAME TO addresses;"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n            CREATE INDEX idx_addresses_accounts ON addresses (\n                account_id ASC\n            );"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n            CREATE INDEX idx_addresses_indices ON addresses (\n                diversifier_index_be ASC\n            );"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n            CREATE INDEX idx_addresses_t_indices ON addresses (\n                transparent_child_index ASC\n            );"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n\n            DROP TABLE ephemeral_addresses;"
       },
       {
-        "line": 437,
+        "line": 439,
         "sql": "\n\n            PRAGMA legacy_alter_table = OFF;"
       },
       {
-        "line": 476,
+        "line": 478,
         "sql": "\n            ALTER TABLE orchard_received_notes\n                ADD COLUMN address_id INTEGER REFERENCES addresses(id);"
       },
       {
-        "line": 476,
+        "line": 478,
         "sql": "\n            ALTER TABLE sapling_received_notes\n                ADD COLUMN address_id INTEGER REFERENCES addresses(id);"
       },
       {
-        "line": 476,
+        "line": 478,
         "sql": "\n            ALTER TABLE transparent_received_outputs\n                ADD COLUMN address_id INTEGER REFERENCES addresses(id);"
       },
       {
-        "line": 621,
+        "line": 623,
         "sql": "\n                PRAGMA legacy_alter_table = ON;"
       },
       {
-        "line": 621,
+        "line": 623,
         "sql": "\n\n                CREATE TABLE transparent_received_outputs_new (\n                    id INTEGER PRIMARY KEY,\n                    transaction_id INTEGER NOT NULL,\n                    output_index INTEGER NOT NULL,\n                    account_id INTEGER NOT NULL,\n                    address TEXT NOT NULL,\n                    script BLOB NOT NULL,\n                    value_zat INTEGER NOT NULL,\n                    max_observed_unspent_height INTEGER,\n                    address_id INTEGER NOT NULL REFERENCES addresses(id),\n                    FOREIGN KEY (transaction_id) REFERENCES transactions(id_tx),\n                    FOREIGN KEY (account_id) REFERENCES accounts(id),\n                    CONSTRAINT transparent_output_unique UNIQUE (transaction_id, output_index)\n                );"
       },
       {
-        "line": 621,
+        "line": 623,
         "sql": "\n\n                DROP TABLE transparent_received_outputs;"
       },
       {
-        "line": 621,
+        "line": 623,
         "sql": "\n                ALTER TABLE transparent_received_outputs_new RENAME TO transparent_received_outputs;"
       },
       {
-        "line": 621,
+        "line": 623,
         "sql": "\n\n                PRAGMA legacy_alter_table = OFF;"
       },
       {
-        "line": 656,
+        "line": 658,
         "sql": "\n            CREATE VIEW v_address_uses AS\n                SELECT orn.address_id, orn.account_id, orn.tx AS transaction_id, t.mined_height,\n                       a.key_scope, a.diversifier_index_be, a.transparent_child_index\n                FROM orchard_received_notes orn\n                JOIN addresses a ON a.id = orn.address_id\n                JOIN transactions t ON t.id_tx = orn.tx\n            UNION\n                SELECT srn.address_id, srn.account_id, srn.tx AS transaction_id, t.mined_height,\n                       a.key_scope, a.diversifier_index_be, a.transparent_child_index\n                FROM sapling_received_notes srn\n                JOIN addresses a ON a.id = srn.address_id\n                JOIN transactions t ON t.id_tx = srn.tx\n            UNION\n                SELECT tro.address_id, tro.account_id, tro.transaction_id, t.mined_height,\n                       a.key_scope, a.diversifier_index_be, a.transparent_child_index\n                FROM transparent_received_outputs tro\n                JOIN addresses a ON a.id = tro.address_id\n                JOIN transactions t ON t.id_tx = tro.transaction_id;"
       },
       {
-        "line": 656,
+        "line": 658,
         "sql": "\n\n            CREATE VIEW v_address_first_use AS\n            SELECT\n                address_id,\n                account_id,\n                key_scope,\n                diversifier_index_be,\n                transparent_child_index,\n                MIN(mined_height) AS first_use_height\n            FROM v_address_uses\n            GROUP BY\n                address_id, account_id, key_scope,\n                diversifier_index_be, transparent_child_index;"
       },
       {
-        "line": 656,
+        "line": 658,
         "sql": "\n\n            DROP VIEW v_received_outputs;"
       },
       {
-        "line": 656,
+        "line": 658,
         "sql": "\n            CREATE VIEW v_received_outputs AS\n                SELECT\n                    sapling_received_notes.id AS id_within_pool_table,\n                    sapling_received_notes.tx AS transaction_id,\n                    2 AS pool,\n                    sapling_received_notes.output_index,\n                    account_id,\n                    sapling_received_notes.value,\n                    is_change,\n                    sapling_received_notes.memo,\n                    sent_notes.id AS sent_note_id,\n                    sapling_received_notes.address_id\n                FROM sapling_received_notes\n                LEFT JOIN sent_notes\n                ON (sent_notes.tx, sent_notes.output_pool, sent_notes.output_index) =\n                   (sapling_received_notes.tx, 2, sapling_received_notes.output_index)\n            UNION\n                SELECT\n                    orchard_received_notes.id AS id_within_pool_table,\n                    orchard_received_notes.tx AS transaction_id,\n                    3 AS pool,\n                    orchard_received_notes.action_index AS output_index,\n                    account_id,\n                    orchard_received_notes.value,\n                    is_change,\n                    orchard_received_notes.memo,\n                    sent_notes.id AS sent_note_id,\n                    orchard_received_notes.address_id\n                FROM orchard_received_notes\n                LEFT JOIN sent_notes\n                ON (sent_notes.tx, sent_notes.output_pool, sent_notes.output_index) =\n                   (orchard_received_notes.tx, 3, orchard_received_notes.action_index)\n            UNION\n                SELECT\n                    u.id AS id_within_pool_table,\n                    u.transaction_id,\n                    0 AS pool,\n                    u.output_index,\n                    u.account_id,\n                    u.value_zat AS value,\n                    0 AS is_change,\n                    NULL AS memo,\n                    sent_notes.id AS sent_note_id,\n                    u.address_id\n                FROM transparent_received_outputs u\n                LEFT JOIN sent_notes\n                ON (sent_notes.tx, sent_notes.output_pool, sent_notes.output_index) =\n                   (u.transaction_id, 0, u.output_index);"
       }
     ]
@@ -2953,12 +2953,12 @@
     "source_sql_lines": [],
     "statements": [
       {
-        "line": 2116,
+        "line": 2130,
         "sql": "\nCREATE TABLE tpir_transaction_metadata (\n    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,\n    txid BLOB NOT NULL CHECK (length(txid) = 32),\n    revision_id INTEGER NOT NULL REFERENCES tpir_revisions(id) ON DELETE CASCADE,\n    mined_height INTEGER NOT NULL CHECK (mined_height >= 0),\n    fee_state INTEGER NOT NULL CHECK (fee_state IN (0, 1, 2)),\n    fee_zat INTEGER CHECK (fee_zat >= 0 AND fee_zat <= 2100000000000000),\n    input_count INTEGER NOT NULL CHECK (input_count >= 0 AND input_count <= 4294967295),\n    shielded INTEGER NOT NULL CHECK (shielded IN (0, 1)),\n    CHECK ((fee_state = 0 AND fee_zat IS NOT NULL) OR (fee_state != 0 AND fee_zat IS NULL)),\n    CHECK (fee_state != 2 OR input_count = 0),\n    PRIMARY KEY (account_id, txid, revision_id)\n);"
       }
     ],
     "external_sources": {
-      "../../db.rs": "4d9a044626b875ef5b67a6d974be5184ec9e8c499269bc6870ef3c72cc6d4f1b"
+      "../../db.rs": "acae356b699d67e0eaa02d5f5749aa670b4e1649f3d8d4b742e525174b8f754f"
     }
   },
   {
@@ -2971,12 +2971,12 @@
     "source_sql_lines": [],
     "statements": [
       {
-        "line": 871,
+        "line": 883,
         "sql": "\nCREATE TABLE tpir_shared_derivations (\n    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,\n    key_scope INTEGER NOT NULL CHECK (key_scope IN (0, 1, 2)),\n    child_index INTEGER NOT NULL CHECK (child_index >= 0 AND child_index < 2147483648),\n    PRIMARY KEY (account_id, key_scope, child_index)\n);"
       }
     ],
     "external_sources": {
-      "../../db.rs": "4d9a044626b875ef5b67a6d974be5184ec9e8c499269bc6870ef3c72cc6d4f1b"
+      "../../db.rs": "acae356b699d67e0eaa02d5f5749aa670b4e1649f3d8d4b742e525174b8f754f"
     }
   },
   {
@@ -3200,6 +3200,91 @@
       {
         "line": 39,
         "sql": "ALTER TABLE transparent_detail_work ADD COLUMN content_failures INTEGER NOT NULL\n                DEFAULT 0 CHECK (content_failures >= 0);"
+      }
+    ]
+  },
+  {
+    "name": "one_time_reset",
+    "id": "f2d02e57b25a4d1484cedb2153fc66d3",
+    "dependencies": [
+      "2eed2da721764d729461c9ae27491b0a"
+    ],
+    "source_sha256": "f1aefa896e74694f28e6b4df9ff6db244797e9b972a452c4bfccced03d5d2aac",
+    "source_sql_lines": [
+      43
+    ],
+    "statements": [
+      {
+        "line": 43,
+        "sql": "-- The use marker, and candidate bindings for the directory and companion tables.\n             ALTER TABLE ironwood_one_time_recovery ADD COLUMN used INTEGER NOT NULL DEFAULT 0\n                CHECK (used IN (0, 1));"
+      },
+      {
+        "line": 43,
+        "sql": "\n             ALTER TABLE ironwood_one_time_payment_recovery RENAME COLUMN payments TO directory;"
+      },
+      {
+        "line": 43,
+        "sql": "\n             ALTER TABLE ironwood_one_time_payment_recovery RENAME COLUMN witnesses TO companion;"
+      },
+      {
+        "line": 43,
+        "sql": "\n             -- The obsolete columns.\n             ALTER TABLE ironwood_one_time_recovery DROP COLUMN skipped_height;"
+      },
+      {
+        "line": 43,
+        "sql": "\n             ALTER TABLE ironwood_one_time_keys DROP COLUMN prebirthday_height;"
+      }
+    ]
+  },
+  {
+    "name": "transparent_spend_map_prevout_index",
+    "id": "c7129551bd3646ca9a98f772ca01ca21",
+    "dependencies": [
+      "f2d02e57b25a4d1484cedb2153fc66d3",
+      "e5339f96a98a4047827428efdb9107ce"
+    ],
+    "source_sha256": "2a632e81d9e784e4c9c87242acaa9cb9153a577075e279aca0898606882e47a0",
+    "source_sql_lines": [
+      43
+    ],
+    "statements": [
+      {
+        "line": 43,
+        "sql": "CREATE INDEX idx_transparent_spend_map_prevout ON transparent_spend_map (\n                prevout_txid ASC,\n                prevout_output_index ASC\n            );"
+      }
+    ]
+  },
+  {
+    "name": "transactions_mined_height_index",
+    "id": "c8583dab3a2e4aec84082a11862fd44a",
+    "dependencies": [
+      "c7129551bd3646ca9a98f772ca01ca21"
+    ],
+    "source_sha256": "21d099692f9e31201190a614d3f01186f0624f9197cfd96dcf30f8fc1124f08c",
+    "source_sql_lines": [
+      42
+    ],
+    "statements": [
+      {
+        "line": 42,
+        "sql": "CREATE INDEX idx_transactions_mined_height ON transactions (mined_height ASC);"
+      }
+    ]
+  },
+  {
+    "name": "addresses_account_scope_child_index",
+    "id": "199336a4731c48ec954fa3645adf8430",
+    "dependencies": [
+      "c8583dab3a2e4aec84082a11862fd44a"
+    ],
+    "source_sha256": "b4509f38e744ee250771e8fecae78d937776b215e07d2ced4bd3d22f58b4bb82",
+    "source_sql_lines": [
+      43
+    ],
+    "statements": [
+      {
+        "line": 43,
+        "sql": "CREATE INDEX idx_addresses_account_scope_child ON addresses (\n                account_id ASC,\n                key_scope ASC,\n                transparent_child_index ASC\n            );"
       }
     ]
   }

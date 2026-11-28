@@ -2666,7 +2666,7 @@ pub(super) const MIGRATIONS: &[Migration] = &[
                  AND sent_note_counts.txid = notes.txid
             GROUP BY notes.account_id, notes.txid"###) }) },
     ] },
-    // transparent_gap_limit_handling; source sha256 a274af86738fb2fe2bbee63593bb653fda2e0a1b3befb835dc4a5fb9c6be78b5
+    // transparent_gap_limit_handling; source sha256 4127d8c0ca4892b11804024636bd05439360da1285539d41061f0d7189b88cb4
     Migration { id: 0xc41dfc0ee8704859be47d2f572f5ca73, dependencies: &[0xcccc623f324343c7b884ceef25149e04], effects: &[
         Effect { name: r###"addresses"###, object: Some(Object { kind: r###"table"###, table: r###"addresses"###, sql: Some(r###"CREATE TABLE "addresses" (
                 id INTEGER NOT NULL PRIMARY KEY,
@@ -6159,5 +6159,86 @@ GROUP BY transaction_id, output_pool, output_index"###) }) },
                 last_map_sha256 BLOB CHECK (length(last_map_sha256) = 32)
             , content_failures INTEGER NOT NULL
                 DEFAULT 0 CHECK (content_failures >= 0))"###) }) },
+    ] },
+    // one_time_reset; source sha256 f1aefa896e74694f28e6b4df9ff6db244797e9b972a452c4bfccced03d5d2aac
+    Migration { id: 0xf2d02e57b25a4d1484cedb2153fc66d3, dependencies: &[0x2eed2da721764d729461c9ae27491b0a], effects: &[
+        Effect { name: r###"ironwood_one_time_keys"###, object: Some(Object { kind: r###"table"###, table: r###"ironwood_one_time_keys"###, sql: Some(r###"CREATE TABLE ironwood_one_time_keys (
+                id INTEGER PRIMARY KEY,
+                account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+                purpose INTEGER NOT NULL CHECK (purpose BETWEEN 0 AND 255),
+                key_index BLOB NOT NULL CHECK (typeof(key_index) = 'blob' AND length(key_index) = 8),
+                receiver BLOB NOT NULL CHECK (typeof(receiver) = 'blob' AND length(receiver) = 43),
+                funding_height INTEGER CHECK (funding_height BETWEEN 0 AND 4294967295),
+                used INTEGER NOT NULL DEFAULT 0 CHECK (used IN (0, 1)),
+                reserved_at INTEGER,
+                released_at INTEGER,
+                reservation_floor INTEGER,
+                UNIQUE (account_id, purpose, key_index)
+            )"###) }) },
+        Effect { name: r###"ironwood_one_time_payment_recovery"###, object: Some(Object { kind: r###"table"###, table: r###"ironwood_one_time_payment_recovery"###, sql: Some(r###"CREATE TABLE ironwood_one_time_payment_recovery (
+                one_time_key_id INTEGER NOT NULL REFERENCES ironwood_one_time_keys(id) ON DELETE CASCADE,
+                txid BLOB NOT NULL CHECK (length(txid) = 32),
+                action_index INTEGER NOT NULL CHECK (action_index BETWEEN 0 AND 4294967295),
+                height INTEGER NOT NULL CHECK (height BETWEEN 0 AND 4294967295),
+                block_hash BLOB NOT NULL CHECK (length(block_hash) = 32),
+                tx_index INTEGER NOT NULL CHECK (tx_index BETWEEN 0 AND 65535),
+                position INTEGER NOT NULL CHECK (position BETWEEN 0 AND 4294967295),
+                encrypted_note BLOB NOT NULL CHECK (length(encrypted_note) = 148),
+                directory BLOB CHECK (length(directory) = 32),
+                companion BLOB CHECK (length(companion) = 32),
+                ordinal INTEGER CHECK (ordinal BETWEEN 0 AND 4294967295),
+                witness BLOB CHECK (length(witness) = 512),
+                witness_height INTEGER CHECK (witness_height BETWEEN 0 AND 4294967295),
+                witness_hash BLOB CHECK (length(witness_hash) = 32),
+                witness_size INTEGER CHECK (witness_size BETWEEN 0 AND 4294967296),
+                PRIMARY KEY (txid, action_index),
+                CHECK ((directory IS NULL) = (ordinal IS NULL)
+                    AND (directory IS NULL) = (companion IS NULL)),
+                CHECK ((witness IS NULL OR directory IS NOT NULL)
+                    AND (witness IS NULL) = (witness_height IS NULL)
+                    AND (witness IS NULL) = (witness_hash IS NULL)
+                    AND (witness IS NULL) = (witness_size IS NULL))
+            )"###) }) },
+        Effect { name: r###"ironwood_one_time_recovery"###, object: Some(Object { kind: r###"table"###, table: r###"ironwood_one_time_recovery"###, sql: Some(r###"CREATE TABLE ironwood_one_time_recovery (
+                account_id INTEGER PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE,
+                enabled INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0, 1)),
+                generation INTEGER NOT NULL DEFAULT 0 CHECK (generation >= 0),
+                history_revision BLOB NOT NULL DEFAULT X'0000000000000000'
+                    CHECK (length(history_revision) = 8),
+                filter_height INTEGER CHECK (filter_height BETWEEN 0 AND 4294967295),
+                filter_hash BLOB CHECK (length(filter_hash) = 32),
+                restore_height INTEGER CHECK (restore_height BETWEEN 0 AND 4294967295),
+                restore_next BLOB NOT NULL DEFAULT X'0000000000000000' CHECK (length(restore_next) = 8),
+                restore_gap INTEGER NOT NULL DEFAULT 0 CHECK (restore_gap BETWEEN 0 AND 4),
+                restore_done INTEGER NOT NULL DEFAULT 0 CHECK (restore_done IN (0, 1)),
+                manual_active INTEGER NOT NULL DEFAULT 0 CHECK (manual_active IN (0, 1)),
+                manual_purpose INTEGER NOT NULL DEFAULT 0 CHECK (manual_purpose IN (0, 1)),
+                manual_next BLOB NOT NULL DEFAULT X'0000000000000000' CHECK (length(manual_next) = 8),
+                manual_end BLOB CHECK (length(manual_end) = 8),
+                manual_height INTEGER CHECK (manual_height BETWEEN 0 AND 4294967295), receive_end BLOB NOT NULL
+                DEFAULT X'0000000000000000' CHECK (length(receive_end) = 8), upgrade_required INTEGER NOT NULL
+                DEFAULT 0 CHECK (upgrade_required IN (0, 1)), used INTEGER NOT NULL DEFAULT 0
+                CHECK (used IN (0, 1)),
+                CHECK ((filter_height IS NULL) = (filter_hash IS NULL))
+            )"###) }) },
+    ] },
+    // transparent_spend_map_prevout_index; source sha256 2a632e81d9e784e4c9c87242acaa9cb9153a577075e279aca0898606882e47a0
+    Migration { id: 0xc7129551bd3646ca9a98f772ca01ca21, dependencies: &[0xf2d02e57b25a4d1484cedb2153fc66d3, 0xe5339f96a98a4047827428efdb9107ce], effects: &[
+        Effect { name: r###"idx_transparent_spend_map_prevout"###, object: Some(Object { kind: r###"index"###, table: r###"transparent_spend_map"###, sql: Some(r###"CREATE INDEX idx_transparent_spend_map_prevout ON transparent_spend_map (
+                prevout_txid ASC,
+                prevout_output_index ASC
+            )"###) }) },
+    ] },
+    // transactions_mined_height_index; source sha256 21d099692f9e31201190a614d3f01186f0624f9197cfd96dcf30f8fc1124f08c
+    Migration { id: 0xc8583dab3a2e4aec84082a11862fd44a, dependencies: &[0xc7129551bd3646ca9a98f772ca01ca21], effects: &[
+        Effect { name: r###"idx_transactions_mined_height"###, object: Some(Object { kind: r###"index"###, table: r###"transactions"###, sql: Some(r###"CREATE INDEX idx_transactions_mined_height ON transactions (mined_height ASC)"###) }) },
+    ] },
+    // addresses_account_scope_child_index; source sha256 b4509f38e744ee250771e8fecae78d937776b215e07d2ced4bd3d22f58b4bb82
+    Migration { id: 0x199336a4731c48ec954fa3645adf8430, dependencies: &[0xc8583dab3a2e4aec84082a11862fd44a], effects: &[
+        Effect { name: r###"idx_addresses_account_scope_child"###, object: Some(Object { kind: r###"index"###, table: r###"addresses"###, sql: Some(r###"CREATE INDEX idx_addresses_account_scope_child ON addresses (
+                account_id ASC,
+                key_scope ASC,
+                transparent_child_index ASC
+            )"###) }) },
     ] },
 ];

@@ -36,7 +36,7 @@ for (const profile of profiles) {
   const receipt = JSON.parse(receiptBytes);
   const inputs = receipt[primitive ? 'primitiveArtifacts' : 'artifacts'];
   const wasm = await readFile(join(source, profile.wasm));
-  assert.ok(wasm.length > 0 && wasm.length <= (primitive ? 3 * 1048576 : 1048576));
+  assert.ok(wasm.length > 0 && wasm.length <= (primitive ? 4 * 1048576 : 1048576));
   const entry = profile.factory
     ? `import {${profile.factory}} from ${JSON.stringify(join(source, 'codec.mjs'))};
 let codec;
