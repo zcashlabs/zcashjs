@@ -8,15 +8,25 @@ import { checks } from './checks';
 
 export default function App() {
   const [lines, setLines] = useState(['Running…']);
+  const [result, setResult] = useState(undefined);
   useEffect(() => {
     const directory = decodeURI(FileSystem.documentDirectory.replace(/^file:\/\//, '')).replace(/\/$/, '');
-    checks(zcash, directory, line => setLines(previous => [...previous, line]))
-      .then(() => setLines(previous => [...previous, 'All checks passed']))
-      .catch(error => setLines(previous => [...previous, `FAILED: ${error?.code ?? ''} ${error?.message ?? error}`]));
+    const add = line => {
+      console.log(`[zcash-example] ${line}`);
+      setLines(previous => [...previous, line]);
+    };
+    checks(zcash, directory, add)
+      .then(() => setResult('All checks passed'))
+      .catch(error => {
+        const text = `FAILED: ${error?.code ?? ''} ${error?.message ?? error}`;
+        console.log(`[zcash-example] ${text}\n${error?.stack ?? ''}`);
+        setResult(text);
+      });
   }, []);
   return (
     <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 64 }}>
-      {lines.map((line, index) => <Text key={index} testID={line === 'All checks passed' ? 'result' : undefined}>{line}</Text>)}
+      {lines.map((line, index) => <Text key={index}>{line}</Text>)}
+      {result && <Text testID="result">{result}</Text>}
     </ScrollView>
   );
 }

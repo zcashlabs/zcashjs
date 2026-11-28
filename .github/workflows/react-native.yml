@@ -95,9 +95,8 @@ jobs:
             console.log('path=' + source);
           " >> "$GITHUB_OUTPUT"
       - name: Build
-        env:
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_LATEST_HOME }}
-        run: cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache "$RUNNER_TEMP/cache"
+        # The runner image provides ANDROID_NDK_LATEST_HOME as a shell variable.
+        run: ANDROID_NDK_HOME="${ANDROID_NDK_LATEST_HOME:-}" cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache "$RUNNER_TEMP/cache"
         working-directory: ${{ steps.source.outputs.path }}
       - uses: actions/upload-artifact@v4
         with:
@@ -155,7 +154,13 @@ jobs:
           arch: x86_64
           target: google_apis
           working-directory: examples/react-native
-          script: npm run e2e:android
+          script: npm run e2e:android || (adb logcat -d -s ReactNativeJS ReactNative AndroidRuntime DEBUG | tail -200; exit 1)
       - if: matrix.target == 'ios'
         working-directory: examples/react-native
         run: npm run e2e:ios
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-${{ matrix.target }}
+          path: ~/.maestro/tests
+          retention-days: 7
