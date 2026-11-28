@@ -58,9 +58,9 @@ fn decode(method: &str, bytes: &[u8], item: bool) -> Result<String, String> {
     Ok(json)
 }
 
-#[wasm_bindgen::prelude::wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 pub fn lightwire_encode(method: &str, json: &str) -> Result<Vec<u8>, String> { encode_request(method,json) }
-#[wasm_bindgen::prelude::wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 pub fn lightwire_decode(method: &str, bytes: &[u8], item: bool) -> Result<String, String> { decode(method,bytes,item) }
 
 /// Encode the pinned response DTO for JSON-RPC tree-state composition.
@@ -73,5 +73,5 @@ pub fn encode_tree_state(json: &str) -> Result<Vec<u8>, String> {
     bounds::wire(&bytes, "TreeState")?;
     Ok(bytes)
 }
-#[wasm_bindgen::prelude::wasm_bindgen]
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen::prelude::wasm_bindgen)]
 pub fn lightwire_encode_tree_state(json: &str) -> Result<Vec<u8>, String> { encode_tree_state(json) }

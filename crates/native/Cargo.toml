@@ -1,0 +1,31 @@
+[package]
+name = "zakura-bindings-native"
+description = "Native (iOS/Android/host) front-end for zakura-bindings-core: a small C ABI"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MIT"
+
+[lib]
+# staticlib for the iOS XCFramework, cdylib for Android and host FFI tests.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = ["wallet"]
+wallet = ["zakura-bindings-core/wallet-storage", "zakura-bindings-core/wallet-threaded", "dep:rusqlite", "dep:libc"]
+
+[dependencies]
+zakura-bindings-core = { path = "../core", features = ["viewing", "birthday", "standalone-pczt"] }
+rusqlite = { version = "=0.37.0", features = ["bundled", "array"], optional = true }
+libc = { version = "0.2", optional = true }
+zakura-lightwire = { path = "../../lightwire" }
+sha2 = "=0.10.9"
+serde_json = "=1.0.151"
+aes-gcm = "0.10"
+hkdf = "0.12"
+hmac = "0.12"
+getrandom = { version = "=0.4.3", features = ["sys_rng"] }
+
+[[bin]]
+name = "zakura-native-bridge"
+path = "src/bin/zakura-native-bridge.rs"

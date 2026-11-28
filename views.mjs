@@ -1,7 +1,7 @@
 // Private worker-local account/address primitive. The enclosing host authenticates
 // this packaged executable closure; this is not the public WalletClient factory.
 import { initializeStorage } from './wallet.mjs';
-import * as binding from './bindings.js';
+import * as wasmBinding from './bindings.js';
 import { copyBytes } from './bytes.mjs';
 const aborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted').get;
 const operations = new Set(['account_balance','account_import','account_import_hd','account_create_hd','account_import_mnemonic','account_import_mnemonic_signer','account_restore_mnemonic_signer','account_create_mnemonic_signer','account_list','account_get','address_current','address_next','address_list','address_at']);
@@ -289,6 +289,8 @@ export async function initializeViews(wasm,backend,format,parameters,genesis) {
 /** Bind account/query operations to the already opened worker-local storage. */
 export function viewsForStorage(storage) {
   const {generation,instance}=storage;
+  // Native runtimes supply their own owner-bound binding; WASM uses the module import.
+  const binding=storage.api??wasmBinding;
   let poisoned=false;
   return Object.freeze({
     generation,instance,
@@ -335,11 +337,18 @@ export function viewsForStorage(storage) {
         }
       }
       catch(error) {
+        failed(error);
+      }
+      finally {ownedSeed?.fill(0);ownedMnemonic?.fill(0);ownedPassphrase?.fill(0);}
+      // Native owner threads answer asynchronously; WASM answers synchronously.
+      if(result&&typeof result.then==='function')return result.then(finish,failed);
+      return finish(result);
+      function failed(error) {
         // Infallible upstream entropy/clock paths can trap. Never reuse that owner.
         if(typeof error!=='string'){poisoned=true;throw Error('DOMAIN_INVALID');}
         throw Object.assign(Error(error),scans.has(operation)?{commit:'none'}:{});
       }
-      finally {ownedSeed?.fill(0);ownedMnemonic?.fill(0);ownedPassphrase?.fill(0);}
+      function finish(result) {
       const value=lift(JSON.parse(result));
       if (operation==='account_import_mnemonic_signer'||operation==='account_create_mnemonic_signer'||operation==='account_restore_mnemonic_signer') {
         if(signal!==undefined&&aborted.call(signal)) {
@@ -374,6 +383,7 @@ export function viewsForStorage(storage) {
         }
       }
       return value;
+      }
     },
     close(token,owner) {
       if(poisoned)throw Error('DOMAIN_INVALID');

@@ -1,10 +1,10 @@
 # zakura-bindings: one Rust core, per-target front-ends.
 #   crates/core    target-neutral wallet and codec logic (no wasm-bindgen)
 #   crates/wasm    wasm-bindgen exports, SQLite VFS adapter, wasm thread pool
-
+#   crates/native  C ABI for iOS/Android (React Native) and host tests
 # lightwire/ and transparent-address/ remain separately locked codec crates.
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/wasm"]
-default-members = ["crates/core", "crates/wasm"]
+members = ["crates/core", "crates/wasm", "crates/native"]
+default-members = ["crates/core", "crates/wasm", "crates/native"]
 exclude = ["lightwire", "transparent-address", "xtask"]
