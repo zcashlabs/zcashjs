@@ -67,7 +67,12 @@ fn archive_for(cargo: &Path, source: &Path) -> Result<PathBuf> {
         )))
 }
 
-pub fn verify(root: &Path, cargo: &Path, metadata: &Value) -> Result<Value> {
+pub fn verify(
+    root: &Path,
+    cargo: &Path,
+    metadata: &Value,
+    excluded: &std::collections::BTreeSet<String>,
+) -> Result<Value> {
     let lock: toml::Value = fs::read_to_string(root.join("Cargo.lock"))?.parse()?;
     let mut packages = json!({});
     for package in metadata["packages"].as_array().ok_or("missing packages")? {
@@ -83,7 +88,9 @@ pub fn verify(root: &Path, cargo: &Path, metadata: &Value) -> Result<Value> {
         .parent()
         .ok_or("missing source")?;
         // Workspace members (crates/*) are this repository's own sources.
-        if source.starts_with(root) && package["source"].is_null() {
+        if source.starts_with(root) && package["source"].is_null()
+            || excluded.contains(&format!("{name}@{version}"))
+        {
             continue;
         }
         let (checksum, actual) = {
