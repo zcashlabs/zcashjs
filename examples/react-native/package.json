@@ -14,8 +14,12 @@
     "@zcashlabs/zcash.js": "file:../..",
     "@zcashlabs/zcash.js-native": "file:../../packages/react-native",
     "expo": "~53.0.0",
+    "expo-asset": "~11.1.7",
     "expo-build-properties": "~0.14.0",
+    "expo-constants": "~17.1.8",
     "expo-file-system": "~18.1.0",
+    "expo-font": "~13.3.2",
+    "expo-keep-awake": "~14.1.4",
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-url-polyfill": "^2.0.0"
