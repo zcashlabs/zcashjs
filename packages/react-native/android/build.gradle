@@ -1,0 +1,35 @@
+// Packages the prebuilt Zakura core (src/main/jniLibs, from `cargo xtask build-mobile`)
+// into the app. The C++ TurboModule is built by React Native's autolinking from
+// CMakeLists.txt (see react-native.config.js).
+buildscript {
+  repositories { google(); mavenCentral() }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "com.facebook.react"
+
+android {
+  namespace "com.zcashlabs.zakuranative"
+  compileSdkVersion safeExtGet("compileSdkVersion", 35)
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 24)
+    targetSdkVersion safeExtGet("targetSdkVersion", 35)
+  }
+  sourceSets {
+    main { jniLibs.srcDirs = ["src/main/jniLibs"] }
+  }
+  packagingOptions {
+    // The app's own native build links against the same library.
+    pickFirst "**/libzakura_bindings_native.so"
+  }
+}
+
+def safeExtGet(prop, fallback) {
+  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+react {
+  jsRootDir = file("..")
+  libraryName = "ZakuraNativeSpec"
+  codegenJavaPackageName = "com.zcashlabs.zakuranative"
+}

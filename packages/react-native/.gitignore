@@ -1,0 +1,4 @@
+ios/ZakuraNative.xcframework/
+android/src/main/jniLibs/
+native-build.json
+node_modules/
