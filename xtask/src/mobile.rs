@@ -76,8 +76,12 @@ pub fn build(root: &Path, output: &Path, cache: &Path, targets: &[String]) -> Re
                 }
             }
             "android" => {
-                let ndk = env::var_os("ANDROID_NDK_HOME").or_else(|| env::var_os("ANDROID_NDK_ROOT"))
+                let ndk = ["ANDROID_NDK_HOME", "ANDROID_NDK_ROOT"].iter()
+                    .filter_map(env::var_os).find(|value| !value.is_empty())
                     .ok_or("android builds need ANDROID_NDK_HOME (Android NDK r26 or newer)")?;
+                if !Path::new(&ndk).is_dir() {
+                    return Err(format!("ANDROID_NDK_HOME is not a directory: {}", Path::new(&ndk).display()).into());
+                }
                 let host = match (env::consts::OS, env::consts::ARCH) {
                     ("linux", "x86_64") => "linux-x86_64",
                     ("macos", _) => "darwin-x86_64", // The NDK ships universal macOS binaries here.

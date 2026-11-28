@@ -56,9 +56,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build
-        env:
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_LATEST_HOME }}
-        run: cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache .cache/sdk
+        # The runner image provides ANDROID_NDK_LATEST_HOME as a shell variable.
+        run: ANDROID_NDK_HOME="${ANDROID_NDK_LATEST_HOME:-}" cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache .cache/sdk
       - name: Size report
         run: |
           python3 - "$RUNNER_TEMP/native/native-build.json" <<'PY'
