@@ -1,6 +1,7 @@
 import type { AccountRecord, SignerSelector } from '../types.js';
 import type { attachWalletWorker } from './host.js';
 import { failure } from '../errors.js';
+import { sha256Hex } from '../hash.js';
 
 /** Lookup hint only; callers still verify the returned key against the native account. */
 export async function signerSelector(
@@ -29,9 +30,6 @@ export async function signerSelector(
   const bytes = new TextEncoder().encode(key);
   return {
     kind: 'fingerprint',
-    fingerprint: Array.from(
-      new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
-      byte => byte.toString(16).padStart(2, '0'),
-    ).join(''),
+    fingerprint: await sha256Hex(bytes),
   };
 }

@@ -1,4 +1,4 @@
 {
-  "repository": "https://github.com/jp4g/zakura-wasm-bindings.git",
-  "release": "v0.1.4"
+  "repository": "https://github.com/jp4g/zakura-bindings.git",
+  "revision": "4ac237174e48b628f94cf8553f523d40279a0110"
 }

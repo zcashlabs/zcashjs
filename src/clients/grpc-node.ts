@@ -4,6 +4,7 @@ import { Client, Metadata, credentials, status } from '@grpc/grpc-js';
 import type { CustomLightTransport, LightUnaryMethod, LightStreamMethod, ZcashError } from '../types.js';
 import { failure, invalidArgument, isZcashError } from '../errors.js';
 import { isGrpcNotFound, recordNotFound } from './grpc-status.js';
+import { anySignal } from '../abort.js';
 
 const service = '/cash.z.wallet.sdk.rpc.CompactTxStreamer/';
 const revision = 'lightwire:80575dbe59a9bf2e6b79e2391eb78679c453f1a0477292eb97ea3b58bb6c8b10:d8d0c8aaa5ceec7d5dcc188ef25b04011df2ec0254901620fce982fc13aeb32d';
@@ -166,7 +167,7 @@ export function createGrpcNodeTransport(url: string, options: GrpcNodeOptions): 
 
   function operation(signal?: AbortSignal) {
     // Private dependent signals observe native cancellation, not caller-dispatched events.
-    const dependent = signal === undefined ? undefined : AbortSignal.any([signal]);
+    const dependent = signal === undefined ? undefined : anySignal([signal]);
     const deadline = Date.now() + timeoutMs;
     let stopped: ZcashError | undefined,
       held: Shared | undefined,

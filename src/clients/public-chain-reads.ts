@@ -5,6 +5,7 @@ import { readRpc, rpcErrorCode } from '../http.js';
 import { failure, invalidArgument } from '../errors.js';
 import { JsonNumber, protocolError } from '../json.js';
 import { blockHash } from '../primitives.js';
+import { sha256 } from '../hash.js';
 
 type ChainReadSource = { readonly transport: HttpTransport; readonly sourceId: string };
 
@@ -89,9 +90,9 @@ export async function getBlockHeader(source: ChainReadSource, args: BlockSelecto
     let digest: Uint8Array;
     try {
       checkAbort(signal);
-      const first = await crypto.subtle.digest('SHA-256', raw);
+      const first = await sha256(raw);
       checkAbort(signal);
-      digest = new Uint8Array(await crypto.subtle.digest('SHA-256', first));
+      digest = await sha256(first);
     } catch {
       checkAbort(signal);
       throw failure('RUNTIME_UNAVAILABLE', 'runtime', 'configure', 'Native SHA-256 is unavailable.');

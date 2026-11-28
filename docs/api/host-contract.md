@@ -8,6 +8,17 @@
 No Rust crate, WASM module, serializer, VFS or host transport is implemented by this document. This contract does not claim G4 approval, runtime validation or F1–F8 completion. Binding-generator choice and final low-level export layout remain qualification decisions.
 :::
 
+::: info Native front-end
+React Native runs the same host contract over the native library
+(`zakura-bindings-native`) instead of WebAssembly. One runtime is one Rust owner
+thread with its own wallet domain, like one WebAssembly instance per worker. The same
+JS glue drives it, with the same commands, error codes and handle rules; a
+native/WebAssembly parity suite checks this. Native code ships inside the signed app
+binary, so H1.1 byte verification does not apply. Instead, the loader requires the
+native identity (ABI version and bindings revision) to match the revision this SDK
+build was produced against, and fails with `PROTOCOL_MISMATCH` otherwise.
+:::
+
 ## H1.1 Negotiation before authority
 
 `WasmArtifact` contains only `manifestUrl` and application-pinned `manifestSha256`; the expected digest is obtained through the application's trusted release configuration, never from the fetched manifest or runtime. `ArtifactManifest` / `ArtifactFile` are the public typed contracts. The loader follows this order:

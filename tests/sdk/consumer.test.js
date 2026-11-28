@@ -31,7 +31,7 @@ async function exec(command, args, options = {}) {
     await rm(folder, { recursive: true, force: true });
   }
 }
-const implemented = ['accountFromViewingKey', 'accountIndex', 'addresses', 'blockHash', 'createCustomSigner', 'createLightClient', 'createPublicClient', 'createWalletClient', 'createZcashClient', 'defineNetwork', 'diversifierIndex', 'encodeNetworkParameters', 'formatZec', 'getConsensusContext', 'grpc', 'httpTransport', 'isZcashError', 'parseZec', 'pczt', 'readGenesisHash', 'resolveBirthday', 'txId', 'viewing'];
+const implemented = ['accountFromViewingKey', 'accountIndex', 'addresses', 'blockHash', 'createCustomSigner', 'createLightClient', 'createPublicClient', 'createWalletClient', 'createZcashClient', 'defineNetwork', 'diversifierIndex', 'downloadProvingParameters', 'encodeNetworkParameters', 'formatZec', 'getConsensusContext', 'grpc', 'httpTransport', 'isZcashError', 'nativeProving', 'parseZec', 'pczt', 'readGenesisHash', 'resolveBirthday', 'txId', 'viewing'];
 
 test('packed release imports and typechecks in an isolated Node consumer', async (t) => {
   const folder = await mkdtemp(join(tmpdir(), 'zcash-sdk-consumer-'));
@@ -44,7 +44,8 @@ test('packed release imports and typechecks in an isolated Node consumer', async
   assert.ok(packed.files.every(file => !file.path.startsWith('qualification/')));
   const topLevel = new Set(['README.md', 'CHANGELOG.md', 'LICENSE', 'package.json']);
   for (const { path } of packed.files) {
-    assert.ok(topLevel.has(path) || path.startsWith('dist/src/') || path.startsWith('licenses/'),
+    assert.ok(topLevel.has(path) || path.startsWith('dist/src/') || path.startsWith('licenses/')
+      || ['dist/react-native/index.js', 'dist/react-native/index.d.ts', 'dist/react-native/build.json'].includes(path),
       `unexpected packaged file: ${path}`);
     assert.doesNotMatch(path, /(?:^|\/)(?:private|\.local|\.env(?:\.[^/]*)?|[^/]+\.(?:db|sqlite|pczt|tgz))(?:\/|$)/);
   }

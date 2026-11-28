@@ -26,10 +26,11 @@ import type { EnhancementApply } from './session.js';
 import type { WalletCommand, WalletReply } from './worker.js';
 import { walletErrorCodes, mnemonicCommand, clearMnemonic } from './worker.js';
 import type { MnemonicAccountInput, NativeCreatedAccount, NativeSignerAuthorization } from './session.js';
+import { addListener, removeListener } from '../abort.js';
 
 const aborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted')!.get!;
-const add = EventTarget.prototype.addEventListener,
-  remove = EventTarget.prototype.removeEventListener;
+const add = addListener,
+  remove = removeListener;
 const signalOf = Object.getOwnPropertyDescriptor(AbortController.prototype, 'signal')!.get!;
 const node = typeof (globalThis as { process?: { versions?: { node?: string } } }).process?.versions?.node === 'string';
 const abortError = () => failure('ABORTED', 'runtime', 'none', 'Wallet operation aborted.');

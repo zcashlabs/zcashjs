@@ -4,9 +4,89 @@ const NativeController = AbortController;
 const nativeSignal = Object.getOwnPropertyDescriptor(AbortController.prototype, 'signal')!.get!;
 export const signalAborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted')!.get!;
 const nativeAbort = AbortController.prototype.abort;
-const nativeAny = AbortSignal.any.bind(AbortSignal);
-const nativeAdd = EventTarget.prototype.addEventListener;
-const nativeRemove = EventTarget.prototype.removeEventListener;
+// React Native's AbortSignal polyfill may not expose a global EventTarget.
+function inherited<T>(name: string): T {
+  for (let proto: object | null = AbortSignal.prototype; proto; proto = Object.getPrototypeOf(proto)) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, name);
+    if (descriptor && typeof descriptor.value === 'function') return descriptor.value as T;
+  }
+  throw new TypeError(`AbortSignal.prototype.${name} is unavailable`);
+}
+const nativeAdd = inherited<EventTarget['addEventListener']>('addEventListener');
+const nativeRemove = inherited<EventTarget['removeEventListener']>('removeEventListener');
+/** EventTarget methods captured from AbortSignal at load (no global EventTarget needed). */
+export const addListener = nativeAdd;
+export const removeListener = nativeRemove;
+/** The same methods resolved at call time, honoring later prototype changes. */
+export const currentAddListener: EventTarget['addEventListener'] = function (this: EventTarget, ...args) {
+  return Reflect.apply(inherited<EventTarget['addEventListener']>('addEventListener'), this, args);
+};
+export const currentRemoveListener: EventTarget['removeEventListener'] = function (this: EventTarget, ...args) {
+  return Reflect.apply(inherited<EventTarget['removeEventListener']>('removeEventListener'), this, args);
+};
+const signalReason = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'reason')?.get;
+const nativeAny = typeof AbortSignal.any === 'function' ? AbortSignal.any.bind(AbortSignal) : undefined;
+const Weak = typeof WeakRef === 'function' ? WeakRef : undefined;
+
+interface Follower { deref(): AbortController | undefined }
+// One listener per source; followers are held weakly so abandoned results can be collected.
+const followers = new WeakMap<AbortSignal, Set<Follower>>();
+function follow(source: AbortSignal, controller: AbortController) {
+  let set = followers.get(source);
+  if (!set) {
+    const created = new Set<Follower>();
+    set = created;
+    followers.set(source, created);
+    nativeAdd.call(source, 'abort', () => {
+      followers.delete(source);
+      const reason = signalReason?.call(source);
+      for (const follower of created) {
+        const target = follower.deref();
+        if (target) nativeAbort.call(target, reason);
+      }
+      created.clear();
+    }, { once: true });
+  }
+  // Sweep collected followers so a long-lived source stays bounded.
+  for (const follower of set) if (!follower.deref()) set.delete(follower);
+  set.add(Weak ? new Weak(controller) : { deref: () => controller });
+}
+
+/** AbortSignal.any with a listener-based fallback for engines that lack it. */
+export function anySignal(signals: readonly AbortSignal[], options: { fallback?: boolean } = {}): AbortSignal {
+  // Resolved at call time like the direct AbortSignal.any calls this replaces.
+  const any = (AbortSignal as { any?: typeof AbortSignal.any }).any;
+  if (typeof any === 'function' && !options.fallback) return Reflect.apply(any, AbortSignal, [signals]);
+  const controller = new NativeController();
+  const result: AbortSignal = nativeSignal.call(controller);
+  for (const source of signals) {
+    if (signalAborted.call(source)) {
+      nativeAbort.call(controller, signalReason?.call(source));
+      return result;
+    }
+  }
+  for (const source of signals) follow(source, controller);
+  // Drop references once the result settles.
+  nativeAdd.call(result, 'abort', () => {
+    for (const source of signals) {
+      const set = followers.get(source);
+      if (!set) continue;
+      for (const follower of set) if (follower.deref() === controller) set.delete(follower);
+    }
+  }, { once: true });
+  return result;
+}
+
+/** AbortSignal.timeout with a timer-based fallback. */
+export function timeoutSignal(ms: number): AbortSignal {
+  if (typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+  const controller = new NativeController();
+  const reason = typeof DOMException === 'function'
+    ? new DOMException('The operation timed out.', 'TimeoutError')
+    : Object.assign(new Error('The operation timed out.'), { name: 'TimeoutError' });
+  setTimeout(() => nativeAbort.call(controller, reason), ms);
+  return nativeSignal.call(controller);
+}
 const nodeHost = (globalThis as {
   process?: { versions?: { node?: string }; getBuiltinModule(name: string): unknown };
 }).process;
@@ -76,7 +156,7 @@ export async function bridgeSignal(original?: AbortSignal, protect = false) {
       dispose = () => Reflect.apply(release, subscription, []);
     } else {
       // Browser dependent signals propagate independently of caller event delivery.
-      const dependent = nativeAny([original]);
+      const dependent = nativeAny ? nativeAny([original]) : anySignal([original]);
       nativeAdd.call(dependent, 'abort', onAbort);
       dispose = () => nativeRemove.call(dependent, 'abort', onAbort);
     }

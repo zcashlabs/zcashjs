@@ -1,6 +1,6 @@
 # zcash.js
 
-An experimental TypeScript SDK for Zcash chain queries and local wallets on Node and browsers.
+An experimental TypeScript SDK for Zcash chain queries and local wallets on Node, browsers and React Native.
 
 **[Read the developer guide](https://zcashlabs.github.io/zcashjs/api/README.html)** · [First request](https://zcashlabs.github.io/zcashjs/api/installation.html) · [Wallet walkthrough](https://zcashlabs.github.io/zcashjs/api/walkthrough.html) · [API reference](https://zcashlabs.github.io/zcashjs/api/reference.html)
 
@@ -20,7 +20,8 @@ const light = await createLightClient('https://testnet.zec.rocks:443', { network
 // Use light.network and light when creating your wallet.
 ```
 
-The same import works in Node and browser applications. No separate runtime
+The same import works in Node, browser and React Native applications (React Native
+also installs `@zcashlabs/zcash.js-native`, which runs the core natively). No separate runtime
 package, Rust installation, or post-install asset download is required. Browser
 bundlers emit the lazy WASM/worker/proving files alongside the application; deploy
 those files too. Persistent Node wallets currently require Linux and `flock`.

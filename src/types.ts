@@ -82,6 +82,12 @@ export interface TransportOptions {
   readonly maxResponseBytes: number;
   /** Omitted = no credentials. Callback results/URLs must never enter diagnostics. */
   readonly headers?: () => Promise<Readonly<Record<string, string>>>;
+  /** Optional fetch implementation (default: global fetch at request time). Light-client
+   * streams over gRPC-Web need ReadableStream response bodies; in React Native pass a
+   * streaming fetch such as `expo/fetch`. It must honor `signal`, `credentials: 'omit'`
+   * and `redirect: 'error'`.
+   */
+  readonly fetch?: typeof fetch;
 }
 export interface HttpTransport { readonly [opaque]: 'http-json-rpc-transport' }
 export interface GrpcTransport { readonly [opaque]: 'lightwallet-grpc-transport' }
@@ -237,6 +243,8 @@ export interface LightClient {
 export type WalletStorage
   = | { readonly kind: 'node-filesystem'; readonly path: string; readonly encryptionKey?: Uint8Array }
     | { readonly kind: 'browser-opfs'; readonly name: string }
+    /** React Native: an absolute directory path in app storage (e.g. the documents directory). */
+    | { readonly kind: 'native-filesystem'; readonly path: string; readonly encryptionKey?: Uint8Array }
     | { readonly kind: 'memory' };
 /** Application-pinned canonical manifest; H1.1 defines URL and verification rules. */
 export interface WasmArtifact {

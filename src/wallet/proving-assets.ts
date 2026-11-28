@@ -2,6 +2,8 @@ import type { AssetRequirement, LocalProvingOptions } from '../types.js';
 import { snapshot, ownBytes } from '../clients/owned-plumbing.js';
 import { errorMessage, failure, invalidArgument, isZcashError } from '../errors.js';
 import { operation } from '../clients/light-chain-reads.js';
+import { anySignal } from '../abort.js';
+import { sha256Hex } from '../hash.js';
 const fail = (code: 'ASSET_UNAVAILABLE' | 'ASSET_INTEGRITY' | 'RESOURCE_LIMIT') => failure(
   code,
   'proving',
@@ -31,10 +33,7 @@ export const saplingAssets = Object.freeze([
 ] as const);
 const total = saplingAssets.reduce((sum, asset) => sum + asset.byteLength, 0);
 async function hash(bytes: Uint8Array): Promise<string> {
-  return Array.from(
-    new Uint8Array(await crypto.subtle.digest('SHA-256', bytes as Uint8Array<ArrayBuffer>)),
-    b => b.toString(16).padStart(2, '0'),
-  ).join('');
+  return sha256Hex(bytes);
 }
 type Builtins = {
   'fs/promises': typeof import('node:fs/promises');
@@ -88,6 +87,20 @@ export function provingOptions(options: LocalProvingOptions): LocalProvingOption
   });
 }
 
+/** React Native: parameter files read and verified by the native library, which
+ * returns short tokens the native prover resolves, so ~50 MB never passes through JS. */
+export type NativeProvingLoader = (path: string, sha256: string, byteLength: number) => Uint8Array;
+let nativeLoader: NativeProvingLoader | undefined;
+const nativeDirectories = new WeakMap<object, string>();
+export function installNativeProving(loader: NativeProvingLoader): void {
+  nativeLoader = loader;
+}
+/** Mark proving options as native file-backed parameters in `directory`. */
+export function registerNativeProving(options: LocalProvingOptions, directory: string): LocalProvingOptions {
+  nativeDirectories.set(options, directory);
+  return options;
+}
+
 /** Fixed canonical asset inventory; caches never receive wallet data or witnesses. */
 export class ProvingAssets {
   private readonly requirements: readonly AssetRequirement[];
@@ -97,7 +110,9 @@ export class ProvingAssets {
   private closed = false;
   private readonly abort = new AbortController();
   private running: Promise<{ spend: Uint8Array; output: Uint8Array }> | undefined;
+  private readonly nativeDirectory: string | undefined;
   constructor(options: LocalProvingOptions, private readonly packageOwned = false) {
+    this.nativeDirectory = typeof options === 'object' && options !== null ? nativeDirectories.get(options) : undefined;
     const input = provingOptions(options);
     this.requirements = input.assets;
     this.cache = input.cache;
@@ -134,11 +149,12 @@ export class ProvingAssets {
 
   private async loadSapling(signal?: AbortSignal): Promise<{ spend: Uint8Array; output: Uint8Array }> {
     const caller = operation(signal),
-      pending = operation(AbortSignal.any([caller.signal, this.abort.signal]));
+      pending = operation(anySignal([caller.signal, this.abort.signal]));
     try {
       this.check();
       pending.check();
       if (this.requirements.length !== 2) throw fail('ASSET_UNAVAILABLE');
+      if (this.nativeDirectory !== undefined) return this.loadNative(this.nativeDirectory);
       if (this.cache.maxBytes < total) throw fail('RESOURCE_LIMIT');
       const bytes: Uint8Array[] = [];
       for (const expected of saplingAssets) {
@@ -184,6 +200,18 @@ export class ProvingAssets {
       pending.close();
       caller.close();
     }
+  }
+
+  private loadNative(directory: string): { spend: Uint8Array; output: Uint8Array } {
+    if (!nativeLoader) throw fail('ASSET_UNAVAILABLE');
+    const tokens = saplingAssets.map((asset) => {
+      try {
+        return nativeLoader!(`${directory}/${asset.assetId}`, asset.sha256, asset.byteLength);
+      } catch (error) {
+        throw fail(error === 'ASSET_INTEGRITY' ? 'ASSET_INTEGRITY' : 'ASSET_UNAVAILABLE');
+      }
+    });
+    return { spend: tokens[0]!, output: tokens[1]! };
   }
 
   private async location() {

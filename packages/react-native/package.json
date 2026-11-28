@@ -1,0 +1,51 @@
+{
+  "name": "@zcashlabs/zcash.js-native",
+  "version": "0.1.4",
+  "description": "Native Zakura core for @zcashlabs/zcash.js on React Native (iOS and Android).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zcashlabs/zcashjs.git",
+    "directory": "packages/react-native"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "react-native": "index.js",
+  "files": [
+    "index.js",
+    "url.js",
+    "index.d.ts",
+    "app.plugin.js",
+    "react-native.config.js",
+    "ZakuraNative.podspec",
+    "src",
+    "cpp",
+    "include",
+    "ios",
+    "android/build.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "native-build.json",
+    "licenses"
+  ],
+  "dependencies": {
+    "react-native-url-polyfill": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@zcashlabs/zcash.js": "0.1.4",
+    "react-native": ">=0.77.0"
+  },
+  "codegenConfig": {
+    "name": "ZakuraNativeSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.zcashlabs.zakuranative"
+    },
+    "ios": {
+      "modulesProvider": {
+        "NativeZakura": "ZakuraModuleProvider"
+      }
+    }
+  }
+}

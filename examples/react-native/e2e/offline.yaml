@@ -1,0 +1,8 @@
+appId: com.zcashlabs.zcashjs.example
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "result"
+    timeout: 180000
+- assertVisible: "All checks passed"

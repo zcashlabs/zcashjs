@@ -1,0 +1,166 @@
+name: React Native
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # dist/react-native under a Hermes-like environment (no WebAssembly, workers,
+  # WebCrypto, structuredClone, TextDecoder or AbortSignal.any) against the actual
+  # native library on the host: shared codec checks and encrypted native wallets.
+  simulate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/native
+            .cache/proving
+          key: rn-native-${{ runner.os }}-${{ hashFiles('scripts/native-source.json', 'scripts/build-native-wallet.js', 'src/wallet/proving-assets.ts') }}
+      - run: npm ci
+      - run: npm run build
+      - run: node --test tests/runtime/text-decoder.test.js tests/runtime/local-channel.test.js
+      - run: npm run test:react-native
+      - name: Native module compiles against React Native headers
+        run: scripts/check-react-native-cpp.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist
+          retention-days: 3
+
+  # The SDK on the Hermes engine React Native pins, through the real JSI module over
+  # the native library, after React Native's Babel preset.
+  hermes:
+    needs: simulate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/native
+            .cache/proving
+            build/hermes-check
+          key: rn-hermes-${{ runner.os }}-${{ hashFiles('scripts/native-source.json', 'scripts/test-hermes.sh') }}
+      - run: sudo apt-get update && sudo apt-get install -y cmake libicu-dev
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:hermes
+
+  # Native libraries from the pinned zakura-bindings revision.
+  mobile:
+    name: Native ${{ matrix.target }}
+    needs: simulate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-24.04
+          - target: ios
+            os: macos-15
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Pinned bindings source
+        id: source
+        run: |
+          node --input-type=module -e "
+            import { checkoutNativeSource, nativeSource } from './scripts/build-native-wallet.js';
+            const { source } = checkoutNativeSource(nativeSource, '.cache/native');
+            console.log('path=' + source);
+          " >> "$GITHUB_OUTPUT"
+      - name: Build
+        # The runner image provides ANDROID_NDK_LATEST_HOME as a shell variable.
+        run: ANDROID_NDK_HOME="${ANDROID_NDK_LATEST_HOME:-}" cargo xtask build-mobile --targets ${{ matrix.target }} --output "$RUNNER_TEMP/native" --cache "$RUNNER_TEMP/cache"
+        working-directory: ${{ steps.source.outputs.path }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: ${{ runner.temp }}/native
+          retention-days: 3
+
+  # The example app on an emulator/simulator: offline checks, memory and encrypted
+  # durable wallets with reopen, through the packaged native module.
+  e2e:
+    name: Example app (${{ matrix.target }})
+    needs: mobile
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-24.04
+          - target: ios
+            os: macos-15
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: sdk-dist
+          path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: native
+      - run: npm ci --ignore-scripts
+      - run: node scripts/build-react-native-package.js native
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Prepare example
+        working-directory: examples/react-native
+        run: npm run setup
+      - if: matrix.target == 'android'
+        name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - if: matrix.target == 'android'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          working-directory: examples/react-native
+          script: npm run e2e:android || (adb logcat -d -s ReactNativeJS ReactNative AndroidRuntime DEBUG | tail -200; exit 1)
+      - if: matrix.target == 'ios'
+        working-directory: examples/react-native
+        run: npm run e2e:ios
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-${{ matrix.target }}
+          path: ~/.maestro/tests
+          retention-days: 7

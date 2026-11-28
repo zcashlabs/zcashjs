@@ -1,4 +1,4 @@
-import { admitSignal, delay, schedule as timeout } from '../abort.js';
+import { admitSignal, delay, schedule as timeout, anySignal } from '../abort.js';
 import { observationOptions, recoveryPolicy } from '../options.js';
 import { ObserverBuffer } from '../observer-buffer.js';
 import type { PaymentState, AccountId } from '../types.js';
@@ -148,7 +148,7 @@ export class WalletPayments {
   ): Promise<T> {
     admitSignal(signal);
     this.check(recovery);
-    const pending = operation(AbortSignal.any(signal ? [signal, this.stopped.signal] : [this.stopped.signal]));
+    const pending = operation(anySignal(signal ? [signal, this.stopped.signal] : [this.stopped.signal]));
     let release: () => void;
     try {
       pending.check();
@@ -635,7 +635,7 @@ export class WalletPayments {
     const controller = new AbortController();
     let running: Promise<void> | undefined;
     const run = () => this.run(
-      AbortSignal.any([input.signal ?? new AbortController().signal, controller.signal]),
+      anySignal([input.signal ?? new AbortController().signal, controller.signal]),
       async (signal) => {
         let revision: string | undefined;
         try {
@@ -699,7 +699,7 @@ export class WalletPayments {
     if (input.timeoutMs !== undefined) positive(input.timeoutMs);
     const caller = operation(input.signal),
       timer = new AbortController(),
-      dependent = operation(AbortSignal.any([caller.signal, timer.signal, this.stopped.signal]));
+      dependent = operation(anySignal([caller.signal, timer.signal, this.stopped.signal]));
     const stop = input.timeoutMs === undefined ? () => { } : timeout(() => timer.abort(), input.timeoutMs);
     let iterator: AsyncIterableIterator<PaymentState> | undefined,
       last: PaymentState | undefined;
@@ -843,7 +843,7 @@ export class WalletPayments {
       lastError: ErrorInfo | null = null;
     if (this.policy.mode !== 'online') return { observed, lastError };
     const timer = new AbortController();
-    const pending = operation(AbortSignal.any([signal, timer.signal]));
+    const pending = operation(anySignal([signal, timer.signal]));
     const stop = timeout(() => timer.abort(), this.policy.timeoutMs);
     try {
       for await (const row of this.recoveryRows(captured, signal, pending.signal)) {

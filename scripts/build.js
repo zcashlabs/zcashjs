@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { buildNative } from './build-native-wallet.js';
 
@@ -44,8 +44,18 @@ try {
     node('scripts/build-wallet-worker.js', worker);
     node('scripts/package-native-wallet.js', native.output, native.source, worker, runtime);
     node('scripts/primitive-capsule.js', native.output, native.revision);
+    // Web/Node builds never load the native glue (React Native replaces this stub), but
+    // bundlers resolve the lazy native worker's imports, so export every declared name.
+    const declared = readFileSync(join(root, 'src/runtime/native-glue.d.mts'), 'utf8');
+    const stub = [...declared.matchAll(/^export (function|const) (\w+)/gm)].map(([, kind, name]) => kind === 'const'
+      ? `export const ${name} = 'unversioned';`
+      : `export function ${name}() { throw new Error('RUNTIME_UNAVAILABLE'); }`);
+    writeFileSync(join(root, 'dist/src/runtime/native-glue.mjs'),
+      `// The Zakura native glue exists only in React Native builds.\n${stub.join('\n')}\n`);
+    copyFileSync(join(root, 'src/runtime/native-glue.d.mts'), join(root, 'dist/src/runtime/native-glue.d.mts'));
     node('scripts/bundled-assets.js', '--generate', runtime, proving);
     node('scripts/bundled-assets.js');
+    node('scripts/build-react-native.js', native.source, native.revision);
   } finally { rmSync(staging, { recursive: true, force: true }); }
   console.error('SDK build complete: dist/');
 } catch (error) {

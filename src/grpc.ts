@@ -8,6 +8,7 @@ import type {
 import { invalidArgument, failure, isZcashError } from './errors.js';
 
 import { ownBytes } from './clients/owned-plumbing.js';
+import { anySignal } from './abort.js';
 
 const transports = new WeakMap<GrpcTransport, Readonly<{ url: string; options: TransportOptions }>>();
 
@@ -41,17 +42,19 @@ export function grpc(url: string, options: TransportOptions): GrpcTransport {
     const endpoint = new URL(url);
     if (endpoint.username || endpoint.password || endpoint.pathname !== '/') throw invalidArgument();
     message = 'gRPC options require sourceId, positive timeoutMs and maxResponseBytes, '
-      + 'readRetry attempts/delayMs, and an optional headers callback.';
-    const input = record(options, ['sourceId', 'timeoutMs', 'readRetry', 'maxResponseBytes', 'headers']);
+      + 'readRetry attempts/delayMs, and optional headers callback and fetch function.';
+    const input = record(options, ['sourceId', 'timeoutMs', 'readRetry', 'maxResponseBytes', 'headers', 'fetch']);
     const retry = record(input.readRetry, ['attempts', 'delayMs']);
     if (typeof input.sourceId !== 'string' || !input.sourceId.trim() || input.sourceId.length > 256
-      || (input.headers !== undefined && typeof input.headers !== 'function')) throw invalidArgument();
+      || (input.headers !== undefined && typeof input.headers !== 'function')
+      || (input.fetch !== undefined && typeof input.fetch !== 'function')) throw invalidArgument();
     const snapshot: TransportOptions = Object.freeze({
       sourceId: input.sourceId,
       timeoutMs: integer(input.timeoutMs, 1, 2_147_483_647),
       maxResponseBytes: integer(input.maxResponseBytes, 1),
       readRetry: Object.freeze({ attempts: integer(retry.attempts, 1), delayMs: integer(retry.delayMs, 0) }),
       ...(input.headers === undefined ? {} : { headers: input.headers as NonNullable<TransportOptions['headers']> }),
+      ...(input.fetch === undefined ? {} : { fetch: input.fetch as typeof fetch }),
     });
     const transport = Object.freeze({}) as GrpcTransport;
     // Preserve the explicit authority/port; URL normalization drops default ports.
@@ -100,7 +103,8 @@ export function grpcAdapter(transport: GrpcTransport): CustomLightTransport {
       timeoutMs: options.timeoutMs,
       ...(options.headers === undefined ? {} : { headers: options.headers }),
     };
-    if (nodeProcess?.versions?.node) {
+    // An explicitly supplied fetch selects gRPC-Web on every platform.
+    if (nodeProcess?.versions?.node && options.fetch === undefined) {
       // Keep the Node-only dependency out of browser bundles.
       const path = './clients/grpc-node.js';
       const { createGrpcNodeTransport } = await import(/* @vite-ignore */ path) as typeof import(
@@ -120,7 +124,11 @@ export function grpcAdapter(transport: GrpcTransport): CustomLightTransport {
     const { createGrpcWebByteTransport } = await import('./clients/grpc-web.js');
     return createGrpcWebByteTransport(
       url,
-      { ...common, limits: { ...limits, decodedBytes: Math.min(options.maxResponseBytes, 64 * 1024 * 1024) } },
+      {
+        ...common,
+        ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
+        limits: { ...limits, decodedBytes: Math.min(options.maxResponseBytes, 64 * 1024 * 1024) },
+      },
     );
   })().catch(() => {
     throw failure('RUNTIME_UNAVAILABLE', 'runtime', 'configure', 'gRPC adapter unavailable.');
@@ -138,7 +146,7 @@ export function grpcAdapter(transport: GrpcTransport): CustomLightTransport {
           && nodeProcess.getBuiltinModule?.('node:util').types.isProxy(input.signal)) throw invalidArgument();
         signalAborted.call(input.signal);
       }
-      signal = AbortSignal.any(input.signal === undefined ? [] : [input.signal as AbortSignal]);
+      signal = anySignal(input.signal === undefined ? [] : [input.signal as AbortSignal]);
     } catch {
       throw invalidArgument();
     }
@@ -178,7 +186,7 @@ export function grpcAdapter(transport: GrpcTransport): CustomLightTransport {
     stream(args) {
       const owned = admit(args),
         stop = new AbortController();
-      const signal = AbortSignal.any([owned.signal, stop.signal]);
+      const signal = anySignal([owned.signal, stop.signal]);
       let iterator: AsyncIterator<Uint8Array> | undefined,
         done = false,
         pending: Promise<IteratorResult<Uint8Array>> | undefined;

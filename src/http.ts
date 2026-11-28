@@ -5,6 +5,8 @@ import { JsonNumber, parseJson, protocolError } from './json.js';
 import type { Json } from './json.js';
 import { blockHash } from './primitives.js';
 import { copyRecord } from './clients/owned-plumbing.js';
+import { bodyReader, selectFetch } from './clients/body.js';
+import type { BodyReader } from './clients/body.js';
 
 interface State {
   readonly url: string;
@@ -50,12 +52,13 @@ export function httpTransport(url: string, options: Partial<TransportOptions> = 
     endpoint = new URL(url);
     if (!['http:', 'https:'].includes(endpoint.protocol) || endpoint.username || endpoint.password
       || url.includes('#')) throw invalidArgument();
-    message = 'HTTP transport options must contain only sourceId, timeoutMs, readRetry, maxResponseBytes and headers.';
-    record(options, ['sourceId', 'timeoutMs', 'readRetry', 'maxResponseBytes', 'headers']);
+    message = 'HTTP transport options must contain only sourceId, timeoutMs, readRetry, maxResponseBytes, '
+      + 'headers and fetch.';
+    record(options, ['sourceId', 'timeoutMs', 'readRetry', 'maxResponseBytes', 'headers', 'fetch']);
     const {
       sourceId = 'public-rpc', timeoutMs = 30000,
       readRetry = { attempts: 2, delayMs: 500 },
-      maxResponseBytes = 4 * 1024 * 1024, headers,
+      maxResponseBytes = 4 * 1024 * 1024, headers, fetch: fetcher,
     } = options;
     message = 'HTTP readRetry must contain attempts and delayMs.';
     record(readRetry, ['attempts', 'delayMs']);
@@ -64,6 +67,7 @@ export function httpTransport(url: string, options: Partial<TransportOptions> = 
       timeoutMs,
       maxResponseBytes,
       ...(headers === undefined ? {} : { headers }),
+      ...(fetcher === undefined ? {} : { fetch: fetcher }),
       readRetry: { attempts: readRetry.attempts, delayMs: readRetry.delayMs },
     };
     message = 'HTTP sourceId must be a nonempty string.';
@@ -78,6 +82,8 @@ export function httpTransport(url: string, options: Partial<TransportOptions> = 
     integer(snapshot.readRetry.delayMs, 0);
     message = 'HTTP headers must be a callback.';
     if (snapshot.headers !== undefined && typeof snapshot.headers !== 'function') throw invalidArgument();
+    message = 'HTTP fetch must be a function.';
+    if (snapshot.fetch !== undefined && typeof snapshot.fetch !== 'function') throw invalidArgument();
     Object.freeze(snapshot.readRetry);
     Object.freeze(snapshot);
     const transport = Object.freeze({}) as HttpTransport;
@@ -198,7 +204,7 @@ async function attempt(
   caller?.addEventListener('abort', onAbort, { once: true });
   const cancelTimer = schedule(state.options.timeoutMs, () => stop(timeout()));
   const started = performance.now();
-  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  let reader: BodyReader | undefined;
   let response: Response | undefined;
   const bounded = <T>(promise: Promise<T>) => waitFor(promise, controller.signal, () => stopped);
   try {
@@ -217,7 +223,8 @@ async function attempt(
     if (performance.now() - started >= state.options.timeoutMs) throw timeout();
     // Cancel a late response even if a nonconforming injected fetch ignores abort.
     dispatched?.();
-    const fetching = fetch(state.url, {
+    const fetcher = selectFetch(state.options.fetch);
+    const fetching = fetcher(state.url, {
       method: 'POST',
       body,
       headers,
@@ -232,8 +239,8 @@ async function attempt(
     });
     response = await bounded(fetching);
     const httpError = responseStatus(response, state.options.maxResponseBytes);
-    if (!response.body) throw httpError ?? protocolError();
-    reader = response.body.getReader();
+    reader = bodyReader(response, false);
+    if (!reader) throw httpError ?? protocolError();
     const text = await readText(() => bounded(reader!.read()), state.options.maxResponseBytes);
     if (stopped) throw stopped;
     const result = parseResponse(text, id, httpError);
@@ -248,10 +255,8 @@ async function attempt(
     cancelTimer();
     caller?.removeEventListener('abort', onAbort);
     // Never await a foreign stream's cancellation promise past the deadline.
-    if (reader) {
-      void reader.cancel().catch(() => { });
-      reader.releaseLock();
-    } else if (response) void response.body?.cancel().catch(() => { });
+    if (reader) reader.cancel();
+    else if (response) void response.body?.cancel().catch(() => { });
     controller.abort();
   }
 }

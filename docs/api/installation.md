@@ -54,6 +54,21 @@ For wallets, bundlers emit the lazy runtime, worker, and proving assets alongsid
 your application. Deploy those assets too. See [platforms](platforms.md) for
 storage requirements and current limitations.
 
+## React Native applications
+
+Install the SDK and its native companion, then import the SDK as usual:
+
+```sh
+npm install @zcashlabs/zcash.js @zcashlabs/zcash.js-native
+cd ios && pod install   # bare React Native; Expo: add the plugin and run a development build
+```
+
+The React Native build runs the Zakura core as a native library instead of
+WebAssembly, so it needs the New Architecture. Wallet storage is `native-filesystem`,
+and proving parameters live in an app directory. Light-client streams need a
+streaming `fetch` such as `expo/fetch`, passed as `transportOptions.fetch`. See
+[platforms](platforms.md#react-native).
+
 ## Next steps
 
 - [Open a wallet](wallet-runtime.md) to create accounts and scan for funds.

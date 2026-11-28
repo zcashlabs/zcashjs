@@ -1,4 +1,4 @@
-import { admitSignal, signalAborted as nativeAborted } from '../abort.js';
+import { admitSignal, signalAborted as nativeAborted, anySignal } from '../abort.js';
 import type { CustomLightTransport, LightClient, Op, NonEmpty } from '../types.js';
 import { txId } from '../primitives.js';
 import { ownBytes, copyRecord } from './owned-plumbing.js';
@@ -78,7 +78,7 @@ async function read<T>(
     original = input.signal;
   admitSignal(original);
   const controller = new AbortController();
-  const dependent = original === undefined ? undefined : AbortSignal.any([original]);
+  const dependent = original === undefined ? undefined : anySignal([original]);
   let reject!: (error: unknown) => void;
   const interruption = new Promise<never>((_, fail) => {
     reject = fail;

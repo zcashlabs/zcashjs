@@ -66,6 +66,15 @@ engine loaded locally versus externally, run
 consumer and a locally trusted TLS certificate/key. The child processes trust
 only the supplied additional CA; certificate verification is not disabled.
 
+## React Native checks
+
+`npm run test:react-native` (after `npm run build`) builds the pinned native library
+for the host. It runs the shared viewing, birthday, PCZT and signer checks, native
+wallets and the example app's device checks against `dist/react-native` with
+WebAssembly, workers, WebCrypto, `structuredClone`, `TextDecoder`, `AbortSignal.any`
+and `JSON.parse` source text removed. It also opens an encrypted Node wallet natively
+and back (`tests/react-native/*.check.js`).
+
 ## Optional browser and TLS tests
 
 The Node suite includes mocked browser-runner lifecycle checks and a VM bundle

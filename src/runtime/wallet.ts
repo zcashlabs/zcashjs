@@ -16,6 +16,8 @@ import { acquireArtifacts, artifactEndpoint } from './artifacts.js';
 import { bundledArtifact } from './bundled-assets.mjs';
 import { sameRecord, walletProfile } from './wallet-profile.js';
 import type { WalletRuntimeIdentity } from './wallet-profile.js';
+import { nativeTransport, reactNative } from './platform.js';
+import { LocalChannel } from './local-channel.js';
 
 const unavailable = () => failure('RUNTIME_UNAVAILABLE', 'runtime', 'configure', 'Wallet runtime unavailable.');
 const mismatch = () => failure('PROTOCOL_MISMATCH', 'runtime', 'configure', 'Wallet runtime profile mismatch.');
@@ -123,6 +125,16 @@ export function runtimeOptions(value: unknown): RuntimeOptions {
 }
 export function walletStorage(value: unknown): WalletStorage {
   const storage = record(value, ['kind', 'path', 'name', 'encryptionKey']);
+  if (reactNative && storage.kind !== 'memory') {
+    if (storage.kind !== 'native-filesystem') throw unavailable();
+    const { path, encryptionKey: key } = storage;
+    if (key !== undefined && (!(key instanceof Uint8Array) || key.length !== 32)) throw invalidArgument();
+    if (Object.keys(storage).length !== (key === undefined ? 2 : 3) || typeof path !== 'string'
+      || !path.startsWith('/') || path.length > 4096 || path.includes('\0')) throw invalidArgument();
+    return key === undefined
+      ? { kind: 'native-filesystem', path }
+      : { kind: 'native-filesystem', path, encryptionKey: Uint8Array.from(key) };
+  }
   if (storage.kind !== 'memory' && storage.kind !== (node ? 'node-filesystem' : 'browser-opfs')) throw unavailable();
   if (storage.kind === 'memory') {
     if (Object.keys(storage).length !== 1) throw invalidArgument();
@@ -511,8 +523,146 @@ async function createOwner(
     }
     if (data.fatal === true) stop(unavailable());
   };
+  // Shared by both bootstraps: the signer authority port and storage opening.
+  async function admit(
+    validatedIdentity: WalletRuntimeIdentity,
+    channels: () => { port1: MessagePort; port2: MessagePort },
+    hostUrl: (kind: 'node-fs.mjs' | 'opfs.mjs') => string | undefined,
+  ) {
+    const authorityChannel = channels();
+    let authority: ReturnType<typeof attachWalletWorker>;
+    try {
+      const reply = await request({ type: 'signers', port: authorityChannel.port2 }, [authorityChannel.port2]);
+      if (reply?.type !== 'signers-ready') throw mismatch();
+      authority = attachWalletWorker(
+        authorityChannel.port1,
+        async () => { },
+        {
+          maxQueuedJobs: runtime.maxQueuedJobs,
+          maxQueuedBytes: runtime.maxQueuedBytes,
+          maxPcztBytes: runtime.maxPcztBytes,
+        },
+        budget,
+      );
+      sessions.add(authority);
+    } catch (error) {
+      authorityChannel.port1.close();
+      authorityChannel.port2.close();
+      throw error;
+    }
+    startup.phase = 'admitted';
+    return {
+      token: Object.freeze({}),
+      identity: Object.freeze(validatedIdentity),
+      check,
+      destroy,
+      signers: authority.signers,
+      invalidate: () => {
+        stop(failure('WORKER_CRASHED', 'runtime', 'reopen', 'Native authority cleanup failed.'));
+        return destroy();
+      },
+      async open(
+        storage: WalletStorage,
+        parametersFormat: string,
+        parameters: Uint8Array,
+        genesis: Uint8Array,
+        release: () => Promise<void>,
+      ): Promise<OpenedWallet> {
+        check();
+        const channel = channels();
+        const ledger = bun && storage.kind !== 'memory'
+          ? new Int32Array(new SharedArrayBuffer(LEDGER_INTS * 4))
+          : undefined;
+        if (ledger) ledgers.add(ledger);
+        try {
+          const opened = await request({
+            type: 'open',
+            storage,
+            ...(storage.kind === 'memory' || storage.kind === 'native-filesystem'
+              ? {}
+              : { hostUrl: hostUrl(node ? 'node-fs.mjs' : 'opfs.mjs') }),
+            ...(ledger ? { ledger } : {}),
+            parametersFormat,
+            parameters,
+            genesis,
+            port: channel.port2,
+          }, [channel.port2]);
+          check();
+          if (opened?.type !== 'opened') {
+            stop(mismatch());
+            throw mismatch();
+          }
+          const session = attachWalletWorker(
+            channel.port1,
+            async () => {
+              sessions.delete(session);
+              // An orderly close released every descriptor the ledger listed.
+              if (ledger && ledger.every((value, index) => index % 4 !== 0 || value === 0)) ledgers.delete(ledger);
+              await release();
+            },
+            {
+              maxQueuedJobs: runtime.maxQueuedJobs,
+              maxQueuedBytes: runtime.maxQueuedBytes,
+              maxPcztBytes: runtime.maxPcztBytes,
+            },
+            budget,
+          );
+          sessions.add(session);
+          return { session, close: () => session.close() };
+        } catch (error) {
+          channel.port1.close();
+          channel.port2.close();
+          await release();
+          throw error;
+        }
+      },
+    };
+  }
+
+  // React Native: an in-process owner over the native library (no artifacts, workers or WASM).
+  async function bootstrapNative() {
+    const transport = nativeTransport();
+    const control = new LocalChannel();
+    const { startNativeWorker } = await import('./native-worker.js');
+    const teardown = startNativeWorker(control.port2, transport);
+    const events = { message };
+    control.port1.onmessage = ({ data }) => events.message(data);
+    worker = {
+      postMessage: (value: unknown) => control.port1.postMessage(value),
+      terminate: async () => {
+        control.port1.close();
+        teardown();
+      },
+      removeEvents: () => {
+        control.port1.onmessage = null;
+      },
+    };
+    startup.phase = 'executing';
+    const ready = await request({ type: 'initialize' });
+    check();
+    const identity = ready.identity as Record<string, unknown> | undefined;
+    if (ready?.type !== 'ready' || !identity || identity.mode !== 'native' || !sameRecord(walletProfile, {
+      contractRevision: identity.contractRevision, abiVersion: identity.abiVersion, schemas: identity.schemas,
+    }) || typeof identity.buildSha256 !== 'string' || typeof identity.dependencyGraphSha256 !== 'string') {
+      throw mismatch();
+    }
+    const validatedIdentity = {
+      contractRevision: walletProfile.contractRevision,
+      abiVersion: walletProfile.abiVersion,
+      schemas: walletProfile.schemas,
+      mode: 'native',
+      buildSha256: identity.buildSha256,
+      dependencyGraphSha256: identity.dependencyGraphSha256,
+      memory: { initialPages: 0, maximumPages: 0, shared: false },
+    } as unknown as WalletRuntimeIdentity;
+    startup.phase = 'ready';
+    const channels = () => new LocalChannel() as unknown as { port1: MessagePort; port2: MessagePort };
+    return await admit(validatedIdentity, channels, () => undefined);
+  }
+
   try {
     check();
+    if (reactNative) return await bootstrapNative();
     const verified = await acquireArtifacts(
       baseline,
       { ...policy, mode: threaded ? 'threaded' : 'baseline', maxFiles: threaded ? 6 : 5 },
@@ -610,92 +760,7 @@ async function createOwner(
         memory: { initialPages: threaded ? 322 : 321, maximumPages: 4096, shared: threaded },
       };
       startup.phase = 'ready';
-      const authorityChannel = channels();
-      let authority: ReturnType<typeof attachWalletWorker>;
-      try {
-        const reply = await request({ type: 'signers', port: authorityChannel.port2 }, [authorityChannel.port2]);
-        if (reply?.type !== 'signers-ready') throw mismatch();
-        authority = attachWalletWorker(
-          authorityChannel.port1,
-          async () => { },
-          {
-            maxQueuedJobs: runtime.maxQueuedJobs,
-            maxQueuedBytes: runtime.maxQueuedBytes,
-            maxPcztBytes: runtime.maxPcztBytes,
-          },
-          budget,
-        );
-        sessions.add(authority);
-      } catch (error) {
-        authorityChannel.port1.close();
-        authorityChannel.port2.close();
-        throw error;
-      }
-      startup.phase = 'admitted';
-      return {
-        token: Object.freeze({}),
-        identity: Object.freeze(validatedIdentity),
-        check,
-        destroy,
-        signers: authority.signers,
-        invalidate: () => {
-          stop(failure('WORKER_CRASHED', 'runtime', 'reopen', 'Native authority cleanup failed.'));
-          return destroy();
-        },
-        async open(
-          storage: WalletStorage,
-          parametersFormat: string,
-          parameters: Uint8Array,
-          genesis: Uint8Array,
-          release: () => Promise<void>,
-        ): Promise<OpenedWallet> {
-          check();
-          const channel = channels();
-          const ledger = bun && storage.kind !== 'memory'
-            ? new Int32Array(new SharedArrayBuffer(LEDGER_INTS * 4))
-            : undefined;
-          if (ledger) ledgers.add(ledger);
-          try {
-            const opened = await request({
-              type: 'open',
-              storage,
-              ...(storage.kind === 'memory' ? {} : { hostUrl: urls[node ? 'node-fs.mjs' : 'opfs.mjs'] }),
-              ...(ledger ? { ledger } : {}),
-              parametersFormat,
-              parameters,
-              genesis,
-              port: channel.port2,
-            }, [channel.port2]);
-            check();
-            if (opened?.type !== 'opened') {
-              stop(mismatch());
-              throw mismatch();
-            }
-            const session = attachWalletWorker(
-              channel.port1,
-              async () => {
-                sessions.delete(session);
-                // An orderly close released every descriptor the ledger listed.
-                if (ledger && ledger.every((value, index) => index % 4 !== 0 || value === 0)) ledgers.delete(ledger);
-                await release();
-              },
-              {
-                maxQueuedJobs: runtime.maxQueuedJobs,
-                maxQueuedBytes: runtime.maxQueuedBytes,
-                maxPcztBytes: runtime.maxPcztBytes,
-              },
-              budget,
-            );
-            sessions.add(session);
-            return { session, close: () => session.close() };
-          } catch (error) {
-            channel.port1.close();
-            channel.port2.close();
-            await release();
-            throw error;
-          }
-        },
-      };
+      return await admit(validatedIdentity, channels, kind => urls[kind]);
     } finally {
       verified.dispose();
     }
