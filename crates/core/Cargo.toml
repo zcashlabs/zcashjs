@@ -1,0 +1,80 @@
+[package]
+name = "zakura-bindings-core"
+description = "Target-neutral Zakura wallet and codec logic shared by the WASM and native front-ends"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MIT"
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+default = ["viewing", "birthday", "standalone-pczt"]
+standalone-pczt = ["dep:pczt", "dep:postcard", "pczt/transparent", "pczt/sapling", "dep:zcash_script", "dep:zcash_transparent", "dep:serde_json"]
+birthday = ["dep:getrandom", "dep:zcash_client_backend", "zcash_client_backend/orchard", "dep:prost", "dep:serde_json", "dep:hex"]
+viewing = ["dep:zcash_keys", "zcash_keys/sapling", "zcash_keys/orchard", "zcash_keys/transparent-inputs", "zcash_keys/zip32-addresses", "dep:zcash_address", "dep:zcash_transparent", "dep:zip32", "dep:serde_json", "dep:hex"]
+wallet-threaded = ["wallet-storage", "dep:rayon"]
+wallet-storage = ["dep:incrementalmerkletree", "dep:secp256k1", "zcash_script/signature-validation","zcash_client_sqlite/serde","zcash_client_backend/pczt", "dep:zcash_note_encryption","dep:sha2","standalone-pczt", "dep:bip39", "dep:secrecy", "dep:rusqlite", "dep:zcash_client_sqlite", "dep:rand_core", "dep:getrandom", "dep:uuid", "dep:pczt", "pczt/io-finalizer", "pczt/signer", "dep:sapling", "dep:orchard", "dep:zcash_client_backend", "dep:zcash_keys", "dep:prost", "dep:zip32", "dep:serde_json", "dep:hex", "dep:zcash_address", "dep:zcash_transparent"]
+
+# Integration tests and their fixtures stay at the repository root, shared with the JS checks.
+[[test]]
+name = "wallet_native"
+path = "../../tests/wallet_native.rs"
+required-features = ["wallet-storage"]
+
+[[test]]
+name = "birthday"
+path = "../../tests/birthday.rs"
+
+[[test]]
+name = "consensus"
+path = "../../tests/consensus.rs"
+
+[[test]]
+name = "transaction"
+path = "../../tests/transaction.rs"
+
+[[test]]
+name = "viewing"
+path = "../../tests/viewing.rs"
+
+[dependencies]
+rayon = { version = "=1.12.0", optional = true }
+incrementalmerkletree = { version = "=0.8.2", default-features = false, optional = true }
+zcash_note_encryption = { package = "zakura-note-encryption", version = "=4.0.0", optional = true }
+sha2 = { version = "=0.10.9", default-features = false, optional = true }
+sapling = { package = "zakura-sapling-crypto", version = "=4.0.0", default-features = false, optional = true }
+orchard = { package = "zakura-orchard", version = "=4.0.0", default-features = false, optional = true }
+bip39 = { version = "=2.2.2", default-features = false, features = ["alloc", "zeroize"], optional = true }
+secrecy = { version = "=0.8.0", optional = true }
+postcard = { version = "=1.1.3", default-features = false, features = ["alloc"], optional = true }
+secp256k1 = { version = "=0.33.1", default-features = false, optional = true }
+zcash_script = { version = "=0.6.0", default-features = false, optional = true }
+zcash_transparent = { package = "zakura-transparent", version = "=4.0.0", default-features = false, optional = true }
+zcash_address = { package = "zakura-address", version = "=4.0.0", optional = true }
+zcash_client_backend = { package = "zakura-client-backend", version = "=0.1.0-rc9.4", default-features = false, optional = true }
+zcash_keys = { package = "zakura-keys", version = "=4.0.0", default-features = false, optional = true }
+prost = { version = "=0.14.4", optional = true }
+zip32 = { version = "=0.2.1", optional = true }
+serde_json = { version = "=1.0.151", optional = true }
+hex = { version = "=0.4.3", optional = true }
+# SQLite migrations call PCZT into_effects, gated by io-finalizer.
+pczt = { package = "zakura-pczt", version = "=0.1.0-rc9", default-features = false, optional = true }
+rusqlite = { version = "=0.37.0", features = ["bundled", "array"], optional = true }
+zcash_client_sqlite = { package = "zakura-client-sqlite", version = "=0.1.0-rc9.4", default-features = false, features = ["orchard", "transparent-inputs"], optional = true }
+rand_core = { version = "=0.10.1", optional = true }
+getrandom = { version = "=0.4.3", features = ["sys_rng"], optional = true }
+uuid = { version = "=1.26.1", optional = true }
+
+zcash_protocol = { package = "zakura-protocol", version = "=4.0.0", default-features = false }
+zcash_primitives = { package = "zakura-primitives", version = "=4.0.0", default-features = false, features = ["std", "backend-halo2"] }
+
+[dev-dependencies]
+secp256k1 = { version = "=0.33.1", default-features = false }
+sapling = { package = "zakura-sapling-crypto", version = "=4.0.0", default-features = false }
+orchard = { package = "zakura-orchard", version = "=4.0.0", default-features = false }
+zcash_note_encryption = { package = "zakura-note-encryption", version = "=4.0.0" }
+
+serde_json = "=1.0.151"
+hex = "=0.4.3"

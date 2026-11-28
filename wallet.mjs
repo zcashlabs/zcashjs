@@ -139,3 +139,82 @@ function openStorage(backend, instance, format, params, identity, execute) {
     },
   };
 }
+
+/** Native (iOS/Android) runtime over owner-bound bindings from createRuntimeBindings.
+ * Same shape as the WASM runtime; storage is a directory path handled natively
+ * (owner lock, optional at-rest encryption), so there is no JS storage backend.
+ */
+let nativeInstances = 0;
+export function initializeNativeWalletRuntime(api) {
+  // Compared for identity only; React Native has no crypto.randomUUID by default.
+  const instance = `native-${++nativeInstances}`;
+  let invalid = false;
+  const latch = error => { if (typeof error !== 'string' || error === 'STORAGE_CLOSE_FAILED') invalid = true; };
+  const run = (_backend, fn) => {
+    if (invalid) throw Error('DOMAIN_INVALID');
+    let result;
+    try { result = fn(); } catch (error) { latch(error); throw error; }
+    if (result && typeof result.then === 'function') return result.then(undefined, error => { latch(error); throw error; });
+    return result;
+  };
+  const signers = Object.freeze({
+    capabilities(token) { uint(token); return JSON.parse(run(undefined, () => api.signer_capabilities(token))); },
+    authorize(token, format, parameters, genesis, height, branch, bytes, maximum) {
+      uint(token); const { params, identity } = network(format, parameters, genesis);
+      if (!Number.isInteger(height) || height < 0 || height > 0xffffffff || !Number.isInteger(branch) || branch < 0 || branch > 0xffffffff) throw TypeError('INVALID_ARGUMENT');
+      if (!Number.isInteger(maximum) || maximum < 1 || maximum > 4 * 1024 * 1024) throw TypeError('RESOURCE_LIMIT');
+      let length;
+      try { length = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'byteLength').get.call(bytes); }
+      catch { throw TypeError('INVALID_PCZT'); }
+      if (length > maximum) throw TypeError('RESOURCE_LIMIT');
+      const input = copyBytes(bytes, maximum, 'INVALID_PCZT');
+      return run(undefined, () => api.signer_authorize(token, params, identity, height, branch, input, maximum));
+    },
+    describe(token) { uint(token); return JSON.parse(run(undefined, () => api.signer_describe(token))); },
+    release(token) { uint(token); return run(undefined, () => api.signer_release(token)); },
+  });
+  const opened = (generation) => {
+    let closed = false, closeError;
+    const check = (token, owner) => {
+      uint(token);
+      if (owner !== instance) throw Error('WRONG_INSTANCE');
+      if (token !== generation) throw Error('STALE_HANDLE');
+    };
+    return {
+      generation, instance, api,
+      run: fn => run(undefined, fn),
+      bindSigner(token, accountId) { uint(token); if (typeof accountId !== 'string' || accountId.length !== 36) throw TypeError('INVALID_ARGUMENT'); if (closed) throw Error('STALE_HANDLE'); return run(undefined, () => api.signer_bind(token, generation, accountId)); },
+      unbindSigner(token, accountId) { uint(token); if (typeof accountId !== 'string' || accountId.length !== 36) throw TypeError('INVALID_ARGUMENT'); if (closed) throw Error('STALE_HANDLE'); return run(undefined, () => api.signer_unbind(token, generation, accountId)); },
+      binding(token, owner) {
+        check(token, owner);
+        if (closed) throw Error('STALE_HANDLE');
+        try { return run(undefined, () => api.storage_binding(token)); }
+        catch (error) { if (typeof error !== 'string') { closed = true; closeError = Error('DOMAIN_INVALID'); } throw error; }
+      },
+      close(token, owner) {
+        check(token, owner);
+        if (closed) { if (closeError) throw closeError; return; }
+        closed = true;
+        try { run(undefined, () => api.storage_close(token)); }
+        catch { closeError = Error('STORAGE_CLOSE_FAILED'); throw closeError; }
+      },
+    };
+  };
+  return Object.freeze({
+    get invalid() { return invalid; },
+    signers,
+    openMemory(format, parameters, genesis) {
+      const { params, identity } = network(format, parameters, genesis);
+      return opened(run(undefined, () => api.storage_initialize_memory(format, params, identity)));
+    },
+    /** `directory` is an absolute path; `key` an optional 32-byte at-rest encryption key. */
+    openPath(directory, format, parameters, genesis, key) {
+      if (typeof directory !== 'string' || !directory.startsWith('/') || directory.length > 4096) throw TypeError('INVALID_ARGUMENT');
+      const { params, identity } = network(format, parameters, genesis);
+      const owned = key === undefined ? undefined : copyBytes(key, 32, 'INVALID_ARGUMENT');
+      if (owned !== undefined && owned.length !== 32) throw TypeError('INVALID_ARGUMENT');
+      try { return opened(run(undefined, () => api.storage_initialize_native(directory, format, params, identity, owned))); }
+      finally { owned?.fill(0); }
+    },
+  });
+}

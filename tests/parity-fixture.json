@@ -1,0 +1,27 @@
+{
+  "note": "Synthetic regtest fixtures shared with zcash.js tests/sdk (viewing-fixture.js, birthday-fixture.js).",
+  "parameters": "{\"encoding\":\"regtest\",\"Overwinter\":10,\"Sapling\":20,\"Blossom\":30,\"Heartwood\":40,\"Canopy\":50,\"Nu5\":60,\"Nu6\":70,\"Nu6_1\":80,\"Nu6_2\":90,\"Nu6_3\":100}",
+  "ufvk": "uviewregtest144wz2yp95kwgdp70ehmf0krq47ftkjqj5x4d66uxluw2fga0qg7ryd49yxzdm64uewephagsfz98uar3h73xa3zpl8d2wwykhwmxeu8w4ypff6nk23r9d706t9gxaqn5js8wpd7f3g2wgvm2xdf5t3kvwgd7u0ng45n7z9t7jwsru3tfpxm4r5csa20u3z8ys9gjh4hv5wjldlwf4f8uec5dhv7awvwjwrqcu96d85lyp836u7z6vksj62d5tarzzhl2ldeh7jf7zszy4g024frgdlyek8nw8k0dmjxnwtyky932qta7sfw7mwhx59kle0n9hfp25lpgtr3fg99snygqydz7qc3flmtuemn9vt30lzywx3uujw8jk8rt6hz6vtrelaywtzrxsmv600lnuwsw7hfcrvfvtumm2232zvk0y6neud887jaluzqrs9nppza8dfjl4dvk93lwndj6u5naf2cdke43f2d9xzmcn0w24d4c7s8xfrf0",
+  "uivk": "uivkregtest1umz0nt7xj0kdvfnccvvscd4wpu8jf339n5shw5w9gwrck4hdlwaxpxjf0snel272kjh9jw2qrswqchk2qem0jjmwtekyhn3tjenzgs0myv9mcwd4y92rzadxw0awhgpp35ngszwsnxqhdg6ce6u927l9l6ve6m6yr3ga5ac0504ucnsre57ey924yqsmc5cksk620cryqm2hxxv3yy8h8dvzh2e49h74le6gwceukg96ydvskchcaum0hcafgud3sukmx8g0qx9n4ymwyjld7mae6f5j0qdvhscez3apuxvyaqqmj49vnveuaquujd9vewenrra5ufygc2hj0mtsfu7h8s9axe",
+  "address": "uregtest195t0mwssv3uzyd59jjw98dlxs3fwdfc4gnnjxyxysmd0ffcskj5wt88m6cwrjp7ptwrg02xc8zcchlnzrajgdq05fkd0s7tzzxh6t56v8gmru2gemvlxckhvs2lthpnetye7446pegkjx4vnathhcvrm28vtr7rgxdgk3kjpqqul5q4u0kkfxkndssh7t4msmnwe7562vm8452rnqf4",
+  "birthday": {
+    "genesis": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "tree": "0a07726567746573741a4030303031303230333034303530363037303830393061306230633064306530663130313131323133313431353136313731383139316131623163316431653166"
+  },
+  "treeState": {
+    "network": "regtest",
+    "height": "100",
+    "hash": "0707070707070707070707070707070707070707070707070707070707070707",
+    "time": 1,
+    "sapling_tree": "000000",
+    "orchard_tree": "000000",
+    "ironwood_tree": "000000"
+  },
+  "transparent": [
+    "t1Hsc1LR8yKnbbe3twRp88p6vFfC5t7DLbs",
+    "t3Vz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd",
+    "tmBsTi2xWTjUdEXnuTceL7fecEQKeWaPDJd",
+    "not-an-address",
+    "t1Hsc1LR8yKnbbe3twRp88p6vFfC5t7DLbt"
+  ]
+}

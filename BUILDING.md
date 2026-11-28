@@ -76,3 +76,41 @@ Checks for build failure handling and committed codec generation:
 cargo test --locked --manifest-path xtask/Cargo.toml
 cargo xtask generate --check
 ```
+
+## Repository layout
+
+| Path | Contents |
+| --- | --- |
+| `crates/core` | `zakura-bindings-core`: all wallet and codec logic, target-neutral. `api.rs` lists the exported surface; `host.rs` is what a front-end supplies (clock, SQLite open/policy, thread-pool readiness). |
+| `crates/wasm` | `zakura-bindings-wasm`: `#[wasm_bindgen]` wrappers with the generated `bindings.js` names, the SQLite VFS adapter (`wallet-host/adapter.c`) and the WASM thread pool. |
+| `crates/native` | `zakura-bindings-native`: a C ABI (`include/zakura_native.h`) for iOS, Android and host tests, with owner-thread runtimes, native storage (owner lock, `zakura-enc` encryption VFS) and natively verified proving parameters. `js/bindings.mjs` presents the `bindings.js` interface over it. |
+| `lightwire`, `transparent-address` | Separately locked codec crates for the WASM codec builds. |
+| `*.mjs`, `wallet-host/*.mjs` | JS glue shared by both front-ends. |
+
+## Native (React Native) libraries
+
+```sh
+cargo xtask build-mobile --targets android --output build/native   # ANDROID_NDK_HOME (NDK r26+)
+cargo xtask build-mobile --targets ios --output build/native-ios   # macOS with Xcode
+cargo xtask build-mobile --targets host --output build/native-host # host library + test bridge
+```
+
+Outputs: `android/jniLibs/<abi>/libzakura_bindings_native.so` (arm64-v8a, x86_64),
+`ios/ZakuraNative.xcframework`, `include/`, `js/` and `native-build.json`, which records
+artifact hashes, the source revision, the dependency-graph digest and toolchains.
+The libraries report the same revision and digest at runtime (`identity()`). zcash.js
+packages them as `@zcashlabs/zcash.js-native`.
+
+Native checks:
+
+```sh
+WALLET_TEST_ROOT=$(mktemp -d) cargo test --locked -p zakura-bindings-core --features wallet-storage
+cargo test --locked -p zakura-bindings-native
+cargo xtask build --output build/sdk && cargo xtask build-mobile --targets host --output build/native-host
+node tests/native-parity.mjs build/sdk build/native-host/host/zakura-native-bridge
+cc crates/native/tests/abi.c -Icrates/native/include -Lbuild/native-host/host -lzakura_bindings_native -o abi \
+  && LD_LIBRARY_PATH=build/native-host/host ./abi
+```
+
+The parity suite runs the same inputs through the WASM bindings and the native ABI and
+requires identical results and thrown values.

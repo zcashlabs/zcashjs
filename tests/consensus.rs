@@ -1,4 +1,4 @@
-use zakura_network_bindings::consensus_branch;
+use zakura_bindings_core::consensus_branch;
 use zcash_protocol::consensus::BranchId;
 
 const FORMAT: &str = "zcash-js-network/1";

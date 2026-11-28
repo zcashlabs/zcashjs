@@ -1,7 +1,9 @@
 // Private worker-local account/address primitive. The enclosing host authenticates
 // this packaged executable closure; this is not the public WalletClient factory.
 import { initializeStorage } from './wallet.mjs';
-import * as binding from './bindings.js';
+import { account_lifecycle_call, enhancement_call, finalized_get, fused_send_call, payment_call, pczt_build_call, pczt_finalize_call, pczt_import_call, pczt_prove_call, proposal_call, query_call, scan_call, signer_create_account, signer_release, sync_call, views_call, views_mnemonic_call, views_seed_call } from './bindings.js';
+// Named imports keep the generated module tree-shakeable (no namespace object).
+const wasmBinding = Object.freeze({ account_lifecycle_call, enhancement_call, finalized_get, fused_send_call, payment_call, pczt_build_call, pczt_finalize_call, pczt_import_call, pczt_prove_call, proposal_call, query_call, scan_call, signer_create_account, signer_release, sync_call, views_call, views_mnemonic_call, views_seed_call });
 import { copyBytes } from './bytes.mjs';
 const aborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted').get;
 const operations = new Set(['account_balance','account_import','account_import_hd','account_create_hd','account_import_mnemonic','account_import_mnemonic_signer','account_restore_mnemonic_signer','account_create_mnemonic_signer','account_list','account_get','address_current','address_next','address_list','address_at']);
@@ -140,7 +142,7 @@ function lowerPayment(args, operation) {
   if(operation==='payment_attempt_begin'&&(!Number.isInteger(input.maximum)||input.maximum<1||input.maximum>2097152))throw TypeError('RESOURCE_LIMIT');
   return input;
 }
-function lowerScan(args, operation) {
+function lowerScan(args,operation,native=false) {
   if(payments.has(operation))return lowerPayment(args,operation);
   if(pczt.has(operation)) {
     const keys=operation==='fused_send'?['operationId','proposalId','reviewCommitment','token','spend','output','maximum']:operation==='pczt_build'?['operationId','proposalId','reviewCommitment']:operation==='pczt_import'?['operationId','bytes','maximum']:(operation==='pczt_prove'||operation==='pczt_finalize')?['operationId','artifactId','spend','output','maximum']:operation==='finalized_get'?['operationId']:['operationId','artifactId'];
@@ -150,7 +152,8 @@ function lowerScan(args, operation) {
       if(!Number.isInteger(input.maximum)||input.maximum<1||input.maximum>4194304)throw TypeError('RESOURCE_LIMIT');
       for(const [key,size] of [['spend',47958396],['output',3592860]]) {
         let length;try{length=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype),'byteLength').get.call(input[key]);}catch{throw TypeError('INVALID_ARGUMENT');}
-        if(length!==0&&length!==size)throw TypeError('INVALID_ARGUMENT');
+        // Native runtimes also accept a 40-byte token for parameters loaded and verified natively.
+        if(length!==0&&length!==size&&!(native&&length===40))throw TypeError('INVALID_ARGUMENT');
         input[key]=copyBytes(input[key],size,'INVALID_ARGUMENT',0);
       }
     }
@@ -289,6 +292,8 @@ export async function initializeViews(wasm,backend,format,parameters,genesis) {
 /** Bind account/query operations to the already opened worker-local storage. */
 export function viewsForStorage(storage) {
   const {generation,instance}=storage;
+  // Native runtimes supply their own owner-bound binding; WASM uses the module import.
+  const binding=storage.api??wasmBinding;
   let poisoned=false;
   return Object.freeze({
     generation,instance,
@@ -303,7 +308,7 @@ export function viewsForStorage(storage) {
         if(descriptor&&!('value' in descriptor))throw TypeError('INVALID_ARGUMENT');
         signal=descriptor?.value;
         abort(signal,'none');
-        const lowered=scans.has(operation)?lowerScan(args,operation):lower(args);
+        const lowered=scans.has(operation)?lowerScan(args,operation,storage.api!==undefined):lower(args);
         if(operation==='pczt_import'){ownedPczt=lowered.bytes;pcztOperationId=lowered.operationId;pcztMaximum=lowered.maximum;delete lowered.bytes;}
         if(operation==='fused_send'||operation==='pczt_prove'||operation==='pczt_finalize'){proof={...lowered};delete lowered.spend;delete lowered.output;}
         input=JSON.stringify(lowered);
@@ -335,11 +340,18 @@ export function viewsForStorage(storage) {
         }
       }
       catch(error) {
+        failed(error);
+      }
+      finally {ownedSeed?.fill(0);ownedMnemonic?.fill(0);ownedPassphrase?.fill(0);}
+      // Native owner threads answer asynchronously; WASM answers synchronously.
+      if(result&&typeof result.then==='function')return result.then(finish,failed);
+      return finish(result);
+      function failed(error) {
         // Infallible upstream entropy/clock paths can trap. Never reuse that owner.
         if(typeof error!=='string'){poisoned=true;throw Error('DOMAIN_INVALID');}
         throw Object.assign(Error(error),scans.has(operation)?{commit:'none'}:{});
       }
-      finally {ownedSeed?.fill(0);ownedMnemonic?.fill(0);ownedPassphrase?.fill(0);}
+      function finish(result) {
       const value=lift(JSON.parse(result));
       if (operation==='account_import_mnemonic_signer'||operation==='account_create_mnemonic_signer'||operation==='account_restore_mnemonic_signer') {
         if(signal!==undefined&&aborted.call(signal)) {
@@ -374,6 +386,7 @@ export function viewsForStorage(storage) {
         }
       }
       return value;
+      }
     },
     close(token,owner) {
       if(poisoned)throw Error('DOMAIN_INVALID');

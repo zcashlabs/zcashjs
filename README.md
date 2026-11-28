@@ -1,4 +1,9 @@
-# Zakura native bindings
+# Zakura bindings
+
+Rust bindings for the pinned Zakura wallet stack, consumed by zcash.js: one shared core
+(`crates/core`) with a WebAssembly front-end (`crates/wasm`, Node and browsers) and a
+native front-end (`crates/native`, iOS and Android for React Native). See
+[BUILDING.md](BUILDING.md#repository-layout) for the layout and native builds.
 
 For the supported SDK build, see **[Build the native SDK components](BUILDING.md)**.
 One command builds the baseline wallet and codecs using the pinned Rust toolchain:

@@ -82,14 +82,28 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "--locked",
             "--offline",
             "--features",
-            "wallet-storage",
+            "zakura-bindings-wasm/wallet-storage",
             "--format-version",
             "1",
         ],
     )?)?;
-    let packages = inputs::verify(root, &cargo, &metadata)?;
+    // The receipt covers the WASM build; packages reachable only from the native
+    // front-end belong to the native (mobile) build and are excluded here.
+    let tree = |args: &[&str]| -> Result<std::collections::BTreeSet<String>> {
+        let mut all = vec!["tree", "--locked", "--offline", "-e", "normal,build,dev", "--target", "all", "--prefix", "none", "-f", "{p}"];
+        all.extend_from_slice(args);
+        Ok(run.capture(root, "cargo", &all)?.lines().filter_map(|line| {
+            let line = line.split(" (").next()?.trim();
+            let (name, version) = line.split_once(" v")?;
+            Some(format!("{name}@{version}"))
+        }).collect())
+    };
+    let wasm_closure = tree(&["-p", "zakura-bindings-wasm", "-p", "zakura-bindings-core", "--features", "zakura-bindings-wasm/wallet-storage"])?;
+    let native_only: std::collections::BTreeSet<String> = tree(&["-p", "zakura-bindings-native"])?
+        .difference(&wasm_closure).cloned().collect();
+    let packages = inputs::verify(root, &cargo, &metadata, &native_only)?;
     configure_wallet(&mut run, root, &cargo, &sdk, &metadata)?;
-    run.run(root, "cargo", &["test", "--locked", "--offline", "--lib"])?;
+    run.run(root, "cargo", &["test", "--locked", "--offline", "-p", "zakura-bindings-core", "--lib"])?;
     for name in ["primitive", "bundle"] {
         let mut args = vec![
             "build",
@@ -98,6 +112,8 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
             "--release",
             "--target",
             "wasm32-unknown-unknown",
+            "-p",
+            "zakura-bindings-wasm",
             "--lib",
         ];
         if name == "bundle" {
@@ -117,7 +133,7 @@ pub fn build(root: &Path, output: &Path, cache: &Path) -> Result<()> {
                 "--out-name",
                 "bindings",
                 text(&cache.join(
-                    "target/wallet/wasm32-unknown-unknown/release/zakura_network_bindings.wasm",
+                    "target/wallet/wasm32-unknown-unknown/release/zakura_bindings_wasm.wasm",
                 )),
             ],
         )?;
