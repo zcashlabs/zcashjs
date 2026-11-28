@@ -144,7 +144,17 @@ export async function publicWalletResponses(fixture,definition) {
       return {payload:text(2,JSON.stringify(tx.display))};
     }
     if(method==='GetAddressUtxos'){
-      check(fixture.publicWallet.unspentAddresses.some(address=>key===request(method,{addresses:[address],start_height:'0',max_entries:1001})),'known unfunded ephemeral address request');
+      // Validate repeated address fields, then compare the exact height/entry bound.
+      const addresses=[],knownAddresses=new Set(fixture.publicWallet.unspentAddresses);
+      const decoder=new TextDecoder();
+      let offset=0;
+      while(payload[offset]===10){
+        const end=offset+2+payload[offset+1];
+        const address=decoder.decode(payload.subarray(offset+2,end));
+        check(knownAddresses.delete(address),'known, unique unfunded ephemeral address');
+        addresses.push(address);offset=end;
+      }
+      check(addresses.length>0&&key===request(method,{addresses,start_height:'0',max_entries:1001}),'exact unfunded ephemeral address request');
       return {payload:new Uint8Array()};
     }
     if(method==='GetTransaction') {

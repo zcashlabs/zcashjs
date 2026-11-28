@@ -40,6 +40,38 @@ test('bundled proving files load offline through the canonical integrity checks'
   finally { await corrupt.close(); }
 });
 
+test('default package proving adopts its freshly read buffers while custom loaders stay copied', async t => {
+  t.mock.method(globalThis, 'fetch', () => { throw Error('bundled proving must not fetch external assets'); });
+  const options = packageProving();
+  for (const packageOwned of [true, false]) {
+    const loaded = [];
+    const assets = new ProvingAssets({ ...options, async loadAsset(args) {
+      const bytes = await options.loadAsset(args);
+      loaded.push(bytes);
+      return bytes;
+    } }, packageOwned);
+    try {
+      const result = await assets.sapling();
+      assert.equal(loaded.length, 2);
+      assert.equal(result.spend.buffer === loaded[0].buffer, packageOwned);
+      assert.equal(result.output.buffer === loaded[1].buffer, packageOwned);
+      if (!packageOwned) {
+        loaded[0][0] ^= 1;
+        await assets.sapling();
+      }
+      result.spend[0] ^= 1;
+      await assert.rejects(assets.sapling(), { code: 'ASSET_INTEGRITY' });
+    } finally { await assets.close(); }
+  }
+  const corrupt = new ProvingAssets({ ...options, async loadAsset(args) {
+    const bytes = await options.loadAsset(args);
+    bytes[0] ^= 1;
+    return bytes;
+  } }, true);
+  try { await assert.rejects(corrupt.sapling(), { code: 'ASSET_INTEGRITY' }); }
+  finally { await corrupt.close(); }
+});
+
 test('root import opens the shipped engine offline and persists an account without runtime configuration', async t => {
   t.mock.method(globalThis, 'fetch', () => { throw Error('bundled Node wallet must not fetch executable assets'); });
   const parent = new URL('../../.local/tests/', import.meta.url);

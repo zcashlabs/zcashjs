@@ -96,9 +96,14 @@ const protocol = () => failure(
 export class WalletProposals {
   private readonly proving?: ProvingAssets;
   private reserved = false;
-  constructor(private readonly session: Session, private readonly network: Network, proving?: LocalProvingOptions) {
+  constructor(
+    private readonly session: Session,
+    private readonly network: Network,
+    proving?: LocalProvingOptions,
+    packageOwned = false,
+  ) {
     networkBinding(network);
-    if (proving) this.proving = new ProvingAssets(proving);
+    if (proving) this.proving = new ProvingAssets(proving, packageOwned);
   }
 
   private project(value: NativeProposalReview): Proposal {

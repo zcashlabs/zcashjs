@@ -83,7 +83,12 @@ try {
   const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json')));
   assert.deepEqual(Object.keys(manifest.exports), ['.', './grpc-node', './testing']);
   assert.equal(manifest.exports['.'].import, './dist/src/index.js');
-  assert.deepEqual(manifest.dependencies, { '@grpc/grpc-js': '1.14.4' });
+  const lock = JSON.parse(await readFile(join(root, 'package-lock.json')));
+  const grpc = '@grpc/grpc-js';
+  const lockedVersion = lock.packages[`node_modules/${grpc}`].version;
+  assert.match(lockedVersion, /^\d+\.\d+\.\d+$/);
+  assert.deepEqual(lock.packages[''].dependencies, { [grpc]: lockedVersion });
+  assert.deepEqual(manifest.dependencies, { [grpc]: lockedVersion });
   const entry = join(consumer, 'entry.mjs');
   await writeFile(entry, "import * as sdk from '@zcashlabs/zcash.js';\nimport { readRpc } from './node_modules/@zcashlabs/zcash.js/dist/src/http.js';\nexport { sdk, readRpc };\n");
   const code = await bundle(consumer, stop.signal);
