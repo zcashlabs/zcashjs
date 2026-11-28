@@ -1,7 +1,9 @@
 // Private worker-local account/address primitive. The enclosing host authenticates
 // this packaged executable closure; this is not the public WalletClient factory.
 import { initializeStorage } from './wallet.mjs';
-import * as wasmBinding from './bindings.js';
+import { account_lifecycle_call, enhancement_call, finalized_get, fused_send_call, payment_call, pczt_build_call, pczt_finalize_call, pczt_import_call, pczt_prove_call, proposal_call, query_call, scan_call, signer_create_account, signer_release, sync_call, views_call, views_mnemonic_call, views_seed_call } from './bindings.js';
+// Named imports keep the generated module tree-shakeable (no namespace object).
+const wasmBinding = Object.freeze({ account_lifecycle_call, enhancement_call, finalized_get, fused_send_call, payment_call, pczt_build_call, pczt_finalize_call, pczt_import_call, pczt_prove_call, proposal_call, query_call, scan_call, signer_create_account, signer_release, sync_call, views_call, views_mnemonic_call, views_seed_call });
 import { copyBytes } from './bytes.mjs';
 const aborted = Object.getOwnPropertyDescriptor(AbortSignal.prototype, 'aborted').get;
 const operations = new Set(['account_balance','account_import','account_import_hd','account_create_hd','account_import_mnemonic','account_import_mnemonic_signer','account_restore_mnemonic_signer','account_create_mnemonic_signer','account_list','account_get','address_current','address_next','address_list','address_at']);
