@@ -27,7 +27,8 @@ class Writer {
     else if (typeof v === 'boolean') this.push(Uint8Array.of(4, v ? 1 : 0));
     else if (v && typeof v === 'object' && handles.has(v)) {
       const id = handles.get(v);
-      if (id === 0n) throw new Error('CLOSED');
+      // Same error wasm-bindgen raises for a freed object.
+      if (id === 0n) throw new Error('null pointer passed to rust');
       const b = new Uint8Array(9); b[0] = 5; new DataView(b.buffer).setBigUint64(1, id, true); this.push(b);
     } else throw new TypeError('INVALID_ARGUMENT');
   }
