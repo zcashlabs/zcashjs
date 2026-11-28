@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "zcash.js example",
+    "slug": "zcash-js-example",
+    "version": "1.0.0",
+    "newArchEnabled": true,
+    "ios": { "bundleIdentifier": "com.zcashlabs.zcashjs.example" },
+    "android": { "package": "com.zcashlabs.zcashjs.example" },
+    "plugins": [
+      "@zcashlabs/zcash.js-native",
+      ["expo-build-properties", { "ios": { "deploymentTarget": "15.1" }, "android": { "minSdkVersion": 24 } }]
+    ]
+  }
+}
