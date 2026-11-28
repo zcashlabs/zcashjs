@@ -51,7 +51,11 @@ test('fallback anySignal does not retain abandoned results on a long-lived sourc
 
 test('timeoutSignal aborts with a TimeoutError', async () => {
   const signal = timeoutSignal(5);
-  await new Promise(resolve => signal.addEventListener('abort', resolve, { once: true }));
+  // Node's AbortSignal.timeout timer is unref'd: keep the event loop alive meanwhile.
+  const keepAlive = setTimeout(() => {}, 1000);
+  try {
+    await new Promise(resolve => signal.addEventListener('abort', resolve, { once: true }));
+  } finally { clearTimeout(keepAlive); }
   assert.equal(signal.reason.name, 'TimeoutError');
 });
 
@@ -65,7 +69,9 @@ test('SDK modules load and cancel without AbortSignal.any', () => {
     c.abort('r');
     if (!s.aborted || s.reason !== 'r') throw new Error('anySignal fallback failed');
     const t = timeoutSignal(1);
+    const keepAlive = setTimeout(() => {}, 1000);
     await new Promise(r => t.addEventListener('abort', r));
+    clearTimeout(keepAlive);
     const outer = new AbortController();
     const bridged = await bridgeSignal(outer.signal);
     outer.abort();
