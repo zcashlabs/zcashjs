@@ -1,0 +1,10 @@
+--- a/src/wallet.rs
++++ b/src/wallet.rs
+@@ -128,6 +128,7 @@
+                 let mut migrating = WalletDb::from_connection(&mut *conn, document.clone(), HostClock, rand_core::UnwrapErr(getrandom::SysRng));
+                 WalletMigrator::new().init_or_migrate(&mut migrating).map_err(|_| "MIGRATION_REQUIRED")?;
+             }
++            accounts::initialize(conn)?;
+             // Bounded real schema read; never enumerate the wallet's accounts.
+             conn.query_row("SELECT EXISTS(SELECT 1 FROM accounts LIMIT 1)", [], |r| r.get::<_, bool>(0)).map_err(|_| "SCHEMA_MISMATCH")?;
+             Ok(())

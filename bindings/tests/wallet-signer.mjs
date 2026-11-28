@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { once } from 'node:events';
+import { Worker,isMainThread,parentPort,workerData } from 'node:worker_threads';
+if(isMainThread) {
+  const worker=new Worker(new URL(import.meta.url),{workerData:{bundle:process.argv[2]}});
+  try {const [result]=await once(worker,'message',{signal:AbortSignal.timeout(30000)});assert.equal(result.pass,true);console.log(JSON.stringify(result));}
+  finally {await worker.terminate();}
+} else {
+  const bundle=pathToFileURL(`${workerData.bundle}/`);
+  const {initializeWalletRuntime}=await import(new URL('wallet.mjs',bundle));
+  const {viewsForStorage}=await import(new URL('views.mjs',bundle));
+  const {acquire}=await import(new URL('wallet-host/node-fs.mjs',bundle));
+  const fixture=JSON.parse(fs.readFileSync(new URL('tests/views-fixture.json',bundle)));
+  const parameters=new Uint8Array(Buffer.from(fixture.import.birthday.parameters,'hex'));
+  const genesis=new Uint8Array(Buffer.from(fixture.import.birthday.genesis,'hex'));
+  const runtime=initializeWalletRuntime(fs.readFileSync(new URL('bindings_bg.wasm',bundle)));
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'native-wallet-signer-'));
+  const paths=['one','two'].map(name=>{const p=path.join(root,name);fs.mkdirSync(p,{mode:0o700});return p;});
+  const open=(i,create)=>viewsForStorage(runtime.open(acquire(paths[i],{create}),'zcash-js-network/1',parameters,genesis));
+  const call=(owner,operation,args={},mnemonic)=>owner.call(owner.generation,owner.instance,operation,args,undefined,mnemonic);
+  const first=open(0,true),second=open(1,true);
+  const memoryA=viewsForStorage(runtime.openMemory('zcash-js-network/1',parameters,genesis));
+  const memoryB=viewsForStorage(runtime.openMemory('zcash-js-network/1',parameters,genesis));
+  assert.throws(()=>memoryA.call(memoryB.generation,memoryB.instance,'account_import',{viewingKey:fixture.import.viewingKey,birthday:'fullScan'}),/STALE_HANDLE/);
+  assert.deepEqual(call(memoryB,'account_list'),[]);assert.equal(runtime.invalid,false);
+  memoryA.close(memoryA.generation,memoryA.instance);memoryB.close(memoryB.generation,memoryB.instance);
+  const mnemonic=new TextEncoder().encode('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+  const created=call(first,'account_import_mnemonic_signer',{accountIndex:0,birthday:'fullScan'},mnemonic);
+  const token=created.signerToken,description=runtime.signers.describe(token);
+  assert.throws(()=>runtime.signers.describe(0),/INVALID_ARGUMENT/);
+  assert.throws(()=>runtime.signers.release(0),/INVALID_ARGUMENT/);
+  assert.throws(()=>first.bindSigner(0,created.account.id),/INVALID_ARGUMENT/);
+  assert.equal(runtime.invalid,false);assert.deepEqual(runtime.signers.describe(token),description);
+  assert.deepEqual(call(second,'account_list'),[]);
+  const other=call(second,'account_import',{viewingKey:description.viewingKey,birthday:'fullScan'});
+  assert.equal(second.bindSigner(token,other.id),'ready');
+  assert.equal(call(second,'account_get',{accountId:other.id}).signerAttached,true);
+  first.close(first.generation,first.instance);
+  assert.deepEqual(runtime.signers.describe(token),description);
+  const reopened=open(0,false);
+  assert.equal(call(reopened,'account_get',{accountId:created.account.id}).id,created.account.id);
+  assert.equal(reopened.bindSigner(token,created.account.id),'ready');
+  second.close(second.generation,second.instance);
+  assert.equal(call(reopened,'account_list').length,1);
+  const controller=new AbortController();
+  const canceledStorage=runtime.openMemory('zcash-js-network/1',parameters,genesis);
+  const canceled=viewsForStorage({...canceledStorage,run:fn=>{const result=canceledStorage.run(fn);controller.abort();return result;}});
+  assert.throws(()=>canceled.call(canceled.generation,canceled.instance,'account_import_mnemonic_signer',{accountIndex:1,birthday:'fullScan',signal:controller.signal},undefined,mnemonic),error=>error.message==='ABORTED'&&error.commit==='committed'&&typeof error.account.id==='string');
+  assert.equal(call(canceled,'account_list').length,1);
+  assert.throws(()=>runtime.signers.describe(token+1),error=>error==='STALE_HANDLE');
+  canceled.close(canceled.generation,canceled.instance);
+  runtime.signers.release(token);
+  assert.throws(()=>runtime.signers.describe(token),error=>error==='STALE_HANDLE');
+  assert.equal(call(reopened,'account_get',{accountId:created.account.id}).signerAttached,false);
+  reopened.close(reopened.generation,reopened.instance);
+  assert.equal(runtime.invalid,false);
+  parentPort.postMessage({pass:true,wallets:2,independentDatabases:true,signerSurvivesClose:true,reopen:true,disposal:true,root});
+}

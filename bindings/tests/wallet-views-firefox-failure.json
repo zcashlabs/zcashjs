@@ -1,0 +1,90 @@
+{
+  "pass": false,
+  "root": "private-views-test-569fe079-d58d-447b-af4e-351ebe4f389c",
+  "results": [],
+  "error": {
+    "name": "Error",
+    "message": "worker deadline",
+    "stack": "start/call/</timer<@http://127.0.0.1:38839/tests/wallet-views-browser.mjs:27:67\n"
+  },
+  "lifecycle": {
+    "created": [
+      "66a5b578-deeb-4e1b-b1ed-7e8602125cd8"
+    ],
+    "destroyed": [
+      "dfcc784b-00a5-424f-946f-836aaaaf1f0b",
+      "de4b289f-5d56-4afa-a8ac-d81501566de8",
+      "66a5b578-deeb-4e1b-b1ed-7e8602125cd8"
+    ],
+    "allWorkersDestroyed": true
+  },
+  "base": "/home/jack/zakura-viewing-accounts-scratch/build-05/bundle",
+  "events": [
+    {
+      "type": "event",
+      "method": "script.realmCreated",
+      "params": {
+        "realm": "dfcc784b-00a5-424f-946f-836aaaaf1f0b",
+        "origin": "null",
+        "context": "87bf75a1-31af-4d7e-8e32-dbb35d3c1903",
+        "type": "window",
+        "userContext": "default"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmDestroyed",
+      "params": {
+        "realm": "dfcc784b-00a5-424f-946f-836aaaaf1f0b"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmCreated",
+      "params": {
+        "realm": "de4b289f-5d56-4afa-a8ac-d81501566de8",
+        "origin": "null",
+        "context": "87bf75a1-31af-4d7e-8e32-dbb35d3c1903",
+        "type": "window",
+        "userContext": "default"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmDestroyed",
+      "params": {
+        "realm": "de4b289f-5d56-4afa-a8ac-d81501566de8"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmCreated",
+      "params": {
+        "realm": "d1ea6cc0-14ce-4c01-9436-ef389cbbfd69",
+        "origin": "http://127.0.0.1:38839",
+        "context": "87bf75a1-31af-4d7e-8e32-dbb35d3c1903",
+        "type": "window",
+        "userContext": "default"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmCreated",
+      "params": {
+        "origin": "http://127.0.0.1:38839/tests/wallet-views-worker.mjs?owner=3933c76e-8ff5-4bc4-962c-8b8a6562d826",
+        "realm": "66a5b578-deeb-4e1b-b1ed-7e8602125cd8",
+        "owners": [
+          "d1ea6cc0-14ce-4c01-9436-ef389cbbfd69"
+        ],
+        "type": "dedicated-worker"
+      }
+    },
+    {
+      "type": "event",
+      "method": "script.realmDestroyed",
+      "params": {
+        "realm": "66a5b578-deeb-4e1b-b1ed-7e8602125cd8"
+      }
+    }
+  ]
+}
